@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.vunguyen.vface">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
+
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:node="replace" />
+
+    <uses-feature
+        android:name="android.hardware.Camera"
+        android:required="true" />
+
+    <application
+        android:name="com.vunguyen.vface.helper.ApiConnector"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name="com.vunguyen.vface.ui.PhotoViewerActivity"></activity>
+        <activity android:name="com.vunguyen.vface.ui.RealTimeFaceDetectActivity" />
+        <activity android:name="com.vunguyen.vface.ui.SelectImageActivity" />
+
+        <activity android:name="com.vunguyen.vface.ui.StudentDataActivity" />
+        <activity android:name="com.vunguyen.vface.ui.AddStudentActivity" />
+        <activity android:name="com.vunguyen.vface.ui.AddEditCourseActivity" />
+        <activity android:name="com.vunguyen.vface.ui.AddCourseActivity" />
+        <activity android:name="com.vunguyen.vface.ui.StudentCoursesActivity" />
+        <activity android:name="com.vunguyen.vface.ui.ResetPasswordActivity" />
+        <activity android:name="com.vunguyen.vface.ui.SignUpActivity" />
+        <activity android:name="com.vunguyen.vface.ui.GroupCheckActivity" />
+        <activity android:name="com.vunguyen.vface.ui.AddFaceActivity"/>
+        <activity android:name="com.vunguyen.vface.ui.LoginActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.vunguyen.vface.ui.Login2Activity" />
+        <activity android:name="com.vunguyen.vface.ui.MainActivity" />
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+        <meta-data
+            android:name="com.google.firebase.ml.vision.DEPENDENCIES"
+            android:value="face" />
+    </application>
+
+</manifest>

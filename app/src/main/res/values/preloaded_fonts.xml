@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="preloaded_fonts" translatable="false">
+        <item>@font/advent_pro</item>
+        <item>@font/advent_pro_bold</item>
+        <item>@font/advent_pro_thin</item>
+        <item>@font/assistant_bold</item>
+        <item>@font/assistant_light</item>
+        <item>@font/audiowide</item>
+        <item>@font/changa_one</item>
+    </array>
+</resources>

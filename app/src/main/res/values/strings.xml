@@ -1,3 +1,43 @@
 <resources>
-    <string name="app_name">VFACE</string>
+    <string name="app_name">VFace</string>
+    <string name="title_activity_login">Sign in</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+
+    <string name="subscription_key">d4265de0ba6f464d91758400376e36ef</string>
+    <string name="endpoint">https://vface2.cognitiveservices.azure.com/face/v1.0</string>
+    <string name="add_subscription_key_tip_title">Subscription Key is Needed</string>
+    <string name="add_subscription_key_tip">Please put your subscription key with its corresponding endpoint to source file \"app/res/values/strings.xml\" to enable Face API calls.</string>
+
+
+    <!-- Courses management activities -->
+    <string name="delete">Delete</string>
+    <string name="done">Done</string>
+
+    <string name="course_available">COURSES MANAGER</string>
+    <string name="courses_tip">Long tap to open actions menu.</string>
+    <string name="add_courses">ADD A NEW COURSE</string>
+
+    <!-- Add Edit Course activities -->
+    <string name="Information">Add courses you are teaching to manage the students.</string>
+    <string name="title">ADD OR EDIT COURSE</string>
+    <string name="save">SAVE</string>
+    <string name="cancel">CANCEL</string>
+    <string name="add_students">ADD A STUDENT</string>
+
+    <!-- Students management activities -->
+    <string name="students_available">STUDENTS MANAGER</string>
+
+    <!-- Warning Message -->
+    <string name="user_provided_person_group_name">Course name</string>
+    <string name="user_provided_person_group_description_data">User data</string>
+    <string name="user_provided_person_name">Student name</string>
+    <string name="user_provided_description_data">User data</string>
+
 </resources>

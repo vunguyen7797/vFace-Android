@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.AddCourseActivity"
+    android:background="#35363B"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="@font/advent_pro_bold"
+        android:text="@string/course_available"
+        android:textSize="25dp"
+        android:layout_marginTop="40dp"
+        android:textColor="#ffffff"
+        android:layout_gravity="center" />
+
+    <ListView
+        android:id="@+id/lvCourses"
+        android:layout_width="wrap_content"
+        android:layout_height="500dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_below="@id/tvTitle"
+        android:layout_above="@id/tvAddCourseTip"/>
+
+
+    <TextView
+        android:id="@+id/tvAddCourseTip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18dp"
+        android:fontFamily="@font/assistant_light"
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="20dp"
+
+        android:textColor="#ffffff"
+        android:text="@string/courses_tip"/>
+
+    <LinearLayout
+        android:id="@+id/btnButtonBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp">
+
+        <Button
+            android:id="@+id/btnAddCourse"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/add_courses"
+            android:textColor="#ffffff"
+            android:background="@drawable/button"
+            android:layout_marginRight="20dp"/>
+
+        <Button
+            android:id="@+id/btnDone"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/done"
+            android:textColor="#ffffff"
+            android:background="@drawable/button" />
+
+    </LinearLayout>
+
+
+</LinearLayout>

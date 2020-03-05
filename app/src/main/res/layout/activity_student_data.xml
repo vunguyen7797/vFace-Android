@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.StudentDataActivity"
+    android:background="#35363B"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tvTitleStudent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/advent_pro_bold"
+        android:text="STUDENT PROFILE"
+        android:textSize="25dp"
+        android:layout_marginTop="40dp"
+        android:textColor="#ffffff"
+        android:gravity="center"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:id="@+id/tvStudentId"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Student ID: "
+            android:textColor="#ffffff"
+            android:fontFamily="@font/assistant_bold"
+            android:textSize="20dp"
+            android:gravity="center"
+            android:layout_marginRight="40dp"/>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etStudentId"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@id/tvStudentId"
+            android:fontFamily="@font/assistant_light"
+            android:textSize="20dp"
+            android:textColor="#ffffff"
+            android:textColorHint="#ffffff"
+            android:hint="Enter student ID"
+            android:gravity="left|center"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:id="@+id/tvStudentName"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Student Name:"
+            android:textColor="#ffffff"
+            android:fontFamily="@font/assistant_bold"
+            android:textSize="20dp"
+            android:gravity="center"
+            android:layout_marginRight="10dp"/>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etStudentName"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@id/tvStudentName"
+            android:fontFamily="@font/assistant_light"
+            android:textSize="20dp"
+            android:textColor="#ffffff"
+            android:textColorHint="#ffffff"
+            android:hint="Enter student name"
+            android:gravity="left|center"/>
+    </RelativeLayout>
+
+    <GridView
+        android:id="@+id/gvStudentFace"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:numColumns="3"
+        android:gravity="center" />
+
+    <LinearLayout
+        android:id="@+id/btnButtonBarStudentProfile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp">
+
+        <Button
+            android:id="@+id/btnAddFace"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="ADD FACE"
+            android:onClick="addFace"
+            android:textColor="#ffffff"
+            android:background="@drawable/button"
+            android:layout_marginRight="20dp"/>
+
+        <Button
+            android:id="@+id/btnDoneProfile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/done"
+            android:textColor="#ffffff"
+            android:onClick = "btnDoneClick"
+            android:background="@drawable/button" />
+
+    </LinearLayout>
+
+</LinearLayout>

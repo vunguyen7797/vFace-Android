@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout2"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#35363B"
+    android:orientation="vertical"
+    tools:context=".ui.GroupCheckActivity">
+
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:fontFamily="@font/advent_pro_bold"
+        android:text="GROUP CHECK"
+        android:textAlignment="center"
+        android:textColor="#ffffff"
+        android:textSize="25dp" />
+
+    <TextView
+        android:id="@+id/tvDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/assistant_light"
+        android:layout_marginTop="5dp"
+        android:textAlignment="center"
+        android:textColor="#ffffff"
+        android:textSize="20dp"/>
+
+    <ImageView
+        android:id="@+id/ivClassImage"
+        android:layout_width="330dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/teacher1" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/tvClass"
+            android:layout_width="79dp"
+            android:layout_height="49dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="1dp"
+            android:fontFamily="@font/assistant_bold"
+            android:text="COURSE:"
+            android:textColor="#ffffff"
+            android:gravity="left|center"
+            android:textSize="15dp" />
+
+        <Spinner
+            android:id="@+id/spinClass"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_marginEnd="20dp"
+            android:layout_marginRight="20dp"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:popupBackground="#35363B"
+            android:dropDownWidth="280dp"
+            />
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/btnTakePhoto"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:text="Take A Photo"
+        android:layout_gravity="center"
+        android:background="@drawable/button"
+        android:textColor="#ffffff"
+        android:layout_marginTop="5dp"
+        android:onClick="takePicture"/>
+    <Button
+        android:id="@+id/btnGallery"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:text="Choose from Gallery"
+        android:layout_gravity="center"
+        android:background="@drawable/button"
+        android:textColor="#ffffff"
+        android:layout_marginTop="10dp"
+        android:onClick="pickImage"/>
+
+    <TextView
+        android:id="@+id/tvStudentList"
+        android:layout_width="wrap_content"
+        android:layout_height="49dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="1dp"
+        android:fontFamily="@font/assistant_bold"
+        android:text="IN-CLASS STUDENT:"
+        android:textColor="#ffffff"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:textSize="15dp" />
+
+    <ListView
+        android:id="@+id/lvIdentifiedFaces"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginEnd="20dp"/>
+
+
+
+</LinearLayout>

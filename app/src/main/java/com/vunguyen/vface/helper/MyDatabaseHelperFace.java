@@ -1,3 +1,6 @@
+/*
+ * MyDatabaseHelperFace.java
+ */
 package com.vunguyen.vface.helper;
 
 import android.content.ContentValues;
@@ -12,11 +15,11 @@ import com.vunguyen.vface.bean.Face;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class contains methods to work with database of Faces
+ */
 public class MyDatabaseHelperFace extends SQLiteOpenHelper
 {
-    private static final String TAG = "SQLite";
-
-
     // version
     private static final int DATABASE_VERSION = 1;
 
@@ -25,9 +28,11 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
 
     private static final String TABLE_FACE = "Face";
     private static final String COLUMN_FACE_ID ="Face_Id";
-    private static final String COLUMN_FACE_STUDENTId ="Face_StudentId";    // Id string of student on Microsoft server
     private static final String COLUMN_FACE_FACEIdSTRING = "Face_FaceStringId";
     private static final String COLUMN_FACE_URI = "Face_FaceStringUri";
+    // Student unique string to work with server tasks
+    private static final String COLUMN_FACE_STUDENTId ="Face_StudentId";
+
 
     public MyDatabaseHelperFace(Context context)
     {
@@ -36,7 +41,8 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
 
     // Create tables
     @Override
-    public void onCreate(SQLiteDatabase db) {
+    public void onCreate(SQLiteDatabase db)
+    {
         Log.i("EXECUTE", "MyDatabaseHelperFace.onCreate ... ");
         // Script to create tables
         String script = "CREATE TABLE " + TABLE_FACE + "("
@@ -50,7 +56,6 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
-
         Log.i("EXECUTE", "MyDatabaseHelperStudent.onUpgrade ... ");
 
         // Drop old tables
@@ -80,10 +85,10 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
     }
 
 
-    // Return a face from the input database Id
+    // Return a face with respective database ID
     public Face getFace(int id)
     {
-        Log.i(TAG, "MyDatabaseHelperFace.getFace ... " + id);
+        Log.i("EXECUTE", "MyDatabaseHelperFace.getFace ... " + id);
 
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -102,7 +107,7 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
     // Return all faces in the database
     public List<Face> getAllFace()
     {
-        Log.i(TAG, "MyDatabaseHelperFace.getAllFaces ... " );
+        Log.i("EXECUTE", "MyDatabaseHelperFace.getAllFaces ... " );
 
         List<Face> faceList = new ArrayList<Face>();
         // Select All Query
@@ -123,6 +128,10 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
                 // Add to the list
                 faceList.add(face);
             } while (cursor.moveToNext());
+        }
+        else
+        {
+            Log.i("EXECUTE", "Error: Cannot get faces from database.");
         }
 
         // return face list
@@ -159,6 +168,10 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
 
             } while (cursor.moveToNext());
         }
+        else
+        {
+            Log.i("EXECUTE", "Error: Cannot get faces from database for the student " + studentServerId);
+        }
 
         // return face list
         return faceList;
@@ -186,6 +199,10 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
                 // Add to the list
             } while (cursor.moveToNext());
         }
+        else
+        {
+            Log.i("EXECUTE", "Error: Cannot get face ids.");
+        }
 
         // return note list
         return faceIdList;
@@ -211,7 +228,7 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
     // Remove a face from database
     public void deleteFace(Face face)
     {
-        Log.i(TAG, "MyDatabaseHelperFace.deleteFace ... " + face.getStudentServerId() );
+        Log.i("EXECUTE", "MyDatabaseHelperFace.deleteFace ... " + face.getStudentServerId() );
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_FACE, COLUMN_FACE_ID + " = ?",
@@ -219,6 +236,7 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
         db.close();
     }
 
+    // Remove a face of a student
     public void deleteFacesWithStudent(String studentServerId)
     {
         Log.i("EXECUTE", "MyDatabaseHelperFace.deleteFacesWithCourse ...");
@@ -232,6 +250,7 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
         {
             do
             {
+                // compare if string value in column 2 is the same with student server ID
                 if ((cursor.getString(2)).equalsIgnoreCase(studentServerId))
                 {
                     db.delete(TABLE_FACE, COLUMN_FACE_ID + " = ?",

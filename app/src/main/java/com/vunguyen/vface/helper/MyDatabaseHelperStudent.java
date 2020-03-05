@@ -1,3 +1,6 @@
+/*
+ * MyDatabaseHelperStudent.java
+ */
 package com.vunguyen.vface.helper;
 
 import android.content.ContentValues;
@@ -12,11 +15,11 @@ import com.vunguyen.vface.bean.Student;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class contains methods to work with database of students
+ */
 public class MyDatabaseHelperStudent extends SQLiteOpenHelper
 {
-    private static final String TAG = "SQLite";
-
-
     // version
     private static final int DATABASE_VERSION = 1;
 
@@ -30,14 +33,15 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
     private static final String COLUMN_STUDENT_NAME = "Student_Name";
     private static final String COLUMN_STUDENT_SERVERId = "Student_ServerId";
 
-    public MyDatabaseHelperStudent(Context context)  {
+    public MyDatabaseHelperStudent(Context context)
+    {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     // Create tables
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.i(TAG, "MyDatabaseHelperStudent.onCreate ... ");
+        Log.i("EXECUTE", "MyDatabaseHelperStudent.onCreate ... ");
         // Script to create tables
         String script = "CREATE TABLE " + TABLE_STUDENT + "("
                 + COLUMN_STUDENT_ID + " INTEGER PRIMARY KEY," + COLUMN_STUDENT_COURSEId + " TEXT," + COLUMN_STUDENT_NUMBERId + " TEXT,"
@@ -50,7 +54,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-        Log.i(TAG, "MyDatabaseHelperStudent.onUpgrade ... ");
+        Log.i("EXECUTE", "MyDatabaseHelperStudent.onUpgrade ... ");
 
         // Drop old tables
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_STUDENT);
@@ -59,9 +63,10 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
         onCreate(db);
     }
 
+    // add a student object to database
     public void addStudent(Student student)
     {
-        Log.i(TAG, "MyDatabaseHelperStudent.addStudent ... " + student.getStudentIdNumber());
+        Log.i("EXECUTE", "MyDatabaseHelperStudent.addStudent ... " + student.getStudentIdNumber());
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -82,7 +87,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
     // Return all students available in the database
     public List<Student> getAllStudents()
     {
-        Log.i(TAG, "MyDatabaseHelperStudent.getAllStudent ... " );
+        Log.i("EXECUTE", "MyDatabaseHelperStudent.getAllStudent ... " );
 
         List<Student> studentList = new ArrayList<Student>();
         // Select All Query
@@ -106,15 +111,19 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
                 studentList.add(student);
             } while (cursor.moveToNext());
         }
+        else
+        {
+            Log.i("EXECUTE", "Error: Cannot get students from database.");
+        }
 
         // return student list
         return studentList;
     }
 
-    // return all students belong to a course from the course database Id
+    // return all students belong to a course from the course server Id
     public List<Student> getStudentWithCourse(String courseServerId)
     {
-        Log.i(TAG, "MyDatabaseHelperStudent.getStudentWithCourse ...");
+        Log.i("EXECUTE", "MyDatabaseHelperStudent.getStudentWithCourse ...");
 
         List<Student> studentList = new ArrayList<Student>();
 
@@ -143,6 +152,10 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
                 }
             } while (cursor.moveToNext());
         }
+        else
+        {
+            Log.i("EXECUTE", "Error: cannot get student from this course " + courseServerId);
+        }
 
         // return student list
         return studentList;
@@ -151,7 +164,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
     // Update student data if there is any changes
     public int updateStudent(Student student)
     {
-        Log.i(TAG, "MyDatabaseHelperStudent.updateStudent ... "  + student.getStudentIdNumber());
+        Log.i("EXECUTE", "MyDatabaseHelperStudent.updateStudent ... "  + student.getStudentIdNumber());
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -168,7 +181,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
 
     // Delete a student row from database
     public void deleteStudent(Student student) {
-        Log.i(TAG, "MyDatabaseHelperStudent.deleteStudent ... " + student.getStudentIdNumber() );
+        Log.i("EXECUTE", "MyDatabaseHelperStudent.deleteStudent ... " + student.getStudentIdNumber() );
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_STUDENT, COLUMN_STUDENT_ID + " = ?",
@@ -176,6 +189,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
         db.close();
     }
 
+    // delete a student in a selected course
     public void deleteStudentWithCourse(String courseServerId, MyDatabaseHelperFace db_face)
     {
         Log.i("EXECUTE", "MyDatabaseHelperStudent.deleteStudentsWithCourse ...");
@@ -201,10 +215,10 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
         db_face.close();
     }
 
-    // return all students belong to a course from the course database Id
+    // return get a student with its student server ID
     public Student getAStudentWithId(String studentServerId)
     {
-        Log.i(TAG, "MyDatabaseHelperStudent.getStudentWithCourse ...");
+        Log.i("EXECUTE", "MyDatabaseHelperStudent.getStudentWithCourse ...");
 
         String selectQuery = "SELECT * FROM " + TABLE_STUDENT;
 
@@ -224,7 +238,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
                 student_tmp.setStudentName(cursor.getString(3));
                 student_tmp.setStudentServerId(cursor.getString(4));
 
-                // Add a student to the student list if the course Id and the column 1 data matching
+                // student server ID matching from database and input
                 if ((cursor.getString(4)).equalsIgnoreCase(studentServerId))
                 {
                    student = student_tmp;
@@ -232,7 +246,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
             } while (cursor.moveToNext());
         }
 
-        // return student list
+        // return student object
         return student;
     }
 }

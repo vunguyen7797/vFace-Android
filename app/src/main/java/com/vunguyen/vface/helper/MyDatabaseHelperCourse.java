@@ -94,9 +94,12 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        if (cursor.moveToFirst())
-        {
-            do {
+        if (!cursor.moveToFirst()) {
+            Log.i("EXECUTE", "Error: Cannot get courses from database");
+        }
+        else
+            do
+            {
                 Course course = new Course();
                 course.setCourseId(Integer.parseInt(cursor.getString(0)));
                 course.setCourseIdNumber(cursor.getString(1));
@@ -106,7 +109,6 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
                 // Add to the list
                 courseList.add(course);
             } while (cursor.moveToNext());
-        }
 
         // return course list
         return courseList;
@@ -115,7 +117,7 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
     // Return the number of courses in the database
     public int getCoursesCount()
     {
-        Log.i(TAG, "MyDatabaseHelperCourse.getCoursesCount ... " );
+        Log.i("EXECUTE", "MyDatabaseHelperCourse.getCoursesCount ... " );
 
         String countQuery = "SELECT  * FROM " + TABLE_COURSE;
         SQLiteDatabase db = this.getReadableDatabase();
@@ -129,8 +131,9 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
     }
 
     // Update the information of a course in database
-    public int updateCourse(Course course) {
-        Log.i(TAG, "MyDatabaseHelperCourse.updateCourse ... "  + course.getCourseIdNumber());
+    public int updateCourse(Course course)
+    {
+        Log.i("EXECUTE", "MyDatabaseHelperCourse.updateCourse ... "  + course.getCourseIdNumber());
 
         SQLiteDatabase db = this.getWritableDatabase();
 

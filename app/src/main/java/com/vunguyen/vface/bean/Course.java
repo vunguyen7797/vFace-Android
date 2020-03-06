@@ -14,25 +14,28 @@ public class Course implements Serializable
     private String courseName;      // Course name from input
     private String courseIdNumber;  // Real course ID number from input
     private String courseServerId;  // Course unique ID string to work with server tasks.
+    private String courseAccount;   // Account ID that is using the app
 
     public Course()
     {
 
     }
 
-    public Course(String courseIdNumber, String courseName, String courseServerId)
+    public Course(String courseIdNumber, String courseName, String courseServerId, String courseAccount)
     {
         this.courseIdNumber = courseIdNumber;
         this.courseName = courseName;
         this.courseServerId = courseServerId;
+        this.courseAccount = courseAccount;
     }
 
-    public Course(int id, String courseIdNumber, String courseName, String courseServerId)
+    public Course(int id, String courseIdNumber, String courseName, String courseServerId, String courseAccount)
     {
         this.courseId = id;
         this.courseIdNumber = courseIdNumber;
         this.courseName = courseName;
         this.courseServerId = courseServerId;
+        this.courseAccount = courseAccount;
     }
 
     public int getCourseId()
@@ -73,6 +76,16 @@ public class Course implements Serializable
     public void setCourseServerId(String courseServerId)
     {
         this.courseServerId = courseServerId;
+    }
+
+    public String getCourseAccount()
+    {
+        return courseAccount;
+    }
+
+    public void setCourseAccount(String courseAccount)
+    {
+        this.courseAccount = courseAccount;
     }
 
     // This method will return course name if the object is requested to return string

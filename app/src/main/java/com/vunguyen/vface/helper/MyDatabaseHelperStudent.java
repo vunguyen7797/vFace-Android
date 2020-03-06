@@ -83,43 +83,6 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
         db.close();
     }
 
-
-    // Return all students available in the database
-    public List<Student> getAllStudents()
-    {
-        Log.i("EXECUTE", "MyDatabaseHelperStudent.getAllStudent ... " );
-
-        List<Student> studentList = new ArrayList<Student>();
-        // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_STUDENT;
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        if (cursor.moveToFirst())
-        {
-            do
-            {
-                Student student = new Student();
-                student.setStudentId(Integer.parseInt(cursor.getString(0)));
-                student.setStudentIdNumber(cursor.getString(2));
-                student.setCourseServerId(cursor.getString(1));
-                student.setStudentName(cursor.getString(3));
-                student.setStudentServerId(cursor.getString(4));
-
-                // Add to the list
-                studentList.add(student);
-            } while (cursor.moveToNext());
-        }
-        else
-        {
-            Log.i("EXECUTE", "Error: Cannot get students from database.");
-        }
-
-        // return student list
-        return studentList;
-    }
-
     // return all students belong to a course from the course server Id
     public List<Student> getStudentWithCourse(String courseServerId)
     {
@@ -146,15 +109,15 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
                 // Add a student to the student list if the course Id and the column 1 data matching
                 if ((cursor.getString(1)).equalsIgnoreCase(courseServerId))
                 {
-                    Log.i("EQUAL", cursor.getString(1));
-
                     studentList.add(student);
                 }
+                else
+                    Log.i("EXECUTE", "Error: Course Server IDs do not match.");
             } while (cursor.moveToNext());
         }
         else
         {
-            Log.i("EXECUTE", "Error: cannot get student from this course " + courseServerId);
+            Log.i("EXECUTE", "Response: No students are found in this course " + courseServerId);
         }
 
         // return student list
@@ -180,7 +143,8 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
     }
 
     // Delete a student row from database
-    public void deleteStudent(Student student) {
+    public void deleteStudent(Student student)
+    {
         Log.i("EXECUTE", "MyDatabaseHelperStudent.deleteStudent ... " + student.getStudentIdNumber() );
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -207,18 +171,23 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
                 {
                     db.delete(TABLE_STUDENT, COLUMN_STUDENT_ID + " = ?",
                             new String[] { String.valueOf(cursor.getInt(0)) });
+                    // When delete a student, all faces will also be deleted
                     db_face.deleteFacesWithStudent(cursor.getString(4));
                 }
+                else
+                    Log.i("EXECUTE", "Error: Course server IDs do not match.");
             } while (cursor.moveToNext());
         }
+        else
+            Log.i("EXECUTE", "Response: No students are found in this course.");
         db.close();
         db_face.close();
     }
 
-    // return get a student with its student server ID
-    public Student getAStudentWithId(String studentServerId)
+    // return a student object from its student server ID
+    public Student getAStudentWithId(String studentServerId, String courseServerId)
     {
-        Log.i("EXECUTE", "MyDatabaseHelperStudent.getStudentWithCourse ...");
+        Log.i("EXECUTE", "MyDatabaseHelperStudent.getStudentWithID ...");
 
         String selectQuery = "SELECT * FROM " + TABLE_STUDENT;
 
@@ -239,11 +208,18 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
                 student_tmp.setStudentServerId(cursor.getString(4));
 
                 // student server ID matching from database and input
-                if ((cursor.getString(4)).equalsIgnoreCase(studentServerId))
+                if ((cursor.getString(4)).equalsIgnoreCase(studentServerId)
+                        && cursor.getString(1).equalsIgnoreCase(courseServerId))
                 {
                    student = student_tmp;
                 }
+                else
+                    Log.i("EXECUTE", "Error: Student server IDs do not mach");
             } while (cursor.moveToNext());
+        }
+        else
+        {
+            Log.i("EXECUTE", "Response: No student is found.");
         }
 
         // return student object

@@ -84,60 +84,6 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
         db.close();
     }
 
-
-    // Return a face with respective database ID
-    public Face getFace(int id)
-    {
-        Log.i("EXECUTE", "MyDatabaseHelperFace.getFace ... " + id);
-
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.query(TABLE_FACE, new String[] { COLUMN_FACE_ID,
-                        COLUMN_FACE_STUDENTId, COLUMN_FACE_FACEIdSTRING, COLUMN_FACE_URI }, COLUMN_FACE_ID + "=?",
-                new String[] { String.valueOf(id) }, null, null, null, null);
-        if (cursor != null)
-            cursor.moveToFirst();
-
-        Face face = new Face(Integer.parseInt(cursor.getString(0)), cursor.getString(1),
-                cursor.getString(2), cursor.getString(3));
-        // return face
-        return face;
-    }
-
-    // Return all faces in the database
-    public List<Face> getAllFace()
-    {
-        Log.i("EXECUTE", "MyDatabaseHelperFace.getAllFaces ... " );
-
-        List<Face> faceList = new ArrayList<Face>();
-        // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_FACE;
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        if (cursor.moveToFirst())
-        {
-            do
-            {   Face face = new Face();
-                face.setFaceId(Integer.parseInt(cursor.getString(0)));
-                face.setStudentServerId(cursor.getString(1));
-                face.setStudentFaceServerId(cursor.getString(2));
-                face.setStudentFaceUri(cursor.getString(3));
-
-                // Add to the list
-                faceList.add(face);
-            } while (cursor.moveToNext());
-        }
-        else
-        {
-            Log.i("EXECUTE", "Error: Cannot get faces from database.");
-        }
-
-        // return face list
-        return faceList;
-    }
-
     // Return all faces belong to one student with student server Id
     public List<Face> getFaceWithStudent(String studentServerId)
     {
@@ -165,14 +111,15 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
                 {
                     faceList.add(face);
                 }
+                else
+                    Log.i("EXECUTE", "Error: Student server IDs do not match.");
 
             } while (cursor.moveToNext());
         }
         else
         {
-            Log.i("EXECUTE", "Error: Cannot get faces from database for the student " + studentServerId);
+            Log.i("EXECUTE", "Response: No faces are found for this student: " + studentServerId);
         }
-
         // return face list
         return faceList;
     }
@@ -195,16 +142,17 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
             {
                 if (cursor.getString(1).equalsIgnoreCase(studentServerId))
                     faceIdList.add(cursor.getString(3));
-
+                else
+                    Log.i("EXECUTE", "Error: Student server IDs do not match.");
                 // Add to the list
             } while (cursor.moveToNext());
         }
         else
         {
-            Log.i("EXECUTE", "Error: Cannot get face ids.");
+            Log.i("EXECUTE", "Response: No face IDs found for this student.");
         }
 
-        // return note list
+        // return face Id list
         return faceIdList;
     }
 
@@ -239,7 +187,7 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
     // Remove a face of a student
     public void deleteFacesWithStudent(String studentServerId)
     {
-        Log.i("EXECUTE", "MyDatabaseHelperFace.deleteFacesWithCourse ...");
+        Log.i("EXECUTE", "MyDatabaseHelperFace.deleteFacesWithStudent ...");
 
         String selectQuery = "SELECT * FROM " + TABLE_FACE;
 
@@ -256,7 +204,13 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
                     db.delete(TABLE_FACE, COLUMN_FACE_ID + " = ?",
                             new String[] { String.valueOf(cursor.getInt(0)) });
                 }
+                else
+                    Log.i ("EXECUTE", "Error: Student server Ids do not match.");
             } while (cursor.moveToNext());
+        }
+        else
+        {
+            Log.i("EXECUTE", "Response: No faces are found for this student.");
         }
         db.close();
     }

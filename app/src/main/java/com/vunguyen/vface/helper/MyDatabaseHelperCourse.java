@@ -30,6 +30,7 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
     private static final String COLUMN_COURSE_COURSEId ="Course_NumberID";
     private static final String COLUMN_COURSE_NAME = "Course_Name";
     private static final String COLUMN_COURSE_SERVERId = "Course_ServerId";
+    private static final String COLUMN_COURSE_ACCOUNT = "Course_Account";
 
     public MyDatabaseHelperCourse(Context context)
     {
@@ -44,7 +45,7 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
         // Script to create tables
         String script = "CREATE TABLE " + TABLE_COURSE + "("
                 + COLUMN_COURSE_ID + " INTEGER PRIMARY KEY," + COLUMN_COURSE_COURSEId + " TEXT,"
-                + COLUMN_COURSE_NAME + " TEXT," + COLUMN_COURSE_SERVERId + " TEXT" + ")";
+                + COLUMN_COURSE_NAME + " TEXT," + COLUMN_COURSE_SERVERId + " TEXT," + COLUMN_COURSE_ACCOUNT + " TEXT" + ")";
         // execute the script
         db.execSQL(script);
     }
@@ -74,6 +75,7 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
         values.put(COLUMN_COURSE_COURSEId, course.getCourseIdNumber());
         values.put(COLUMN_COURSE_NAME, course.getCourseName());
         values.put(COLUMN_COURSE_SERVERId, course.getCourseServerId());
+        values.put(COLUMN_COURSE_ACCOUNT, course.getCourseAccount());
 
         // Insert a new line of data into the tables
         db.insert(TABLE_COURSE, null, values);
@@ -82,8 +84,8 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
         db.close();
     }
 
-    // Return all courses available in the database
-    public List<Course> getAllCourses()
+    // Return all courses available in the database for the account
+    public List<Course> getAllCourses(String account)
     {
         Log.i("EXECUTE", "MyDatabaseHelperCourse.getAllCourses ... " );
 
@@ -94,10 +96,7 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        if (!cursor.moveToFirst()) {
-            Log.i("EXECUTE", "Error: Cannot get courses from database");
-        }
-        else
+        if (cursor.moveToFirst()) {
             do
             {
                 Course course = new Course();
@@ -105,10 +104,17 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
                 course.setCourseIdNumber(cursor.getString(1));
                 course.setCourseName(cursor.getString(2));
                 course.setCourseServerId(cursor.getString(3));
+                course.setCourseAccount(cursor.getString(4));
 
-                // Add to the list
-                courseList.add(course);
+                if ((cursor.getString(4)).equalsIgnoreCase(account))
+                {
+                    // Add to the list
+                    courseList.add(course);
+                }
             } while (cursor.moveToNext());
+        }
+        else
+            Log.i("EXECUTE", "Response: No courses are found for this account.");
 
         // return course list
         return courseList;
@@ -134,13 +140,13 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
     public int updateCourse(Course course)
     {
         Log.i("EXECUTE", "MyDatabaseHelperCourse.updateCourse ... "  + course.getCourseIdNumber());
-
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(COLUMN_COURSE_COURSEId, course.getCourseIdNumber());
         values.put(COLUMN_COURSE_NAME, course.getCourseName());
         values.put(COLUMN_COURSE_SERVERId, course.getCourseServerId());
+        values.put(COLUMN_COURSE_ACCOUNT, course.getCourseAccount());
 
         // updating row
         return db.update(TABLE_COURSE, values, COLUMN_COURSE_ID + " = ?",
@@ -148,7 +154,8 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
     }
 
     // Delete a course from database
-    public void deleteCourse(Course course) {
+    public void deleteCourse(Course course)
+    {
         Log.i("EXECUTE", "MyDatabaseHelperCourse.deleteCourse ... " + course.getCourseIdNumber() );
 
         SQLiteDatabase db = this.getWritableDatabase();

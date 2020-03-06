@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
+import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 
@@ -89,7 +91,7 @@ public class StudentDataActivity extends AppCompatActivity
                 {
                     addFace();
                 } else {
-                   // doneAndSave();
+                    saveData();
                 }
             }
         }
@@ -176,7 +178,7 @@ public class StudentDataActivity extends AppCompatActivity
 
     String student_serverId = null;
 
-    private int courseId;
+    private String account;
     private String courseServerId;
 
     private TextInputEditText etStudentID;
@@ -196,6 +198,7 @@ public class StudentDataActivity extends AppCompatActivity
     private static final int REQUEST_SELECT_IMAGE = 0;
     private static final int MENU_ITEM_DELETE = 111;
 
+    int courseId;
     GridView gvStudentFace;
     MyDatabaseHelperFace db_face;
     List<Face> faceList = new ArrayList<>();
@@ -233,6 +236,7 @@ public class StudentDataActivity extends AppCompatActivity
 
             courseServerId = intent_info.getStringExtra("courseServerId");
             courseId = intent_info.getIntExtra("courseId", 0);
+            account = intent_info.getStringExtra("account");
 
             student_serverId = student.getStudentServerId();
             Log.i("EXECUTE", "Edit Student: " + student_serverId + " in Group: " + courseServerId);
@@ -249,6 +253,7 @@ public class StudentDataActivity extends AppCompatActivity
         {
             Bundle bundle = getIntent().getBundleExtra("CourseId");
             courseId = bundle.getInt("courseId");
+            account = bundle.getString("account");
             courseServerId = bundle.getString("courseServerId");
 
             this.mode = MODE_ADD;
@@ -279,6 +284,7 @@ public class StudentDataActivity extends AppCompatActivity
         outState.putString("CourseServerId", courseServerId);
         outState.putString("StudentId", etStudentID.getText().toString());
         outState.putString("StudentName", etStudentName.getText().toString());
+        outState.putString("account", account);
     }
 
 
@@ -292,6 +298,7 @@ public class StudentDataActivity extends AppCompatActivity
         courseServerId = savedInstanceState.getString("CourseServerId");
         etStudentID.setText(savedInstanceState.getString("StudentId"));
         etStudentName.setText(savedInstanceState.getString("StudentName"));
+        account = savedInstanceState.getString("account");
     }
 
 
@@ -401,13 +408,22 @@ public class StudentDataActivity extends AppCompatActivity
     // Button Add Face click event
     public void addFace(View view)
     {
-        if (student_serverId == null)
+        if (etStudentName.getText().toString().equals("") && etStudentID.getText().toString().equals(""))
         {
-            new AddStudentTask(true).execute(courseServerId);
+            Toast.makeText(getApplicationContext(), "Enter student ID & student name\n to add face.",
+                    Toast.LENGTH_SHORT).show();
+            return;
         }
-        else
+        else if (!etStudentName.getText().toString().equals("") && !etStudentID.getText().toString().equals(""))
         {
-            addFace();
+            if (student_serverId == null)
+            {
+                new AddStudentTask(true).execute(courseServerId);
+            }
+            else
+            {
+                addFace();
+            }
         }
     }
 
@@ -428,12 +444,19 @@ public class StudentDataActivity extends AppCompatActivity
                 {
                     Log.i("EXECUTE", "GOT PHOTO FROM CAMERA");
                     Uri uriImagePicked = data.getData();
+                    Bitmap mBitmap = ImageEditor.loadSizeLimitedBitmapFromUri(
+                            uriImagePicked, getContentResolver());
+
                     Intent intent = new Intent(this, AddFaceActivity.class);
                     intent.putExtra("StudentServerId", student_serverId);
 
                     intent.putExtra("CourseServerId", courseServerId);
                     intent.putExtra("ImageUriStr", uriImagePicked.toString());
-                    startActivity(intent);
+                    //startActivity(intent);
+                    AddFaceToStudent addFaceToStudent = new AddFaceToStudent(mBitmap, student_serverId,
+                            courseServerId, db_face, getApplicationContext(), StudentDataActivity.this);
+                    addFaceToStudent.addFaceToPerson();
+
                 }
                 break;
             default:
@@ -444,7 +467,14 @@ public class StudentDataActivity extends AppCompatActivity
     // Click event for Done button
     public void btnDoneClick(View view)
     {
-        MyDatabaseHelperStudent db = new MyDatabaseHelperStudent(this);
+
+        if (student_serverId == null)
+        {
+            new AddStudentTask(false).execute(courseServerId);
+        }
+        else
+            saveData();
+/*MyDatabaseHelperStudent db = new MyDatabaseHelperStudent(this);
         // get input
         String number_id = this.etStudentID.getText().toString();
         String name = this.etStudentName.getText().toString();
@@ -457,7 +487,7 @@ public class StudentDataActivity extends AppCompatActivity
 
         if(mode == MODE_ADD )
         {
-           if (student_serverId == null)
+            if (student_serverId == null)
                 new AddStudentTask(false).execute(courseServerId);
             Log.i ("EXECUTE", " Add Student Server id: " + student_serverId + " to group: " + courseServerId);
             this.student = new Student(number_id, courseServerId, name, student_serverId);
@@ -475,7 +505,61 @@ public class StudentDataActivity extends AppCompatActivity
         this.needRefresh = true;
 
         // Back to current activity
+        Intent intent = new Intent(StudentDataActivity.this, StudentManagerActivity.class);
+        intent.putExtra("ACCOUNT", account);
+        startActivity(intent); */
+
+    }
+
+    private void saveData()
+    {
+        MyDatabaseHelperStudent db = new MyDatabaseHelperStudent(this);
+        // get input
+        String number_id = this.etStudentID.getText().toString();
+        String name = this.etStudentName.getText().toString();
+
+        if(number_id.equals("") || name.equals("")) {
+            Toast.makeText(getApplicationContext(),
+                    "Please enter student ID & student name.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if(mode == MODE_ADD )
+        {
+            Log.i ("EXECUTE", " Add Student Server id: " + student_serverId + " to group: " + courseServerId);
+            this.student = new Student(number_id, courseServerId, name, student_serverId);
+            db.addStudent(student);
+        }
+        else
+        {
+            this.student.setStudentIdNumber(number_id);
+            this.student.setStudentName(name);
+            db.updateStudent(student);
+        }
+
+        new TrainCourseTask().execute(courseServerId);
+
+        this.needRefresh = true;
+
+        // Back to current activity
         onBackPressed();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!this.etStudentID.getText().toString().equals("") || !this.etStudentName.getText().toString().equals(""))
+        {
+            Toast.makeText(this, "Save data before exit.", Toast.LENGTH_SHORT).show();
+        }
+        else if (this.etStudentID.getText().toString().equals("")
+                && this.etStudentName.getText().toString().equals(""))
+        {
+            Intent intent = new Intent(StudentDataActivity.this, StudentManagerActivity.class);
+            intent.putExtra("ACCOUNT", account);
+            startActivity(intent);
+
+        }
+
     }
 
     // Finish activity

@@ -1,4 +1,6 @@
-
+/*
+ * CourseManagerActivity.java
+ */
 package com.vunguyen.vface.ui;
 
 import android.app.Activity;
@@ -20,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,41 +39,16 @@ import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddCourseActivity extends AppCompatActivity
+/**
+ * This activity class implements methods and events for the Course Manager feature.
+ * Also, implements several background tasks to work with server.
+ */
+public class CourseManagerActivity extends AppCompatActivity
 {
-    // Background task of deleting a course from server
-    class DeleteCourseTask extends AsyncTask<String, String, String>
-    {
-        @Override
-        protected String doInBackground(String... params)
-        {
-            FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
-            try
-            {
-                publishProgress("Deleting selected course...");
-                faceServiceClient.deleteLargePersonGroup(params[0]);
-                return params[0];
-
-            }
-            catch (Exception e)
-            {
-                publishProgress(e.getMessage());
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (result != null) {
-               Log.i("EXECUTE","GROUP DELETED");
-            }
-        }
-    }
-
-
     Button btnAddCourse;
-    ListView lvCourses;
     Button btnDone;
+    ListView lvCourses;
+    String account;
 
     // Request code for the menu
     private static final int MENU_ITEM_VIEW = 111;
@@ -80,8 +58,10 @@ public class AddCourseActivity extends AppCompatActivity
 
     private static final int MY_REQUEST_CODE = 1000;
 
+    //List contains the courses to display on screen
     private final List<Course> courseList = new ArrayList<>();
-    private ArrayAdapter<Course> listViewAdapter;
+    // Array adapter to connect ListView and data
+    private ArrayAdapter<Course> courseArrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -91,34 +71,41 @@ public class AddCourseActivity extends AppCompatActivity
         // Set no notification bar on activity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_add_course);
+        setContentView(R.layout.activity_course_manager);
+
+        // Get email account
+        account = getIntent().getStringExtra("ACCOUNT");
+        Toast.makeText(this, "ACCOUNT COURSE MANAGER: " + account, Toast.LENGTH_SHORT).show();
 
         // Set event for the Add Course button
         btnAddCourse = findViewById(R.id.btnAddCourse);
-        btnAddCourse.setOnClickListener(new View.OnClickListener() {
+        btnAddCourse.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(AddCourseActivity.this, AddEditCourseActivity.class);
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(CourseManagerActivity.this, AddEditCourseActivity.class);
+                intent.putExtra("ACCOUNT", account);
                 startActivityForResult(intent, MY_REQUEST_CODE);
-                finish();
             }
         });
 
         // Open the course database, transfer all course from database to a course list
         MyDatabaseHelperCourse db = new MyDatabaseHelperCourse(this);
-        List<Course> list=  db.getAllCourses();
+        List<Course> list=  db.getAllCourses(account);
         this.courseList.addAll(list);
 
-
+        // initialize list view
         lvCourses = findViewById(R.id.lvCourses);
 
-        // create adapter for listview of courses
-        this.listViewAdapter = new ArrayAdapter<Course>(this,
+        // create adapter for list view of courses
+        this.courseArrayAdapter = new ArrayAdapter<Course>(this,
                 android.R.layout.simple_list_item_activated_1, android.R.id.text1, this.courseList)
         {
             @NonNull
             @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent)
+            {
                 View view = super.getView(position, convertView, parent);
                 TextView tv = view.findViewById(android.R.id.text1);
                 tv.setTextColor(Color.WHITE);
@@ -127,34 +114,34 @@ public class AddCourseActivity extends AppCompatActivity
             }
         };
 
-
         // Register Adapter for ListView.
-        this.lvCourses.setAdapter(this.listViewAdapter);
+        this.lvCourses.setAdapter(this.courseArrayAdapter);
 
         // Register the menu context for ListView.
         registerForContextMenu(this.lvCourses);
 
         // Set event for the Done button
         btnDone = findViewById(R.id.btnDone);
-        btnDone.setOnClickListener(new View.OnClickListener() {
+        btnDone.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
-                startActivity(new Intent(AddCourseActivity.this, StudentCoursesActivity.class));
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(CourseManagerActivity.this, StudentCoursesActivity.class);
+                intent.putExtra("ACCOUNT", account);
+                startActivity(intent);
                 finish();
             }
         });
     }
 
-
-    // Create Menu for ListView
+    // Create Menu context for ListView
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view,
                                     ContextMenu.ContextMenuInfo menuInfo)
     {
-
         super.onCreateContextMenu(menu, view, menuInfo);
 
-        // groupId, itemId, order, title
         menu.add(0, MENU_ITEM_VIEW , 0, "View Course Information");
         menu.add(0, MENU_ITEM_ADD , 1, "Add Course");
         menu.add(0, MENU_ITEM_EDIT , 2, "Edit Course");
@@ -183,12 +170,14 @@ public class AddCourseActivity extends AppCompatActivity
         else if(item.getItemId() == MENU_ITEM_ADD)
         {
             Intent intent = new Intent(this, AddEditCourseActivity.class);
+            intent.putExtra("ACCOUNT", account);
             this.startActivityForResult(intent, MY_REQUEST_CODE);
         }
         else if(item.getItemId() == MENU_ITEM_EDIT )
         {
             Intent intent = new Intent(this, AddEditCourseActivity.class);
             intent.putExtra("course", selectedCourse);
+            intent.putExtra("ACCOUNT", account);
             this.startActivityForResult(intent,MY_REQUEST_CODE);
         }
         else if(item.getItemId() == MENU_ITEM_DELETE)
@@ -197,7 +186,8 @@ public class AddCourseActivity extends AppCompatActivity
             new AlertDialog.Builder(this)
                     .setMessage(selectedCourse.getCourseName() +". Are you sure you want to delete?")
                     .setCancelable(false)
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                    {
                         public void onClick(DialogInterface dialog, int id) {
                             deleteCourse(selectedCourse);
                         }
@@ -224,7 +214,7 @@ public class AddCourseActivity extends AppCompatActivity
         db_student.deleteStudentWithCourse(courseServerId, db_face);
         Log.i("EXECUTE", "DELETE COURSE " + courseServerId);
         // Refresh ListView.
-        this.listViewAdapter.notifyDataSetChanged();
+        this.courseArrayAdapter.notifyDataSetChanged();
     }
 
 
@@ -241,10 +231,41 @@ public class AddCourseActivity extends AppCompatActivity
             {
                 this.courseList.clear();
                 MyDatabaseHelperCourse db = new MyDatabaseHelperCourse(this);
-                List<Course> list = db.getAllCourses();
+                List<Course> list = db.getAllCourses(account);
                 this.courseList.addAll(list);
                 // Notify the change of data to refresh the listview
-                this.listViewAdapter.notifyDataSetChanged();
+                this.courseArrayAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    // Deleting a course from server - running background
+    private class DeleteCourseTask extends AsyncTask<String, String, String>
+    {
+        @Override
+        protected String doInBackground(String... params)
+        {
+            // Connect to FaceA Cognitive server
+            FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
+            try
+            {
+                faceServiceClient.deleteLargePersonGroup(params[0]);
+                return params[0];
+            }
+            catch (Exception e)
+            {
+                Log.i("EXECUTE", e.getMessage());
+                return null;
+            }
+        }
+
+        // Execute after the background task is completed.
+        @Override
+        protected void onPostExecute(String result)
+        {
+            if (result != null)
+            {
+                Toast.makeText(getApplicationContext(),"The group has been deleted.", Toast.LENGTH_SHORT).show();
             }
         }
     }

@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.vunguyen.vface.R;
 
-public class LoginActivity extends AppCompatActivity {
+public class WelcomeScreenActivity extends AppCompatActivity {
     private Button btnLogin;
     TextView tvRegister;
 
@@ -24,7 +24,7 @@ public class LoginActivity extends AppCompatActivity {
         getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_welcome_screen);
 
         btnLogin = findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(new View.OnClickListener()
@@ -39,7 +39,7 @@ public class LoginActivity extends AppCompatActivity {
         tvRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
+                startActivity(new Intent(WelcomeScreenActivity.this, SignUpActivity.class));
                 finish();
             }
         });

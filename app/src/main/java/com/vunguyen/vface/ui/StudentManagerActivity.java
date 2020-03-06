@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class AddStudentActivity extends AppCompatActivity {
+public class StudentManagerActivity extends AppCompatActivity {
 
     Spinner spinCourses;
     private final List<Course> courseList = new ArrayList<>();
@@ -48,6 +49,7 @@ public class AddStudentActivity extends AppCompatActivity {
     private MyDatabaseHelperStudent db_student;
 
     GridView gvStudents;
+    String account;
 
     // Menu request code
     private static final int MENU_ITEM_VIEW = 111;
@@ -58,7 +60,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
     Button btnDone;
     Button btnAddStudent;
-    private int courseId;
+    private int courseId = 0;
     private String courseServerId ="";
 
     @Override
@@ -69,12 +71,14 @@ public class AddStudentActivity extends AppCompatActivity {
         // Set no notification bar on activity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_add_student);
+        setContentView(R.layout.activity_student_manager);
+
+        account = getIntent().getStringExtra("ACCOUNT");
 
         // Display courses on spinner
         spinCourses = findViewById(R.id.spinClass);
         MyDatabaseHelperCourse db = new MyDatabaseHelperCourse(this);
-        List<Course> listCourses=  db.getAllCourses();
+        List<Course> listCourses=  db.getAllCourses(account);
         this.courseList.addAll(listCourses);
         ArrayAdapter<Course> spinnerArrayAdapter = new ArrayAdapter<Course>(this, R.layout.spinner_item, listCourses);
         spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_item);
@@ -85,28 +89,58 @@ public class AddStudentActivity extends AppCompatActivity {
         db_student = new MyDatabaseHelperStudent(this);
 
         // Default display will be the students of the first course in the list
-        spinCourses.setSelection(0);
-        Course course = (Course) spinCourses.getItemAtPosition(0);
-        displayGridView(course.getCourseServerId(),0);
-
-        // display list of students on course selection
-        spinCourses.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        if (courseList.size() != 0)
         {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+                spinCourses.setSelection(0);
+                Course course = (Course) spinCourses.getItemAtPosition(0);
+                courseServerId = course.getCourseServerId();
+                displayGridView(course.getCourseServerId(),0);
+
+            // display list of students on course selection
+            spinCourses.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
-                courseId = (int) parent.getItemIdAtPosition(position); // get the course id database
-                Course course = (Course) parent.getItemAtPosition(position);
-                courseServerId = course.getCourseServerId();    // get course id on server
-                Log.i("EXECUTE", "Course Selected: " + courseServerId);
-                displayGridView(courseServerId, 1);   // request 1 to notify that selection is changed
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent)
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+                {
+                     courseId = (int) parent.getItemIdAtPosition(position); // get the course id database
+                     Course course = (Course) parent.getItemAtPosition(position);
+                     courseServerId = course.getCourseServerId();    // get course id on server
+                    // Log.i("EXECUTE", "Course Selected: " + courseServerId);
+                     displayGridView(courseServerId, 1);   // request 1 to notify that selection is changed
+                }
+                @Override
+                public void onNothingSelected(AdapterView<?> parent)
+                {
+
+                }
+            });
+
+            // Button Add Student event, send the course ids to the student profile activity
+            btnAddStudent = findViewById(R.id.btnAddStudent);
+            btnAddStudent.setOnClickListener(new View.OnClickListener()
             {
-                // Set spinner default with the first course in the list
-            }
-        });
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(StudentManagerActivity.this, StudentDataActivity.class);
+                    Bundle b = new Bundle();
+                    b.putInt("courseId", courseId);
+                    b.putString("courseServerId", courseServerId);
+                    b.putString("account", account);
+                    intent.putExtra("CourseId", b);
+                    startActivityForResult(intent, MY_REQUEST_CODE);
+                }
+            });
+        }
+        else
+        {
+            btnAddStudent = findViewById(R.id.btnAddStudent);
+            btnAddStudent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getApplicationContext(), "Addd a course before adding students.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
 
         // Button Done Click Event
@@ -116,25 +150,21 @@ public class AddStudentActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                startActivity(new Intent(AddStudentActivity.this, StudentCoursesActivity.class));
+                Intent intent = new Intent(StudentManagerActivity.this, StudentCoursesActivity.class);
+                intent.putExtra("ACCOUNT", account);
+                startActivity(intent);
                 finish();
             }
         });
 
-        // Button Add Student event, send the course ids to the student profile activity
-        btnAddStudent = findViewById(R.id.btnAddStudent);
-        btnAddStudent.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(AddStudentActivity.this, StudentDataActivity.class);
-                Bundle b = new Bundle();
-                b.putInt("courseId", courseId);
-                b.putString("courseServerId", courseServerId);
-                intent.putExtra("CourseId", b);
-                startActivityForResult(intent, MY_REQUEST_CODE);
-            }
-        });
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(StudentManagerActivity.this, StudentCoursesActivity.class);
+        intent.putExtra("ACCOUNT", account);
+        startActivity(intent);
     }
 
     @Override
@@ -165,25 +195,29 @@ public class AddStudentActivity extends AppCompatActivity {
         {
             new AlertDialog.Builder(this)
                     .setMessage("Student ID Number: " + selectedStudent.getStudentIdNumber() +
-                            "\nStudent Name: " + selectedStudent.getStudentName())
+                            "\nStudent Name: " + selectedStudent.getStudentName()+
+                            "\nStudent UID: " + selectedStudent.getStudentServerId()+
+                            "\nCourse UID: " + selectedStudent.getCourseServerId())
                     .setCancelable(false)
                     .setNegativeButton("OK", null)
                     .show();
         }
         else if(item.getItemId() == MENU_ITEM_ADD)
         {
-            Intent intent = new Intent(AddStudentActivity.this, StudentDataActivity.class);
+            Intent intent = new Intent(StudentManagerActivity.this, StudentDataActivity.class);
             Bundle b = new Bundle();
             b.putInt("courseId", courseId);
             b.putString("courseServerId", courseServerId);
+            b.putString("account", account);
             intent.putExtra("CourseId", b);
             startActivityForResult(intent, MY_REQUEST_CODE);
         }
         else if (item.getItemId() == MENU_ITEM_EDIT)
         {
-            Intent intent = new Intent(AddStudentActivity.this, StudentDataActivity.class);
+            Intent intent = new Intent(StudentManagerActivity.this, StudentDataActivity.class);
             intent.putExtra("courseServerId", courseServerId);
             intent.putExtra("courseId", courseId);
+            intent.putExtra("account", account);
             intent.putExtra("student", selectedStudent);
             startActivityForResult(intent, MY_REQUEST_CODE);
         }
@@ -250,7 +284,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
     }
 
-    class DeleteStudentTask extends AsyncTask<String, String, String>
+    static class DeleteStudentTask extends AsyncTask<String, String, String>
     {
         String courseServerId;
         DeleteStudentTask(String courseServerId)

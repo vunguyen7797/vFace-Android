@@ -1,6 +1,10 @@
+/*
+ * AddEditCourseActivity.java
+ */
 package com.vunguyen.vface.ui;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,86 +26,27 @@ import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
 
 import java.util.UUID;
 
+/**
+ * This class contains background tasks to work with server
+ * and implements events for activity properties.
+ */
 public class AddEditCourseActivity extends AppCompatActivity
 {
-    // Background task of adding a course to server.
-    class AddCourseTask extends AsyncTask<String, String, String>
-    {
-        @Override
-        protected String doInBackground(String... params)
-        {
-            // Get an instance of face service client.
-            FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
-            Log.i("EXECUTE", "Call Face Service Done");
-            try
-            {
-                Log.i("EXECUTE", "Syncing with server to add course");
-
-                // Start creating a course as a person group in server.
-                faceServiceClient.createLargePersonGroup(params[0], "Name", "User Data");
-                return params[0];
-            }
-            catch (Exception e)
-            {
-                Log.i("EXECUTE", "ERRORS OCCUR!");
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result)
-        {
-            if (result != null)
-            {
-                Log.i("EXECUTE", "Course created successfully on server.");
-            }
-        }
-    }
-
-    // Background task of training a group of student (course) on server
-    class TrainCourseTask extends AsyncTask<String, String, String>
-    {
-        @Override
-        protected String doInBackground(String... params)
-        {
-            FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
-            try
-            {
-                Log.i("EXECUTE", "Training the student group (course)");
-                faceServiceClient.trainLargePersonGroup(params[0]);
-                return params[0];
-
-            }
-            catch (Exception e)
-            {
-                publishProgress(e.getMessage());
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            //progressDialog.dismiss();
-
-            if (result != null)
-            {
-                Toast.makeText(getApplicationContext(), "Success. Course " + result + " trained", Toast.LENGTH_LONG).show();
-                finish();
-            }
-        }
-    }
-
     Button btnCancel;
     Course course;
+    TextInputEditText etCourseID;
+    TextInputEditText etCourseName;
+    ProgressDialog progressDialog;
+
+    // Request code
     private static final int MODE_ADD = 1;
     private static final int MODE_EDIT = 2;
 
-    String courseServerId = "";
+    String courseServerId;
     private int mode;
-    private TextInputEditText etCourseID;
-    private TextInputEditText etCourseName;
+    String account; // email address of the user
 
-    private boolean needRefresh;
+    private boolean needRefresh; // signal flag to refresh data
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -115,18 +60,21 @@ public class AddEditCourseActivity extends AppCompatActivity
 
         // Set event for Cancel button
         btnCancel = findViewById(R.id.btnCancel);
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(AddEditCourseActivity.this, AddCourseActivity.class));
-            }
+        btnCancel.setOnClickListener(v -> {
+            // Go back to the Course Manager activity
+            Intent intent = new Intent (AddEditCourseActivity.this, CourseManagerActivity.class);
+            intent.putExtra("ACCOUNT", account);
+            startActivity(intent);
         });
 
         etCourseID = findViewById(R.id.etCourseID);
         etCourseName = findViewById(R.id.etCourseName);
 
-        Intent intent = this.getIntent();
-        this.course = (Course) intent.getSerializableExtra("course");
+        // Extract data passed from the previous activity
+        Intent intentData = this.getIntent();
+        this.course = (Course) intentData.getSerializableExtra("course");
+        account = getIntent().getStringExtra("ACCOUNT");
+
         // set mode of the activity: add a new course or edit an available course
         if(course == null)
         {
@@ -139,52 +87,61 @@ public class AddEditCourseActivity extends AppCompatActivity
             this.etCourseID.setText(course.getCourseIdNumber());
             this.etCourseName.setText(course.getCourseName());
         }
+
+        // initializing progress dialog
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("V.FACE");
     }
 
 
-    // Click event for Save button
+    // Set click event for Save button
     public void btnSaveClick(View view)
     {
+        // Open database Course
         MyDatabaseHelperCourse db = new MyDatabaseHelperCourse(this);
 
+        // Get input from the edit text fields
         String  courseNumberId = this.etCourseID.getText().toString();
         String courseName = this.etCourseName.getText().toString();
 
-
-        if(courseNumberId.equals("") || courseName.equals("")) {
+        // Check if input are null or not
+        if(courseNumberId.equals("") || courseName.equals(""))
+        {
             Toast.makeText(getApplicationContext(),
                     "Please enter course ID & course name.", Toast.LENGTH_LONG).show();
-            return;
         }
-
-        if(mode == MODE_ADD )  // Add new course to the database
+        else
         {
-            // Generate a server string Id for the new course
-            courseServerId = UUID.randomUUID().toString();
-            Log.i("EXECUTE", "Execute Background task for adding course: " + courseServerId);
-            new AddCourseTask().execute(courseServerId);
+            if (mode == MODE_ADD)  // Add new course to the database
+            {
+                // Generate a server string Id for the new course
+                courseServerId = UUID.randomUUID().toString();
+                // Execute the background task to create a course on server
+                new AddCourseTask().execute(courseServerId);
 
-            this.course = new Course(courseNumberId, courseName, courseServerId);
-
-            Log.i("EXECUTE", "Adding course to database");
-            db.addCourse(course);
+                this.course = new Course(courseNumberId, courseName, courseServerId, account);
+                db.addCourse(course);   // add course to database
 
 
-        }
-        else // Update the course data in the database
-        {
+            }
+            else // Mode is edit. Update the course data in the database
+            {
                 this.course.setCourseIdNumber(courseNumberId);
                 this.course.setCourseName(courseName);
                 db.updateCourse(course);
+            }
+
+            this.needRefresh = true; // flag to refresh the data
+
+            // Go back to previous activity
+            Intent intent = new Intent(AddEditCourseActivity.this, CourseManagerActivity.class);
+            intent.putExtra("ACCOUNT", account);
+            startActivity(intent);
         }
-
-        this.needRefresh = true;
-
-        // Back to the previous activity
-        startActivity(new Intent(AddEditCourseActivity.this, AddCourseActivity.class));
     }
 
-    // Finish activity
+    // Override Finish method to close the activity and send request refreshing
+    // the list of course after adding or deleting a course.
     @Override
     public void finish()
     {
@@ -192,9 +149,75 @@ public class AddEditCourseActivity extends AppCompatActivity
         Intent data = new Intent();
         // Request the List Course refresh
         data.putExtra("needRefresh", needRefresh);
-
         // Activity complete
         this.setResult(Activity.RESULT_OK, data);
         super.finish();
+    }
+
+    /**
+     * This class implements background task to create a course
+     * as a large person group on Microsoft Face API server.
+     */
+    class AddCourseTask extends AsyncTask<String, String, String>
+    {
+        @Override
+        protected String doInBackground(String... params)
+        {
+            // Get an instance of face service client.
+            FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
+            try
+            {
+                publishProgress("Syncing with server...");
+                Log.i("EXECUTE", "Syncing with server to add course");
+
+                // Start creating a course as a person group in server.
+                faceServiceClient.createLargePersonGroup(params[0], "Name", "User Data");
+                return params[0];
+            }
+            catch (Exception e)
+            {
+                Log.i("EXECUTE", "Errors: " + e.getMessage());
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPreExecute()
+        {
+            startProgressingDialog();
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values)
+        {
+            duringTaskProgressDialog(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(String result)
+        {
+            if (result != null)
+            {
+                progressDialog.dismiss();
+                Log.i("EXECUTE", "Course " + result + " created successfully on server.");
+            }
+            else
+            {
+                Log.i("EXECUTE", "Response: Course is not created on server.");
+            }
+        }
+    }
+
+
+    // Showing the progressing dialog when the task starts
+    private void startProgressingDialog()
+    {
+        progressDialog.show();
+    }
+
+    // Showing message on progressing dialog during the task
+    private void duringTaskProgressDialog(String progress)
+    {
+        progressDialog.setMessage(progress);
     }
 }

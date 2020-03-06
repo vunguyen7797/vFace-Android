@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -17,6 +18,7 @@ public class StudentCoursesActivity extends AppCompatActivity {
     CardView cvAddCourse;
     CardView cvAddStudent;
     ImageView ivBackArrow;
+    String account;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,11 +29,17 @@ public class StudentCoursesActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_student_courses);
 
+        account = getIntent().getStringExtra("ACCOUNT");
+        Toast.makeText(getApplicationContext(), account, Toast.LENGTH_SHORT).show();
+
         cvAddCourse = findViewById(R.id.cvAddCourse);
         cvAddCourse.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                startActivity(new Intent(StudentCoursesActivity.this, AddCourseActivity.class));
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(StudentCoursesActivity.this, CourseManagerActivity.class);
+                intent.putExtra("ACCOUNT", account);
+                startActivity(intent);
                 finish();
             }
         });
@@ -40,7 +48,9 @@ public class StudentCoursesActivity extends AppCompatActivity {
         ivBackArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(StudentCoursesActivity.this, MainActivity.class));
+                Intent intent = new Intent(StudentCoursesActivity.this, DashBoardActivity.class);
+                intent.putExtra("ACCOUNT", account);
+                startActivity(intent);
                 finish();
             }
         });
@@ -48,11 +58,22 @@ public class StudentCoursesActivity extends AppCompatActivity {
         cvAddStudent = findViewById(R.id.cvAddStudent);
         cvAddStudent.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                startActivity(new Intent(StudentCoursesActivity.this, AddStudentActivity.class));
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(StudentCoursesActivity.this, StudentManagerActivity.class);
+                intent.putExtra("ACCOUNT", account);
+
+                startActivity(intent);
                 finish();
             }
         });
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(StudentCoursesActivity.this, DashBoardActivity.class);
+        intent.putExtra("ACCOUNT", account);
+        startActivity(intent);
     }
 }

@@ -50,7 +50,7 @@ public class Login2Activity extends AppCompatActivity
                 if(mFirebaseUser != null)
                 {
                     Toast.makeText(Login2Activity.this, "You are logged in", Toast.LENGTH_SHORT).show();
-                    openDashBoard();
+                    openDashBoard(mFirebaseUser.getEmail());
                 }
                 else
                 {
@@ -103,7 +103,7 @@ public class Login2Activity extends AppCompatActivity
                                 Toast.makeText(Login2Activity.this, "Login failed. Your email or password is incorrect. Please try again!", Toast.LENGTH_SHORT).show();
                             }
                             else {
-                                openDashBoard();
+                                openDashBoard(email);
                             }
 
                         }
@@ -145,14 +145,15 @@ public class Login2Activity extends AppCompatActivity
 
     public void openWelcomeScreen()
     {
-        Intent intent = new Intent(this, LoginActivity.class);
+        Intent intent = new Intent(this, WelcomeScreenActivity.class);
         startActivity(intent);
         finish();
     }
 
-    public void openDashBoard()
+    public void openDashBoard(String email)
     {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, DashBoardActivity.class);
+        intent.putExtra("ACCOUNT", email);
         startActivity(intent);
         finish();
     }

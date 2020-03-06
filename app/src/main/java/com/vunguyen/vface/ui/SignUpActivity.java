@@ -108,7 +108,7 @@ public class SignUpActivity extends AppCompatActivity
 
     public void openWelcome()
     {
-        Intent intent = new Intent(this, LoginActivity.class );
+        Intent intent = new Intent(this, WelcomeScreenActivity.class );
         startActivity(intent);
         finish();
     }

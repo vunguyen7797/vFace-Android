@@ -64,9 +64,8 @@ import java.util.UUID;
 
 public class GroupCheckActivity extends AppCompatActivity
 {
-
     // Background task of face identification.
-    private class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]>
+    public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]>
     {
         private boolean succeed = true;
         String courseServerId;
@@ -149,16 +148,22 @@ public class GroupCheckActivity extends AppCompatActivity
                         String studentServerId =
                                 identifyResult.candidates.get(0).personId.toString();
 
-                        Student student = db_student.getAStudentWithId(studentServerId);
+                        Student student = db_student.getAStudentWithId(studentServerId, courseServerId);
 
-                        String studentName = student.getStudentName();
-                        String studentIdNumber = student.getStudentIdNumber();
-                        String course = spinCourses.getSelectedItem().toString();
-                        String identity = "Student: " + studentName.toUpperCase() + "\n"
-                                + "Student ID: " + studentIdNumber + "\n"
-                                + "Course: " + course;
+                        if (student != null)
+                        {
+                            String studentIdNumber = student.getStudentIdNumber();
+                            String course = spinCourses.getSelectedItem().toString();
+                            String studentName = student.getStudentName();
+                            String identity = "Student: " + studentName.toUpperCase() + "\n"
+                                    + "Student ID: " + studentIdNumber + "\n"
+                                    + "Course: " + course;
 
-                        detectedDetailsList.add(identity);
+                            detectedDetailsList.add(identity);
+                        }
+                        else
+                            Log.i("EXECUTE", "STUDENT NULL");
+
                     } else
                         detectedDetailsList.add("UNKNOWN STUDENT");
                 }
@@ -181,21 +186,22 @@ public class GroupCheckActivity extends AppCompatActivity
             }
         }
 
-        private void setUiAfterIdentification(boolean succeed, List<Pair<Bitmap, String>> studentIdentityList)
+    }
+
+    private void setUiAfterIdentification(boolean succeed, List<Pair<Bitmap, String>> studentIdentityList)
+    {
+
+        if (succeed)
         {
+            progressDialog.dismiss();
+            listViewAdapter = new FaceListViewAdapter(studentIdentityList);
 
-            if (succeed)
-            {
-                progressDialog.dismiss();
-                listViewAdapter = new FaceListViewAdapter(studentIdentityList);
-
-                ListView listView = findViewById(R.id.lvIdentifiedFaces);
-                listView.setAdapter(listViewAdapter);
-            }
+            ListView listView = findViewById(R.id.lvIdentifiedFaces);
+            listView.setAdapter(listViewAdapter);
         }
     }
 
-    private class FaceListViewAdapter implements ListAdapter
+    class FaceListViewAdapter implements ListAdapter
     {
         List<Bitmap> faceThumbnails;
         List<String> studentInfo;
@@ -300,7 +306,7 @@ public class GroupCheckActivity extends AppCompatActivity
 
 
     // Background task of face detection.
-    private class DetectionTask extends AsyncTask<InputStream, String, Face[]> {
+    public class DetectionTask extends AsyncTask<InputStream, String, Face[]> {
         @Override
         protected Face[] doInBackground(InputStream... params) {
             // Get an instance of face service client to detect faces in image.
@@ -397,7 +403,10 @@ public class GroupCheckActivity extends AppCompatActivity
     List<Face> facesList; // store face objects from the task results;
     FaceListViewAdapter listViewAdapter;
 
+    List<Student> studentList;
+
     ProgressDialog progressDialog;
+    String account;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -409,6 +418,8 @@ public class GroupCheckActivity extends AppCompatActivity
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_group_check);
+
+        account = getIntent().getStringExtra("ACCOUNT");
 
         identifyResultsList = new ArrayList<>();
         detectedDetailsList = new ArrayList<>();
@@ -422,7 +433,7 @@ public class GroupCheckActivity extends AppCompatActivity
         spinCourses = findViewById(R.id.spinClass);
 
         MyDatabaseHelperCourse db = new MyDatabaseHelperCourse(this);
-        List<Course> listCourses=  db.getAllCourses();
+        List<Course> listCourses=  db.getAllCourses(account);
         this.courseList.addAll(listCourses);
 
         spinnerArrayAdapter = new ArrayAdapter<Course>(this, R.layout.spinner_item, listCourses);
@@ -430,32 +441,42 @@ public class GroupCheckActivity extends AppCompatActivity
         spinCourses.setAdapter(spinnerArrayAdapter);
 
 
-
-        // display list of students on course selection
-        spinCourses.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        if (courseList.size() != 0)
         {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-            {
-                Course course = (Course) parent.getItemAtPosition(position);
-                courseServerId = course.getCourseServerId();    // get course id on server
-                Log.i("EXECUTE", "Course Selected: " + courseServerId);
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent)
-            {
-                spinCourses.setSelection(0);
-                Course course = (Course) spinCourses.getItemAtPosition(0);
-                courseServerId = course.getCourseServerId();
-            }
-        });
+            spinCourses.setSelection(0);
+            Course course = (Course) spinCourses.getItemAtPosition(0);
+            courseServerId = course.getCourseServerId();
+            // display list of students on course selection
+            spinCourses.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    Course course = (Course) parent.getItemAtPosition(position);
+                    courseServerId = course.getCourseServerId();    // get course id on server
+                    Log.i("EXECUTE", "Course Selected: " + courseServerId);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+        }
 
         ivClass = findViewById(R.id.ivClassImage);
         lvIdentifiedFaces = findViewById(R.id.lvIdentifiedFaces);
 
+        studentIdentityList = new ArrayList<>();
         db_student = new MyDatabaseHelperStudent(this);
+        studentList = db_student.getStudentWithCourse(courseServerId);
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("V.FACE");
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(GroupCheckActivity.this, DashBoardActivity.class);
+        intent.putExtra("ACCOUNT", account);
+        startActivity(intent);
     }
 
     private void startProgressDialog()

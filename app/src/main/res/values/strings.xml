@@ -22,7 +22,7 @@
 
     <string name="course_available">COURSES MANAGER</string>
     <string name="courses_tip">Long tap to open actions menu.</string>
-    <string name="add_courses">ADD A NEW COURSE</string>
+    <string name="add_courses">ADD COURSE</string>
 
     <!-- Add Edit Course activities -->
     <string name="Information">Add courses you are teaching to manage the students.</string>

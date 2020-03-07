@@ -26,28 +26,31 @@
         android:layout_marginRight="20dp"
         android:layout_marginTop="20dp">
 
-        <TextView
-            android:id="@+id/tvStudentId"
-            android:layout_width="wrap_content"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/outlinedTextStudentId"
+            style="@style/MyTextInputLayout2"
+            android:layout_width="300dp"
             android:layout_height="match_parent"
-            android:text="Student ID: "
-            android:textColor="#ffffff"
-            android:fontFamily="@font/assistant_bold"
-            android:textSize="20dp"
-            android:gravity="center"
-            android:layout_marginRight="40dp"/>
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etStudentId"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_toRightOf="@id/tvStudentId"
-            android:fontFamily="@font/assistant_light"
-            android:textSize="20dp"
-            android:textColor="#ffffff"
-            android:textColorHint="#ffffff"
-            android:hint="Enter student ID"
-            android:gravity="left|center"/>
+            android:layout_marginStart="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginRight="20dp"
+            android:hint="STUDENT ID">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etStudentId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="#ffffff"
+                android:maxLength="8"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -55,31 +58,42 @@
         android:layout_height="50dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="30dp">
 
-        <TextView
-            android:id="@+id/tvStudentName"
-            android:layout_width="wrap_content"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/outlinedTextStudentName"
+            android:layout_width="300dp"
             android:layout_height="match_parent"
-            android:text="Student Name:"
-            android:textColor="#ffffff"
-            android:fontFamily="@font/assistant_bold"
-            android:textSize="20dp"
-            android:gravity="center"
-            android:layout_marginRight="10dp"/>
+            style="@style/MyTextInputLayout2"
+            android:hint="STUDENT NAME"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etStudentName"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_toRightOf="@id/tvStudentName"
-            android:fontFamily="@font/assistant_light"
-            android:textSize="20dp"
-            android:textColor="#ffffff"
-            android:textColorHint="#ffffff"
-            android:hint="Enter student name"
-            android:gravity="left|center"/>
+            android:layout_marginStart="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginEnd="20dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etStudentName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="#ffffff" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
     </RelativeLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="STUDENT FACES: "
+        android:textSize="15dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        android:textColor="#ffffff"/>
 
     <GridView
         android:id="@+id/gvStudentFace"
@@ -117,7 +131,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/done"
+            android:text="SAVE"
             android:textColor="#ffffff"
             android:onClick = "btnDoneClick"
             android:background="@drawable/button" />

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.AddStudentActivity"
+    tools:context=".ui.StudentManagerActivity"
     android:background="#35363B"
     android:orientation="vertical">
 
@@ -20,37 +20,25 @@
         android:textColor="#ffffff"
         android:layout_gravity="center" />
 
-    <RelativeLayout
-        android:layout_width="match_parent"
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/MyTextInputLayout"
+        android:layout_width="325dp"
         android:layout_height="50dp"
-        android:layout_marginTop="50dp">
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:gravity="center"
+        android:hint="CHOOSE A COURSE"
+        android:textAlignment="center">
 
-        <TextView
-            android:id="@+id/tvClass"
-            android:layout_width="79dp"
-            android:layout_height="49dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="1dp"
-            android:fontFamily="@font/assistant_bold"
-            android:text="COURSE:"
-            android:textColor="#ffffff"
-            android:gravity="left|center"
-            android:textSize="15dp" />
-
-        <Spinner
-            android:id="@+id/spinClass"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:layout_marginEnd="20dp"
-            android:layout_marginRight="20dp"
-            android:gravity="center"
+        <AutoCompleteTextView
+            android:id="@+id/filled_exposed_dropdown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:textAlignment="center"
-            android:popupBackground="#35363B"
-            android:dropDownWidth="280dp"
-            />
-    </RelativeLayout>
+            android:textStyle="bold"
+            android:textColor="#ffffff" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:id="@+id/tvStudentList"

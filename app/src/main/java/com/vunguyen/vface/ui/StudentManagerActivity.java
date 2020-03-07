@@ -16,6 +16,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.Spinner;
@@ -26,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
@@ -62,6 +64,7 @@ public class StudentManagerActivity extends AppCompatActivity {
     Button btnAddStudent;
     private int courseId = 0;
     private String courseServerId ="";
+    AutoCompleteTextView courseMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -75,14 +78,22 @@ public class StudentManagerActivity extends AppCompatActivity {
 
         account = getIntent().getStringExtra("ACCOUNT");
 
+
+
         // Display courses on spinner
-        spinCourses = findViewById(R.id.spinClass);
+        //spinCourses = findViewById(R.id.spinClass);
         MyDatabaseHelperCourse db = new MyDatabaseHelperCourse(this);
         List<Course> listCourses=  db.getAllCourses(account);
         this.courseList.addAll(listCourses);
-        ArrayAdapter<Course> spinnerArrayAdapter = new ArrayAdapter<Course>(this, R.layout.spinner_item, listCourses);
-        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_item);
-        spinCourses.setAdapter(spinnerArrayAdapter);
+        //ArrayAdapter<Course> spinnerArrayAdapter = new ArrayAdapter<Course>(this, R.layout.spinner_item, listCourses);
+       // spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_item);
+        //spinCourses.setAdapter(spinnerArrayAdapter);
+
+
+        courseMenu = findViewById(R.id.filled_exposed_dropdown);
+        ArrayAdapter<Course> tvArrayAdapter = new ArrayAdapter<Course>(this, R.layout.dropdown_menu_popup_item, listCourses);
+        courseMenu.setAdapter(tvArrayAdapter);
+
 
         // Display students on grid view
         gvStudents = findViewById(R.id.gvStudents);
@@ -91,11 +102,26 @@ public class StudentManagerActivity extends AppCompatActivity {
         // Default display will be the students of the first course in the list
         if (courseList.size() != 0)
         {
-                spinCourses.setSelection(0);
-                Course course = (Course) spinCourses.getItemAtPosition(0);
-                courseServerId = course.getCourseServerId();
-                displayGridView(course.getCourseServerId(),0);
+            //courseMenu.setSelection(0);
+           // courseMenu.setText(tvArrayAdapter.getItem(0).getCourseName());
+            //Course course = (Course) tvArrayAdapter.getItem(0);
+            //courseServerId = course.getCourseServerId();
+            displayGridView("",0);
+                //spinCourses.setSelection(0);
+                //Course course = (Course) spinCourses.getItemAtPosition(0);
+            courseMenu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+                {
+                    courseId = (int) parent.getItemIdAtPosition(position); // get the course id database
+                    Course course = (Course) parent.getItemAtPosition(position);
+                    courseServerId = course.getCourseServerId();    // get course id on server
+                    // Log.i("EXECUTE", "Course Selected: " + courseServerId);
+                    displayGridView(courseServerId, 1);   // request 1 to notify that selection is changed
 
+                }
+            });
+/*
             // display list of students on course selection
             spinCourses.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
@@ -114,7 +140,7 @@ public class StudentManagerActivity extends AppCompatActivity {
 
                 }
             });
-
+*/
             // Button Add Student event, send the course ids to the student profile activity
             btnAddStudent = findViewById(R.id.btnAddStudent);
             btnAddStudent.setOnClickListener(new View.OnClickListener()
@@ -224,17 +250,18 @@ public class StudentManagerActivity extends AppCompatActivity {
         else if(item.getItemId() == MENU_ITEM_DELETE)
         {
             // Confirmation dialog before delete
-            new AlertDialog.Builder(this)
-                    .setMessage(selectedStudent.getStudentName() +". Are you sure you want to delete?")
-                    .setCancelable(false)
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener()
-                    {
-                        public void onClick(DialogInterface dialog, int id) {
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle("VFACE - STUDENT MANAGER")
+                    .setMessage("Are you sure you want to delete " + selectedStudent.getStudentName() + "?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
                             deleteStudent(selectedStudent);
                         }
                     })
                     .setNegativeButton("No", null)
                     .show();
+
         }
         else
         {

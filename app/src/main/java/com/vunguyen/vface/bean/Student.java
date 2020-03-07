@@ -15,6 +15,7 @@ public class Student implements Serializable
     private String studentName;         // Student name from input
     private String studentIdNumber;     // Real student ID number from input
     private String studentServerId;     // Student unique ID string to work with server tasks
+    private String studentIdentifyFlag;
 
     public Student()
     {
@@ -27,6 +28,15 @@ public class Student implements Serializable
         this.studentIdNumber = studentIdNumber;
         this.studentName = studentName;
         this.studentServerId = studentServerId;
+    }
+
+    public Student (String studentIdNumber, String courseServerId, String studentName, String studentServerId, String studentIdentifyFlag)
+    {
+        this.courseServerId = courseServerId;
+        this.studentIdNumber = studentIdNumber;
+        this.studentName = studentName;
+        this.studentServerId = studentServerId;
+        this.studentIdentifyFlag = studentIdentifyFlag;
     }
 
     public Student(int id, String courseServerId, String studentIdNumber, String studentName, String studentServerId)
@@ -46,6 +56,16 @@ public class Student implements Serializable
     public void setCourseServerId(String courseServerIdId)
     {
         this.courseServerId = courseServerIdId;
+    }
+
+    public String getStudentIdentifyFlag()
+    {
+        return studentIdentifyFlag;
+    }
+
+    public void setStudentIdentifyFlag(String studentIdentifyFlag)
+    {
+        this.studentIdentifyFlag = studentIdentifyFlag;
     }
 
     public int getStudentId()

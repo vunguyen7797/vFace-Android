@@ -12,7 +12,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/advent_pro_bold"
+        android:textStyle="bold"
         android:text="@string/title"
         android:textSize="25dp"
         android:layout_marginTop="40dp"

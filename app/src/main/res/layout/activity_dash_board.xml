@@ -7,7 +7,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="@drawable/dash_background_curve"
-    tools:context=".ui.MainActivity">
+    tools:context=".ui.DashBoardActivity">
 
 
     <LinearLayout
@@ -272,8 +272,7 @@
                 android:layout_height="match_parent"
                 android:text="Log Out?"
                 android:textColor="#ffffff"
-                android:fontFamily="@font/assistant_bold"
-                android:textSize="20dp"
+                android:textSize="15dp"
                 android:textAlignment="center"
                 android:layout_marginTop="05dp"/>
         </LinearLayout>

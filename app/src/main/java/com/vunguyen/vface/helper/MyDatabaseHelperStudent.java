@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.view.ViewDebug;
 
 import com.vunguyen.vface.bean.Student;
 
@@ -32,6 +33,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
     private static final String COLUMN_STUDENT_COURSEId = "Student_CourseServerId";
     private static final String COLUMN_STUDENT_NAME = "Student_Name";
     private static final String COLUMN_STUDENT_SERVERId = "Student_ServerId";
+    private static final String COLUMN_STUDENT_IDENTIFY_FLAG = "Student_IdentifyFlag";
 
     public MyDatabaseHelperStudent(Context context)
     {
@@ -45,7 +47,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
         // Script to create tables
         String script = "CREATE TABLE " + TABLE_STUDENT + "("
                 + COLUMN_STUDENT_ID + " INTEGER PRIMARY KEY," + COLUMN_STUDENT_COURSEId + " TEXT," + COLUMN_STUDENT_NUMBERId + " TEXT,"
-                + COLUMN_STUDENT_NAME + " TEXT," + COLUMN_STUDENT_SERVERId + " TEXT" + ")";
+                + COLUMN_STUDENT_NAME + " TEXT," + COLUMN_STUDENT_SERVERId + " TEXT," + COLUMN_STUDENT_IDENTIFY_FLAG + " TEXT" + ")";
         // execute the script
         db.execSQL(script);
     }
@@ -75,6 +77,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
         values.put(COLUMN_STUDENT_COURSEId, student.getCourseServerId());
         values.put(COLUMN_STUDENT_NAME, student.getStudentName());
         values.put(COLUMN_STUDENT_SERVERId, student.getStudentServerId());
+        values.put(COLUMN_STUDENT_IDENTIFY_FLAG, "NO");
 
         // Insert a new line of data into the tables
         db.insert(TABLE_STUDENT, null, values);
@@ -105,6 +108,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
                 student.setCourseServerId(cursor.getString(1));
                 student.setStudentName(cursor.getString(3));
                 student.setStudentServerId(cursor.getString(4));
+                student.setStudentIdentifyFlag(cursor.getString(5));
 
                 // Add a student to the student list if the course Id and the column 1 data matching
                 if ((cursor.getString(1)).equalsIgnoreCase(courseServerId))
@@ -113,6 +117,54 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
                 }
                 else
                     Log.i("EXECUTE", "Error: Course Server IDs do not match.");
+            } while (cursor.moveToNext());
+        }
+        else
+        {
+            Log.i("EXECUTE", "Response: No students are found in this course " + courseServerId);
+        }
+
+        // return student list
+        return studentList;
+    }
+
+    // return all students belong to a course from the course server Id
+    public List<Student> getAbsenceStudent(String courseServerId)
+    {
+        Log.i("EXECUTE", "MyDatabaseHelperStudent.getStudentWithAbsence ...");
+
+        List<Student> studentList = new ArrayList<Student>();
+
+        String selectQuery = "SELECT * FROM " + TABLE_STUDENT;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                Student student = new Student();
+                student.setStudentId(Integer.parseInt(cursor.getString(0)));
+                student.setStudentIdNumber(cursor.getString(2));
+                student.setCourseServerId(cursor.getString(1));
+                student.setStudentName(cursor.getString(3));
+                student.setStudentServerId(cursor.getString(4));
+                student.setStudentIdentifyFlag(cursor.getString(5));
+
+                // Add a student to the student list if the course Id and the column 1 data matching
+                if ((cursor.getString(1)).equalsIgnoreCase(courseServerId)
+                        && (cursor.getString(5).equalsIgnoreCase("NO")))
+                {
+                    Log.i("EXECUTE", "NAME: " + cursor.getString((3)));
+                    studentList.add(student);
+                }
+                else if (cursor.getString(1).equalsIgnoreCase(courseServerId)
+                && (cursor.getString(5).equalsIgnoreCase("YES")))
+                {
+                    Log.i("EXECUTE", "NAME YES: " + cursor.getString(3));
+                }
+                else    Log.i("EXECUTE", "Error: Course Server IDs do not match. ");
             } while (cursor.moveToNext());
         }
         else
@@ -136,10 +188,31 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
         values.put(COLUMN_STUDENT_COURSEId, student.getCourseServerId());
         values.put(COLUMN_STUDENT_NAME, student.getStudentName());
         values.put(COLUMN_STUDENT_SERVERId, student.getStudentServerId());
+        values.put(COLUMN_STUDENT_IDENTIFY_FLAG, student.getStudentIdentifyFlag());
 
         // updating row
         return db.update(TABLE_STUDENT, values, COLUMN_STUDENT_ID + " = ?",
                 new String[]{String.valueOf(student.getStudentId())});
+    }
+
+    // return all students belong to a course from the course server Id
+    public void resetStudentFlag(List<Student> studentList)
+    {
+        Log.i("EXECUTE", "MyDatabaseHelperStudent.getResetFlag ...");
+
+        String selectQuery = "SELECT * FROM " + TABLE_STUDENT;
+
+        for (Student student: studentList)
+        {
+            SQLiteDatabase db = this.getWritableDatabase();
+            Cursor cursor = db.rawQuery(selectQuery, null);
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_STUDENT_IDENTIFY_FLAG, "NO");
+
+            // updating row
+            db.update(TABLE_STUDENT, values, COLUMN_STUDENT_ID + " = ?",
+                    new String[]{String.valueOf(student.getStudentId())});
+        }
     }
 
     // Delete a student row from database
@@ -206,6 +279,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
                 student_tmp.setCourseServerId(cursor.getString(1));
                 student_tmp.setStudentName(cursor.getString(3));
                 student_tmp.setStudentServerId(cursor.getString(4));
+                student_tmp.setStudentIdentifyFlag(cursor.getString(5));
 
                 // student server ID matching from database and input
                 if ((cursor.getString(4)).equalsIgnoreCase(studentServerId)

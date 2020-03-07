@@ -34,6 +34,14 @@
         android:textSize="20dp"/>
 
     <ImageView
+        android:id="@+id/ivTest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        />
+
+    <ImageView
         android:id="@+id/ivClassImage"
         android:layout_width="330dp"
         android:layout_height="200dp"
@@ -63,13 +71,12 @@
             android:id="@+id/spinClass"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_marginEnd="20dp"
-            android:layout_marginRight="20dp"
             android:gravity="center"
             android:textAlignment="center"
             android:popupBackground="#35363B"
-            android:dropDownWidth="280dp"
+            android:dropDownWidth="250dp"
             />
     </RelativeLayout>
 
@@ -94,19 +101,19 @@
         android:layout_marginTop="10dp"
         android:onClick="pickImage"/>
 
-    <TextView
-        android:id="@+id/tvStudentList"
+
+    <Spinner
+        android:id="@+id/spinStudentList"
         android:layout_width="wrap_content"
         android:layout_height="49dp"
+        android:layout_alignParentRight="true"
         android:layout_marginStart="20dp"
         android:layout_marginLeft="20dp"
-        android:layout_marginTop="1dp"
-        android:fontFamily="@font/assistant_bold"
-        android:text="IN-CLASS STUDENT:"
-        android:textColor="#ffffff"
-        android:textAlignment="center"
         android:gravity="center"
-        android:textSize="15dp" />
+        android:textAlignment="center"
+        android:popupBackground="#35363B"
+        android:dropDownWidth="180dp"
+        />
 
     <ListView
         android:id="@+id/lvIdentifiedFaces"
@@ -116,7 +123,8 @@
         android:layout_marginStart="20dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginEnd="20dp"/>
+        android:layout_marginEnd="20dp"
+        android:drawSelectorOnTop="false"/>
 
 
 

@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -47,12 +48,14 @@ import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
+import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -65,13 +68,14 @@ import java.util.UUID;
 public class GroupCheckActivity extends AppCompatActivity
 {
     // Background task of face identification.
-    public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]>
+    class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]>
     {
         private boolean succeed = true;
         String courseServerId;
         int identifyTurn;   // Index of  this task being executed
         int totalTurn;      // How many times this task being executed
         List<Pair<Bitmap, String>> studentIdentity = new ArrayList<>();
+        Student student;
 
         IdentificationTask(String courseServerId, int identifyTurn, int totalTurn)
         {
@@ -148,7 +152,7 @@ public class GroupCheckActivity extends AppCompatActivity
                         String studentServerId =
                                 identifyResult.candidates.get(0).personId.toString();
 
-                        Student student = db_student.getAStudentWithId(studentServerId, courseServerId);
+                        student = db_student.getAStudentWithId(studentServerId, courseServerId);
 
                         if (student != null)
                         {
@@ -160,6 +164,8 @@ public class GroupCheckActivity extends AppCompatActivity
                                     + "Course: " + course;
 
                             detectedDetailsList.add(identity);
+                            student.setStudentIdentifyFlag("YES");
+                            db_student.updateStudent(student);
                         }
                         else
                             Log.i("EXECUTE", "STUDENT NULL");
@@ -168,14 +174,27 @@ public class GroupCheckActivity extends AppCompatActivity
                         detectedDetailsList.add("UNKNOWN STUDENT");
                 }
 
-                if (identifyTurn == totalTurn) {
+                if (identifyTurn == totalTurn)
+                {
                     int i = 0;
-                    for (String info : detectedDetailsList) {
+                    for (String info : detectedDetailsList)
+                    {
                         Pair<Bitmap, String> pair = new Pair<Bitmap, String>(detectedFacesList.get(i), info);
-                        studentIdentity.add(pair);
+                        if (info.equals("UNKNOWN STUDENT"))
+                        {
+                            Log.i("EXECUTE", "UNKNOWN ADD");
+                            identifyUnknownList.add(pair);
+                        }
+                        else
+                        {
+                            Log.i("EXECUTE", "PAIR ADD");
+                            studentIdentity.add(pair);
+                        }
+
                         i++;
                     }
 
+                    identifyTaskDone = true;
                     studentIdentityList = studentIdentity;
                     setUiAfterIdentification(succeed, studentIdentity);
                 }
@@ -205,6 +224,7 @@ public class GroupCheckActivity extends AppCompatActivity
     {
         List<Bitmap> faceThumbnails;
         List<String> studentInfo;
+        //int requestCode;
         public FaceListViewAdapter()
         {
         }
@@ -213,16 +233,14 @@ public class GroupCheckActivity extends AppCompatActivity
         {
             faceThumbnails = new ArrayList<>();
             studentInfo = new ArrayList<>();
+            //this.requestCode = requestCode;
 
             if (studentIdentityList != null)
             {
                 for (Pair<Bitmap, String> pair : studentIdentityList)
                 {
-                    if (!pair.second.equalsIgnoreCase("UNKNOWN STUDENT"))
-                    {
                         faceThumbnails.add(pair.first);
                         studentInfo.add(pair.second);
-                    }
 
                 }
             }
@@ -306,7 +324,7 @@ public class GroupCheckActivity extends AppCompatActivity
 
 
     // Background task of face detection.
-    public class DetectionTask extends AsyncTask<InputStream, String, Face[]> {
+    class DetectionTask extends AsyncTask<InputStream, String, Face[]> {
         @Override
         protected Face[] doInBackground(InputStream... params) {
             // Get an instance of face service client to detect faces in image.
@@ -382,6 +400,7 @@ public class GroupCheckActivity extends AppCompatActivity
 
     TextView tvDate;
     Spinner spinCourses;
+    Spinner spinStudentList;
     private ImageView ivClass;
     private static final int REQUEST_IMAGE_CAPTURE = 101;
     private static final int GALLERY_REQUEST_CODE = 1;
@@ -394,7 +413,9 @@ public class GroupCheckActivity extends AppCompatActivity
     String courseServerId;
 
     MyDatabaseHelperStudent db_student;
+    MyDatabaseHelperFace db_face;
     ArrayAdapter<Course> spinnerArrayAdapter;
+    ArrayAdapter<String> spinnerListOptionArrayAdapter;
 
     List<IdentifyResult[]> identifyResultsList; // Store list of identify results after identify tasks
     List<String> detectedDetailsList;   // store the students' information after detection
@@ -403,10 +424,16 @@ public class GroupCheckActivity extends AppCompatActivity
     List<Face> facesList; // store face objects from the task results;
     FaceListViewAdapter listViewAdapter;
 
+    List<Pair<Bitmap, String>> identifyUnknownList;
+    List<Student> absenceStudentList;
+    List<Pair<Bitmap, String>> absenceStudentDisplayList;
     List<Student> studentList;
 
     ProgressDialog progressDialog;
+    boolean studentListChanged = false;
+    boolean identifyTaskDone = false;
     String account;
+    ImageView ivTest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -426,6 +453,8 @@ public class GroupCheckActivity extends AppCompatActivity
         detectedFacesList = new ArrayList<>();
         studentIdentityList = new ArrayList<>();
         facesList = new ArrayList<>();
+        absenceStudentList = new ArrayList<>();
+        absenceStudentDisplayList = new ArrayList<>();
 
         tvDate = findViewById(R.id.tvDate);
         setDate(tvDate);
@@ -433,6 +462,7 @@ public class GroupCheckActivity extends AppCompatActivity
         spinCourses = findViewById(R.id.spinClass);
 
         MyDatabaseHelperCourse db = new MyDatabaseHelperCourse(this);
+        db_face = new MyDatabaseHelperFace(this);
         List<Course> listCourses=  db.getAllCourses(account);
         this.courseList.addAll(listCourses);
 
@@ -461,12 +491,157 @@ public class GroupCheckActivity extends AppCompatActivity
                 }
             });
         }
+        ivTest = findViewById(R.id.ivTest);
+        db_student = new MyDatabaseHelperStudent(this);
+        studentIdentityList = new ArrayList<>();
+        identifyUnknownList = new ArrayList<>();
+        spinStudentList = findViewById(R.id.spinStudentList);
+        List<String> studentListOptions = new ArrayList<>();
+        studentListOptions.add("IN-CLASS STUDENTS:");
+        studentListOptions.add("ABSENCE STUDENTS:");
+        studentListOptions.add("UNKNOWN STUDENTS:");
+        spinnerListOptionArrayAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, studentListOptions)
+        {
+            @Override
+            public boolean isEnabled(int position) {
+                if (identifyUnknownList.size() == 0 && position == 2)
+                {
+                    //studentListChanged = true;
+                    return false;
+                }
+                return true;
+            }
+
+            // Change color item
+            @Override
+            public View getDropDownView(int position, View convertView,
+                                        ViewGroup parent) {
+                // TODO Auto-generated method stub
+                View mView = super.getDropDownView(position, convertView, parent);
+                TextView mTextView = (TextView) mView;
+                if ((identifyUnknownList.size() == 0 && position == 2)) {
+                    mTextView.setTextColor(Color.RED);
+                } else {
+                    mTextView.setTextColor(Color.WHITE);
+                }
+                return mView;
+            }
+        };
+        spinnerListOptionArrayAdapter.setDropDownViewResource(R.layout.spinner_item);
+        spinStudentList.setAdapter(spinnerListOptionArrayAdapter);
+        spinStudentList.setSelection(0);
+
+        spinStudentList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+            {
+
+                if (position == 2)
+                {
+                    listViewAdapter = new FaceListViewAdapter(identifyUnknownList);
+                    studentListChanged = true;
+                }
+                else if (studentListChanged && position == 0)
+                {
+                    Log.i("EXECUTE", "SET LIST VIEW AT POSITION 0");
+                    listViewAdapter = new FaceListViewAdapter(studentIdentityList);
+                }
+                else if (position == 1)
+                {
+                    if (absenceStudentDisplayList.size() > 0)
+                    {
+                        absenceStudentDisplayList.clear();
+
+                        Log.i("EXECUTE", "Clear list");
+                    }
+                    if (identifyTaskDone) {
+                        Course course = (Course) spinCourses.getSelectedItem();
+                        absenceStudentList = db_student.getAbsenceStudent(course.getCourseServerId());
+                        if (absenceStudentList.size() != 0) {
+                            //Student student = absenceStudentList.get(0);
+
+                            Log.i("EXECUTE", "STUDENT ABSENCE: " + absenceStudentList.size());
+                            //for (Student student : absenceStudentList)
+                            //{
+
+                            for (int i = 0; i < absenceStudentList.size(); i++) {
+                                Bitmap faceThumbnail;
+                                String studentIdNumber = absenceStudentList.get(i).getStudentIdNumber();
+                                String studentName = absenceStudentList.get(i).getStudentName();
+                                String identity = "Student: " + studentName.toUpperCase() + "\n"
+                                        + "Student ID: " + studentIdNumber + "\n"
+                                        + "Course: " + course;
+
+                                List<com.vunguyen.vface.bean.Face> faceList = db_face.getFaceWithStudent(absenceStudentList.get(i).getStudentServerId());
+
+                                if (faceList.size() > 0) {
+                                    faceThumbnail = ImageEditor.loadSizeLimitedBitmapFromUri(Uri.parse(faceList.get(0).getStudentFaceUri()),
+                                            getContentResolver());
+                                } else
+                                    faceThumbnail = null;
+
+                                Log.i("EXECUTE", "Face thumbnail: " + faceThumbnail);
+                                Pair<Bitmap, String> pair = new Pair<Bitmap, String>(faceThumbnail, identity);
+                                absenceStudentDisplayList.add(pair);
+                                absenceStudentList.get(i).setStudentIdentifyFlag("");
+                                Log.i("EXECUTE", "Done adding absence");
+
+                            }
+
+                            listViewAdapter = new FaceListViewAdapter(absenceStudentDisplayList);
+                            // ivClass.setImageBitmap(faceThumbnail);
+                            studentListChanged = true;
+
+                        }
+                    } else if (!identifyTaskDone)
+                    {
+                        studentListChanged = false;
+                    }
+
+
+                            //Pair<Bitmap, String> pair = new Pair<Bitmap, String>(bitmapImage, identity);
+                            //absenceStudentDisplayList.add(pair);
+                            //Log.i("EXECUTE", "Absence size: " + absenceStudentDisplayList.size());
+                        //}
+
+                        //Log.i("EXECUTE", "Absence size: " + absenceStudentDisplayList.size());
+
+                        //listViewAdapter = new FaceListViewAdapter(absenceStudentDisplayList);
+                        /*for (Student student : absenceStudentList)
+                        {
+
+                            course = (Course) spinCourses.getSelectedItem();
+
+                            Pair<Bitmap, String> pair = new Pair<Bitmap, String>(null, identity);
+                            absenceStudentDisplayList.add(pair);
+                        }
+
+                         */
+                    }
+                    else
+                        Toast.makeText(getApplicationContext(), "NO DISPLAY", Toast.LENGTH_SHORT).show();
+
+
+                ListView listView = findViewById(R.id.lvIdentifiedFaces);
+                listView.setAdapter(listViewAdapter);
+
+
+
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         ivClass = findViewById(R.id.ivClassImage);
         lvIdentifiedFaces = findViewById(R.id.lvIdentifiedFaces);
 
-        studentIdentityList = new ArrayList<>();
-        db_student = new MyDatabaseHelperStudent(this);
+
+
+
         studentList = db_student.getStudentWithCourse(courseServerId);
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("V.FACE");
@@ -501,6 +676,10 @@ public class GroupCheckActivity extends AppCompatActivity
     {
         detectedDetailsList.clear();
         detectedFacesList.clear();
+        db_student.resetStudentFlag(studentList);
+        identifyUnknownList.clear();
+        absenceStudentDisplayList.clear();
+        spinStudentList.setSelection(0);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
             if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED ||
@@ -551,6 +730,10 @@ public class GroupCheckActivity extends AppCompatActivity
 
         detectedDetailsList.clear();
         detectedFacesList.clear();
+        db_student.resetStudentFlag(studentList);
+        identifyUnknownList.clear();
+        absenceStudentDisplayList.clear();
+        spinStudentList.setSelection(0);
         Intent intPickImage = new Intent(Intent.ACTION_PICK);
         intPickImage.setType("image/*");
 

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.AddCourseActivity"
+    tools:context=".ui.CourseManagerActivity"
     android:background="#35363B"
     android:orientation="vertical">
 
@@ -13,36 +13,58 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:fontFamily="@font/advent_pro_bold"
+        android:textStyle="bold"
         android:text="@string/course_available"
         android:textSize="25dp"
         android:layout_marginTop="40dp"
         android:textColor="#ffffff"
         android:layout_gravity="center" />
 
-    <ListView
-        android:id="@+id/lvCourses"
-        android:layout_width="wrap_content"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cvCourses"
+        android:layout_width="match_parent"
         android:layout_height="500dp"
         android:layout_marginStart="20dp"
         android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
-        android:layout_below="@id/tvTitle"
-        android:layout_above="@id/tvAddCourseTip"/>
+        app:cardBackgroundColor="@color/common_google_signin_btn_text_dark_disabled"
+        app:cardCornerRadius="15dp"
+        style="@style/Widget.MaterialComponents.CardView"
+        app:cardElevation="0dp">
+
+        <ListView
+            android:id="@+id/lvCourses"
+            android:layout_width="wrap_content"
+            android:layout_height="450dp"
+            android:layout_above="@id/tvAddCourseTip"
+            android:layout_below="@id/tvTitle"
+            android:layout_marginStart="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@android:color/transparent"
+            android:divider="#ffffff"
+            android:dividerHeight="4px"
+            />
+
+    </com.google.android.material.card.MaterialCardView>
+
 
 
     <TextView
         android:id="@+id/tvAddCourseTip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18dp"
+        android:textSize="15dp"
         android:fontFamily="@font/assistant_light"
         android:layout_marginStart="20dp"
         android:layout_marginLeft="20dp"
-
+        android:textAlignment="center"
         android:textColor="#ffffff"
         android:text="@string/courses_tip"/>
 
@@ -65,7 +87,7 @@
             android:text="@string/add_courses"
             android:textColor="#ffffff"
             android:background="@drawable/button"
-            android:layout_marginRight="20dp"/>
+            android:layout_marginRight="20dp" />
 
         <Button
             android:id="@+id/btnDone"

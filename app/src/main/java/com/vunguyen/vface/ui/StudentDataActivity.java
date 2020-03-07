@@ -28,6 +28,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.microsoft.projectoxford.face.contract.CreatePersonResult;
 import com.vunguyen.vface.R;
@@ -205,6 +206,8 @@ public class StudentDataActivity extends AppCompatActivity
     private ArrayAdapter<Face> gridViewAdapter;
     List<Boolean> faceChecked;
 
+    TextInputLayout outlinedTextStudentId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -215,6 +218,8 @@ public class StudentDataActivity extends AppCompatActivity
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_student_data);
+
+        outlinedTextStudentId = findViewById(R.id.outlinedTextStudentId);
 
         // initialize face database
         db_face = new MyDatabaseHelperFace(this);

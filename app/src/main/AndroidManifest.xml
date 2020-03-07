@@ -29,15 +29,15 @@
         <activity android:name="com.vunguyen.vface.ui.SelectImageActivity" />
 
         <activity android:name="com.vunguyen.vface.ui.StudentDataActivity" />
-        <activity android:name="com.vunguyen.vface.ui.AddStudentActivity" />
+        <activity android:name="com.vunguyen.vface.ui.StudentManagerActivity" />
         <activity android:name="com.vunguyen.vface.ui.AddEditCourseActivity" />
-        <activity android:name="com.vunguyen.vface.ui.AddCourseActivity" />
+        <activity android:name="com.vunguyen.vface.ui.CourseManagerActivity" />
         <activity android:name="com.vunguyen.vface.ui.StudentCoursesActivity" />
         <activity android:name="com.vunguyen.vface.ui.ResetPasswordActivity" />
         <activity android:name="com.vunguyen.vface.ui.SignUpActivity" />
         <activity android:name="com.vunguyen.vface.ui.GroupCheckActivity" />
         <activity android:name="com.vunguyen.vface.ui.AddFaceActivity"/>
-        <activity android:name="com.vunguyen.vface.ui.LoginActivity">
+        <activity android:name="com.vunguyen.vface.ui.WelcomeScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -45,7 +45,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.vunguyen.vface.ui.Login2Activity" />
-        <activity android:name="com.vunguyen.vface.ui.MainActivity" />
+        <activity android:name="com.vunguyen.vface.ui.DashBoardActivity" />
 
         <meta-data
             android:name="preloaded_fonts"

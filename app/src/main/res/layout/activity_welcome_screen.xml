@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background"
-    tools:context=".ui.LoginActivity">
+    tools:context=".ui.WelcomeScreenActivity">
 
     <TextView
         android:id="@+id/tvNotMember"
@@ -94,7 +94,6 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/button"
         android:text="Login"
         android:textSize="20dp"
         android:textColor="#ffffff"

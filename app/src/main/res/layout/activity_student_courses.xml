@@ -31,7 +31,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cvAddCourse"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -60,9 +60,9 @@
                     android:textColor="#35363B"
                     android:textSize="15sp" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cvAddStudent"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -92,7 +92,7 @@
                     android:textColor="#35363B"
                     android:textSize="15sp" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

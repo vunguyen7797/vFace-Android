@@ -121,7 +121,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="ADD FACE"
-            android:onClick="addFace"
+            android:onClick="btnAddFace"
             android:textColor="#ffffff"
             android:background="@drawable/button"
             android:layout_marginRight="20dp"/>

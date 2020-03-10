@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
-        android:fontFamily="@font/advent_pro_bold"
+        android:textStyle="bold"
         android:text="GROUP CHECK"
         android:textAlignment="center"
         android:textColor="#ffffff"
@@ -27,7 +27,7 @@
         android:id="@+id/tvDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/assistant_light"
+
         android:layout_marginTop="5dp"
         android:textAlignment="center"
         android:textColor="#ffffff"
@@ -61,7 +61,7 @@
             android:layout_marginStart="20dp"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="1dp"
-            android:fontFamily="@font/assistant_bold"
+            android:textStyle="bold"
             android:text="COURSE:"
             android:textColor="#ffffff"
             android:gravity="left|center"
@@ -89,7 +89,7 @@
         android:background="@drawable/button"
         android:textColor="#ffffff"
         android:layout_marginTop="5dp"
-        android:onClick="takePicture"/>
+        android:onClick="btnTakePhoto"/>
     <Button
         android:id="@+id/btnGallery"
         android:layout_width="300dp"
@@ -99,7 +99,7 @@
         android:background="@drawable/button"
         android:textColor="#ffffff"
         android:layout_marginTop="10dp"
-        android:onClick="pickImage"/>
+        android:onClick="btnPickImage"/>
 
 
     <Spinner
@@ -107,8 +107,7 @@
         android:layout_width="wrap_content"
         android:layout_height="49dp"
         android:layout_alignParentRight="true"
-        android:layout_marginStart="20dp"
-        android:layout_marginLeft="20dp"
+        android:layout_marginStart="3dp"
         android:gravity="center"
         android:textAlignment="center"
         android:popupBackground="#35363B"

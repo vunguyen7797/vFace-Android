@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.Login2Activity">
+    tools:context=".ui.LoginActivity">
 
     <TextView
         android:id="@+id/tvHello"
@@ -41,8 +41,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvHello" />
 
-    <EditText
-        android:id="@+id/password"
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/outlinedPasswordId"
+        style="@style/MyTextInputLayout2"
         android:layout_width="300dp"
         android:layout_height="50dp"
         android:layout_marginStart="8dp"
@@ -51,20 +53,30 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/input_field"
-        android:ems="10"
+
         android:hint="Password"
-        android:inputType="textPassword"
-        android:textColorHint="#35363B"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.506"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/emailID"
-        app:layout_constraintVertical_bias="0.052" />
+        app:layout_constraintTop_toBottomOf="@+id/outlinedEmailId"
+        app:layout_constraintVertical_bias="0.052"
+        app:endIconMode="password_toggle">>
 
-    <EditText
-        android:id="@+id/emailID"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:inputType="textPassword"
+            android:textColor="#000000" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/outlinedEmailId"
+        style="@style/MyTextInputLayout2"
         android:layout_width="300dp"
         android:layout_height="50dp"
         android:layout_marginStart="8dp"
@@ -72,15 +84,21 @@
         android:layout_marginTop="252dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:background="@drawable/input_field"
-        android:ems="10"
-        android:hint="Email address"
-        android:inputType="textPersonName"
-        android:textColorHint="#35363B"
+        android:hint="Emaill Address"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.506"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/emailID"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:inputType="textPersonName" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btnLogin"
@@ -93,16 +111,15 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/button"
-        android:fontFamily="@font/assistant_light"
         android:text="Login"
-        android:textAllCaps="false"
+        android:textAllCaps="true"
         android:textColor="#ffffff"
         android:textSize="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password"
+        app:layout_constraintTop_toBottomOf="@+id/outlinedPasswordId"
         app:layout_constraintVertical_bias="0.068" />
 
     <ImageView
@@ -146,7 +163,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
-            android:fontFamily="@font/advent_pro"
             android:text="You are not a member?"
             android:textColor="#35363B"
             android:textSize="20dp"
@@ -165,11 +181,10 @@
             android:layout_marginStart="5dp"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="15dp"
-            android:fontFamily="@font/advent_pro_bold"
+            android:textStyle="bold"
             android:text="Register."
             android:textColor="#CB4D4D"
             android:textSize="20dp"
-            app:fontFamily="@font/assistant_bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"

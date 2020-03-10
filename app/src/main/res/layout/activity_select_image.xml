@@ -16,7 +16,7 @@
         android:background="@drawable/button"
         android:text="TAKE A PHOTO"
         android:textColor="#ffffff"
-        android:onClick="takePhoto"
+        android:onClick="btnTakePhoto"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

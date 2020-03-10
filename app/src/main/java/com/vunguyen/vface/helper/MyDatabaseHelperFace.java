@@ -68,7 +68,7 @@ public class MyDatabaseHelperFace extends SQLiteOpenHelper
     // Add a single face into the database
     public void addFace(Face student_face)
     {
-        Log.i("EXECUTE", "MyDatabaseHelperFace.addFace ... " + student_face.getStudentFaceServerId());
+        Log.i("EXECUTE", "MyDatabaseHelperFace.btnAddFace ... " + student_face.getStudentFaceServerId());
 
         SQLiteDatabase db = this.getWritableDatabase();
 

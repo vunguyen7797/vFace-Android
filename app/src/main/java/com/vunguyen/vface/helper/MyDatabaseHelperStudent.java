@@ -42,19 +42,22 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
 
     // Create tables
     @Override
-    public void onCreate(SQLiteDatabase db) {
+    public void onCreate(SQLiteDatabase db)
+    {
         Log.i("EXECUTE", "MyDatabaseHelperStudent.onCreate ... ");
         // Script to create tables
         String script = "CREATE TABLE " + TABLE_STUDENT + "("
-                + COLUMN_STUDENT_ID + " INTEGER PRIMARY KEY," + COLUMN_STUDENT_COURSEId + " TEXT," + COLUMN_STUDENT_NUMBERId + " TEXT,"
-                + COLUMN_STUDENT_NAME + " TEXT," + COLUMN_STUDENT_SERVERId + " TEXT," + COLUMN_STUDENT_IDENTIFY_FLAG + " TEXT" + ")";
+                + COLUMN_STUDENT_ID + " INTEGER PRIMARY KEY," + COLUMN_STUDENT_COURSEId + " TEXT,"
+                + COLUMN_STUDENT_NUMBERId + " TEXT," + COLUMN_STUDENT_NAME + " TEXT,"
+                + COLUMN_STUDENT_SERVERId + " TEXT," + COLUMN_STUDENT_IDENTIFY_FLAG + " TEXT" + ")";
         // execute the script
         db.execSQL(script);
     }
 
     // Update database
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
+    {
 
         Log.i("EXECUTE", "MyDatabaseHelperStudent.onUpgrade ... ");
 
@@ -77,6 +80,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
         values.put(COLUMN_STUDENT_COURSEId, student.getCourseServerId());
         values.put(COLUMN_STUDENT_NAME, student.getStudentName());
         values.put(COLUMN_STUDENT_SERVERId, student.getStudentServerId());
+        // initialize the default value for all students that have not been identified yet
         values.put(COLUMN_STUDENT_IDENTIFY_FLAG, "NO");
 
         // Insert a new line of data into the tables
@@ -110,7 +114,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
                 student.setStudentServerId(cursor.getString(4));
                 student.setStudentIdentifyFlag(cursor.getString(5));
 
-                // Add a student to the student list if the course Id and the column 1 data matching
+                // Add a student to the student list if the course Id and the column 1 value matching
                 if ((cursor.getString(1)).equalsIgnoreCase(courseServerId))
                 {
                     studentList.add(student);
@@ -128,7 +132,7 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
         return studentList;
     }
 
-    // return all students belong to a course from the course server Id
+    // return all students who are absent from the course.
     public List<Student> getAbsenceStudent(String courseServerId)
     {
         Log.i("EXECUTE", "MyDatabaseHelperStudent.getStudentWithAbsence ...");
@@ -156,15 +160,11 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
                 if ((cursor.getString(1)).equalsIgnoreCase(courseServerId)
                         && (cursor.getString(5).equalsIgnoreCase("NO")))
                 {
-                    Log.i("EXECUTE", "NAME: " + cursor.getString((3)));
+                    // add student to absence list
                     studentList.add(student);
                 }
-                else if (cursor.getString(1).equalsIgnoreCase(courseServerId)
-                && (cursor.getString(5).equalsIgnoreCase("YES")))
-                {
-                    Log.i("EXECUTE", "NAME YES: " + cursor.getString(3));
-                }
-                else    Log.i("EXECUTE", "Error: Course Server IDs do not match. ");
+                else
+                    Log.i("EXECUTE", "Error: Course Server IDs do not match. ");
             } while (cursor.moveToNext());
         }
         else
@@ -195,17 +195,13 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
                 new String[]{String.valueOf(student.getStudentId())});
     }
 
-    // return all students belong to a course from the course server Id
+    // reset all the student identify flag back to "NO" after an identification task completes
     public void resetStudentFlag(List<Student> studentList)
     {
         Log.i("EXECUTE", "MyDatabaseHelperStudent.getResetFlag ...");
-
-        String selectQuery = "SELECT * FROM " + TABLE_STUDENT;
-
         for (Student student: studentList)
         {
             SQLiteDatabase db = this.getWritableDatabase();
-            Cursor cursor = db.rawQuery(selectQuery, null);
             ContentValues values = new ContentValues();
             values.put(COLUMN_STUDENT_IDENTIFY_FLAG, "NO");
 

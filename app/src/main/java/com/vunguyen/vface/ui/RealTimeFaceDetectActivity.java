@@ -1,3 +1,6 @@
+/*
+ * RealTimeFaceDetectActivity.java
+ */
 package com.vunguyen.vface.ui;
 
 import android.content.Intent;
@@ -6,6 +9,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -32,28 +37,33 @@ import java.io.IOException;
 
 import static com.vunguyen.vface.utils.base.Cons.IMG_EXTRA_KEY;
 
+/**
+ * This class will open the camera and automatically detect the face to fit the quality standard
+ * for later identification task.
+ * When face is put into the frame, it will be captured automatically and added to student data
+ */
 public class RealTimeFaceDetectActivity extends BaseActivity
     implements ActivityCompat.OnRequestPermissionsResultCallback, FrameReturn, FaceDetectStatus
 {
     private static final String FACE_DETECTION = "Face Detection";
-    private static final String TAG = "MLKitTAG";
-
     Bitmap originalImage = null;
     private CameraSource cameraSource = null;
     private CameraSourcePreview preview;
     private GraphicOverlay graphicOverlay;
     private ImageView ivFaceFrame;
-    private ImageView ivTest;
-    private Button btnTakePhoto;
     private Bitmap croppedImage = null;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
+        // hide notification bar
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_real_time_face_detect);
 
         preview = findViewById(R.id.cameraPreview);
-        btnTakePhoto = findViewById(R.id.btnTakePhoto);
+
         ivFaceFrame = findViewById(R.id.faceFrame);
         graphicOverlay = findViewById(R.id.graphicFaceOverlay);
 
@@ -66,15 +76,12 @@ public class RealTimeFaceDetectActivity extends BaseActivity
             PublicMethods.getRuntimePermissions(this);
         }
 
-        btnTakePhoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                takePhoto(v);
-            }
-        });
 
     }
 
+    // This activity will not use camera directly from the phone
+    // But using it a source to make a separate camera "app" using
+    // front camera only
     private void createCameraSource()
     {
         if (cameraSource == null)
@@ -84,21 +91,22 @@ public class RealTimeFaceDetectActivity extends BaseActivity
         try
         {
             FaceDetectionProcessor processor = new FaceDetectionProcessor(getResources());
-            processor.frameHandler = (FrameReturn) this;
-            processor.faceDetectStatus = (FaceDetectStatus) this;
+            processor.frameHandler = this;
+            processor.faceDetectStatus = this;
             cameraSource.setMachineLearningFrameProcessor(processor);
         }
         catch (Exception e)
         {
-            Log.e(TAG, "Can not create image processor: " + FACE_DETECTION, e);
+            Log.e("EXECUTE", "Cannot create image processor: " + FACE_DETECTION, e);
             Toast.makeText(
                     getApplicationContext(),
-                    "Can not create image processor: " + e.getMessage(),
+                    "Cannot create image processor: " + e.getMessage(),
                     Toast.LENGTH_LONG)
                     .show();
         }
     }
 
+    // start the camera source to take photo
     private void startCameraSource()
     {
         if (cameraSource != null)
@@ -106,8 +114,10 @@ public class RealTimeFaceDetectActivity extends BaseActivity
             try
             {
                 preview.start(cameraSource, graphicOverlay);
-            } catch (IOException e) {
-                Log.e(TAG, "Unable to start camera source.", e);
+            }
+            catch (IOException e)
+            {
+                Log.e("EXECUTE", "Unable to start camera source.", e);
                 cameraSource.release();
                 cameraSource = null;
             }
@@ -115,41 +125,48 @@ public class RealTimeFaceDetectActivity extends BaseActivity
     }
 
     @Override
-    public void onResume() {
+    public void onResume()
+    {
         super.onResume();
         startCameraSource();
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause()
+    {
         super.onPause();
         preview.stop();
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroy()
+    {
         super.onDestroy();
-        if (cameraSource != null) {
+        if (cameraSource != null)
+        {
             cameraSource.release();
         }
     }
 
     @Override
     public void onRequestPermissionsResult(
-            int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (PublicMethods.allPermissionsGranted(this)) {
+            int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        if (PublicMethods.allPermissionsGranted(this))
+        {
             createCameraSource();
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-
+    // Process the image when the face is put in the frame
     @Override
     public void onFaceLocated(RectModel rectModel)
     {
+        // When face is recognized in the frame, face frame turns to red
         ivFaceFrame.setColorFilter(ContextCompat.getColor(this, R.color.red));
-        btnTakePhoto.setEnabled(true);
 
+        // processing of cropping the image from the preview
         float left = (float) (originalImage.getWidth() * 0.2);
         float newWidth = (float) (originalImage.getWidth() * 0.6);
 
@@ -161,39 +178,31 @@ public class RealTimeFaceDetectActivity extends BaseActivity
                         (int) (top),
                         ((int) (newWidth)),
                         (int) (newHeight));
-       // test.setImageBitmap(croppedImage);
-        if (croppedImage != null) {
+
+        // When image is cropped , respond back to the SelectImage activity for other tasks
+        if (croppedImage != null)
+        {
             String path = PublicMethods.saveToInternalStorage(croppedImage, Cons.IMG_FILE, mActivity);
-            Uri imageUri = Uri.parse(path);
             Intent intent = new Intent();
             intent.putExtra("PATH", path);
             setResult(RESULT_OK, intent);
             finish();
-            //startActivity(new Intent(mActivity, PhotoViewerActivity.class)
-            //   .putExtra(IMG_EXTRA_KEY, path));}
         }
+        else
+            Log.i("EXECUTE", "Failed Cropping Image");
     }
 
-
-    private void takePhoto(View v) {
-        if (croppedImage != null) {
-
-            String path = PublicMethods.saveToInternalStorage(croppedImage, Cons.IMG_FILE, mActivity);
-            startActivity(new Intent(mActivity, PhotoViewerActivity.class)
-                   .putExtra(IMG_EXTRA_KEY, path));
-        }
-    }
-
-
-
+    // When face is not located in the frame
     @Override
-    public void onFaceNotLocated() {
+    public void onFaceNotLocated()
+    {
+        // set the frame as black
         ivFaceFrame.setColorFilter(ContextCompat.getColor(this, R.color.black));
-        btnTakePhoto.setEnabled(false);
     }
 
     @Override
-    public void onFrame(Bitmap image, FirebaseVisionFace face, FrameMetadata frameMetadata, GraphicOverlay graphicOverlay) {
+    public void onFrame(Bitmap image, FirebaseVisionFace face, FrameMetadata frameMetadata, GraphicOverlay graphicOverlay)
+    {
         originalImage = image;
     }
 }

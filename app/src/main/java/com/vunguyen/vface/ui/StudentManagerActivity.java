@@ -1,3 +1,6 @@
+/*
+ * StudentManagerActivity.java
+ */
 package com.vunguyen.vface.ui;
 
 import android.app.Activity;
@@ -19,7 +22,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,17 +43,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class StudentManagerActivity extends AppCompatActivity {
-
-    Spinner spinCourses;
-    private final List<Course> courseList = new ArrayList<>();
-
+/**
+ * This class implements functions for student manager screen activity
+ */
+public class StudentManagerActivity extends AppCompatActivity
+{
+    // data list
+    private List<Course> courseList = new ArrayList<>();
     private List<Student> studentList = new ArrayList<>();
-    private ArrayAdapter<Student> gridViewAdapter;
-    private MyDatabaseHelperStudent db_student;
 
-    GridView gvStudents;
+    // array adapter and database
+    private ArrayAdapter<Student> studentArrayAdapter;
+    private MyDatabaseHelperStudent db_student;
+    private MyDatabaseHelperCourse db_course;
+
+    // variables
     String account;
+    private int courseId = 0;
+    private String courseServerId ="";
 
     // Menu request code
     private static final int MENU_ITEM_VIEW = 111;
@@ -60,11 +69,11 @@ public class StudentManagerActivity extends AppCompatActivity {
     private static final int MENU_ITEM_DELETE = 444;
     private static final int MY_REQUEST_CODE = 1000;
 
+    // functions
     Button btnDone;
     Button btnAddStudent;
-    private int courseId = 0;
-    private String courseServerId ="";
     AutoCompleteTextView courseMenu;
+    GridView gvStudents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -76,131 +85,73 @@ public class StudentManagerActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_student_manager);
 
+        // get account to identify the database
         account = getIntent().getStringExtra("ACCOUNT");
 
+        // get all courses belong to this account
+        db_course = new MyDatabaseHelperCourse(this);
+        this.courseList = db_course.getAllCourses(account);
 
-
-        // Display courses on spinner
-        //spinCourses = findViewById(R.id.spinClass);
-        MyDatabaseHelperCourse db = new MyDatabaseHelperCourse(this);
-        List<Course> listCourses=  db.getAllCourses(account);
-        this.courseList.addAll(listCourses);
-        //ArrayAdapter<Course> spinnerArrayAdapter = new ArrayAdapter<Course>(this, R.layout.spinner_item, listCourses);
-       // spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_item);
-        //spinCourses.setAdapter(spinnerArrayAdapter);
-
-
+        // initialize course menu
         courseMenu = findViewById(R.id.filled_exposed_dropdown);
-        ArrayAdapter<Course> tvArrayAdapter = new ArrayAdapter<Course>(this, R.layout.dropdown_menu_popup_item, listCourses);
+        ArrayAdapter<Course> tvArrayAdapter = new ArrayAdapter<Course>(this, R.layout.dropdown_menu_popup_item, courseList);
         courseMenu.setAdapter(tvArrayAdapter);
 
-
-        // Display students on grid view
+        // initialize student gridview and student database
         gvStudents = findViewById(R.id.gvStudents);
         db_student = new MyDatabaseHelperStudent(this);
+        btnAddStudent = findViewById(R.id.btnAddStudent);
+        btnAddStudent.setEnabled(false);
 
-        // Default display will be the students of the first course in the list
         if (courseList.size() != 0)
         {
-            //courseMenu.setSelection(0);
-           // courseMenu.setText(tvArrayAdapter.getItem(0).getCourseName());
-            //Course course = (Course) tvArrayAdapter.getItem(0);
-            //courseServerId = course.getCourseServerId();
+            // set default
             displayGridView("",0);
-                //spinCourses.setSelection(0);
-                //Course course = (Course) spinCourses.getItemAtPosition(0);
-            courseMenu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-                {
-                    courseId = (int) parent.getItemIdAtPosition(position); // get the course id database
-                    Course course = (Course) parent.getItemAtPosition(position);
-                    courseServerId = course.getCourseServerId();    // get course id on server
-                    // Log.i("EXECUTE", "Course Selected: " + courseServerId);
-                    displayGridView(courseServerId, 1);   // request 1 to notify that selection is changed
-
-                }
-            });
-/*
-            // display list of students on course selection
-            spinCourses.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+            courseMenu.setOnItemClickListener((parent, view, position, id) ->
             {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-                {
-                     courseId = (int) parent.getItemIdAtPosition(position); // get the course id database
-                     Course course = (Course) parent.getItemAtPosition(position);
-                     courseServerId = course.getCourseServerId();    // get course id on server
-                    // Log.i("EXECUTE", "Course Selected: " + courseServerId);
-                     displayGridView(courseServerId, 1);   // request 1 to notify that selection is changed
-                }
-                @Override
-                public void onNothingSelected(AdapterView<?> parent)
-                {
+                courseId = (int) parent.getItemIdAtPosition(position);  // get the course id database
+                Course course = (Course) parent.getItemAtPosition(position);
+                courseServerId = course.getCourseServerId();            // get course id on server
+                displayGridView(courseServerId, 1);   // request 1 to notify that selection is changed
+                btnAddStudent.setEnabled(true);
 
-                }
             });
-*/
+
             // Button Add Student event, send the course ids to the student profile activity
-            btnAddStudent = findViewById(R.id.btnAddStudent);
-            btnAddStudent.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(StudentManagerActivity.this, StudentDataActivity.class);
-                    Bundle b = new Bundle();
-                    b.putInt("courseId", courseId);
-                    b.putString("courseServerId", courseServerId);
-                    b.putString("account", account);
-                    intent.putExtra("CourseId", b);
-                    startActivityForResult(intent, MY_REQUEST_CODE);
-                }
-            });
+            btnAddStudent.setOnClickListener(v ->
+                    addStudent());
         }
         else
         {
-            btnAddStudent = findViewById(R.id.btnAddStudent);
-            btnAddStudent.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(getApplicationContext(), "Addd a course before adding students.", Toast.LENGTH_SHORT).show();
-                }
-            });
+            // If there is no course, the button is disable and show notification
+            btnAddStudent.setEnabled(false);
+            btnAddStudent.setOnClickListener(v ->
+                    Toast.makeText(getApplicationContext(), "Addd a course before adding students.",
+                            Toast.LENGTH_SHORT).show());
         }
-
 
         // Button Done Click Event
         btnDone = findViewById(R.id.btnDoneStudentsManager);
-        btnDone.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent(StudentManagerActivity.this, StudentCoursesActivity.class);
-                intent.putExtra("ACCOUNT", account);
-                startActivity(intent);
-                finish();
-            }
-        });
-
-
+        btnDone.setOnClickListener(v ->
+                onBackPressed());
     }
 
+    // Event for clicking the back button on navigation bar
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
         Intent intent = new Intent(StudentManagerActivity.this, StudentCoursesActivity.class);
         intent.putExtra("ACCOUNT", account);
         startActivity(intent);
+        finish();
     }
 
+    // Create menu for each grid view item
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view,
                                     ContextMenu.ContextMenuInfo menuInfo)
     {
-
         super.onCreateContextMenu(menu, view, menuInfo);
-
-        // groupId, itemId, order, title
         menu.add(0, MENU_ITEM_VIEW , 0, "View Student Information");
         menu.add(0, MENU_ITEM_ADD , 1, "Add Student");
         menu.add(0, MENU_ITEM_EDIT , 2, "Edit Student");
@@ -219,24 +170,17 @@ public class StudentManagerActivity extends AppCompatActivity {
 
         if(item.getItemId() == MENU_ITEM_VIEW)
         {
-            new AlertDialog.Builder(this)
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle("VFACE - STUDENT MANAGER")
                     .setMessage("Student ID Number: " + selectedStudent.getStudentIdNumber() +
-                            "\nStudent Name: " + selectedStudent.getStudentName()+
-                            "\nStudent UID: " + selectedStudent.getStudentServerId()+
-                            "\nCourse UID: " + selectedStudent.getCourseServerId())
+                            "\nStudent Name: " + selectedStudent.getStudentName())
                     .setCancelable(false)
                     .setNegativeButton("OK", null)
                     .show();
         }
         else if(item.getItemId() == MENU_ITEM_ADD)
         {
-            Intent intent = new Intent(StudentManagerActivity.this, StudentDataActivity.class);
-            Bundle b = new Bundle();
-            b.putInt("courseId", courseId);
-            b.putString("courseServerId", courseServerId);
-            b.putString("account", account);
-            intent.putExtra("CourseId", b);
-            startActivityForResult(intent, MY_REQUEST_CODE);
+            addStudent();
         }
         else if (item.getItemId() == MENU_ITEM_EDIT)
         {
@@ -253,21 +197,62 @@ public class StudentManagerActivity extends AppCompatActivity {
             new MaterialAlertDialogBuilder(this)
                     .setTitle("VFACE - STUDENT MANAGER")
                     .setMessage("Are you sure you want to delete " + selectedStudent.getStudentName() + "?")
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            deleteStudent(selectedStudent);
-                        }
-                    })
+                    .setPositiveButton("Yes", (dialog, which) -> deleteStudent(selectedStudent))
                     .setNegativeButton("No", null)
                     .show();
-
         }
         else
         {
             return false;
         }
         return true;
+    }
+
+    // Go to the student profile activity to add student
+    private void addStudent()
+    {
+        Intent intent = new Intent(StudentManagerActivity.this, StudentDataActivity.class);
+        Bundle b = new Bundle();
+        b.putInt("courseId", courseId);
+        b.putString("courseServerId", courseServerId);
+        b.putString("account", account);
+        intent.putExtra("CourseId", b);
+        startActivityForResult(intent, MY_REQUEST_CODE);
+    }
+
+
+    // Delete a student from database
+    private void deleteStudent(Student student)
+    {
+        db_student.deleteStudent(student);
+        this.studentList.remove(student);
+        // delete faces in database that belong to this student
+        MyDatabaseHelperFace db_face = new MyDatabaseHelperFace(this);
+        db_face.deleteFacesWithStudent(student.getStudentServerId());
+        // Refresh ListView.
+        this.studentArrayAdapter.notifyDataSetChanged();
+        // execute background task to delete student from server
+        new DeleteStudentTask(courseServerId).execute(student.getStudentServerId());
+    }
+
+
+    // Refresh the student list after adding new student
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (resultCode == Activity.RESULT_OK && requestCode == MY_REQUEST_CODE ) {
+            boolean needRefresh = data.getBooleanExtra("needRefresh",true);
+            // Refresh ListView
+            if(needRefresh)
+            {
+                this.studentList.clear();
+                MyDatabaseHelperStudent db_student = new MyDatabaseHelperStudent(this);
+                List<Student> list=  db_student.getStudentWithCourse(courseServerId);
+                this.studentList.addAll(list);
+                // Notify data changed to grid view
+                this.studentArrayAdapter.notifyDataSetChanged();
+            }
+        }
     }
 
     // Display the information of student on GridView based on course selection
@@ -278,7 +263,7 @@ public class StudentManagerActivity extends AppCompatActivity {
             List<Student> listStudents =  db_student.getStudentWithCourse(courseServerId);
             this.studentList.addAll(listStudents);
 
-            gridViewAdapter = new ArrayAdapter<Student>(this,
+            studentArrayAdapter = new ArrayAdapter<Student>(this,
                     android.R.layout.simple_list_item_activated_1, android.R.id.text1, studentList)
             {
                 @NonNull
@@ -295,7 +280,7 @@ public class StudentManagerActivity extends AppCompatActivity {
             };
 
             // Register Adapter cho ListView.
-            this.gvStudents.setAdapter(this.gridViewAdapter);
+            this.gvStudents.setAdapter(this.studentArrayAdapter);
             // Register the menu context
             registerForContextMenu(this.gvStudents);
         }
@@ -305,34 +290,37 @@ public class StudentManagerActivity extends AppCompatActivity {
             MyDatabaseHelperStudent db = new MyDatabaseHelperStudent(this);
             List<Student> list = db.getStudentWithCourse(courseServerId);
             this.studentList.addAll(list);
-            this.gridViewAdapter.notifyDataSetChanged();
+            this.studentArrayAdapter.notifyDataSetChanged();
 
         }
 
     }
 
-    static class DeleteStudentTask extends AsyncTask<String, String, String>
+    /**
+     * This class is a background task to delete a student and its information on server
+     */
+    class DeleteStudentTask extends AsyncTask<String, String, String>
     {
         String courseServerId;
         DeleteStudentTask(String courseServerId)
         {
             this.courseServerId = courseServerId;
         }
+
         @Override
         protected String doInBackground(String... params)
         {
-            // Get an instance of face service client.
+            // Connect to server
             FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
             try
             {
-                publishProgress("Deleting selected student...");
                 Log.i("EXECUTE","Request: Deleting student " + params[0]);
-
                 UUID studentServerId = UUID.fromString(params[0]);
                 faceServiceClient.deletePersonInLargePersonGroup(courseServerId, studentServerId);
                 return params[0];
-            } catch (Exception e) {
-                publishProgress(e.getMessage());
+            }
+            catch (Exception e)
+            {
                 Log.i("EXECUTE","ERROR DELETE STUDENT FROM SERVER: " + e.getMessage());
                 return null;
             }
@@ -344,39 +332,6 @@ public class StudentManagerActivity extends AppCompatActivity {
             if (result != null)
             {
                 Log.i("EXECUTE", "Response: Success. Deleting student " + result + " succeed");
-            }
-        }
-    }
-
-    // Delete a student from database
-    private void deleteStudent(Student student)
-    {
-        MyDatabaseHelperStudent db = new MyDatabaseHelperStudent(this);
-        db.deleteStudent(student);
-        this.studentList.remove(student);
-        MyDatabaseHelperFace db_face = new MyDatabaseHelperFace(this);
-        db_face.deleteFacesWithStudent(student.getStudentServerId());
-        // Refresh ListView.
-        this.gridViewAdapter.notifyDataSetChanged();
-        new DeleteStudentTask(courseServerId).execute(student.getStudentServerId());
-    }
-
-
-    // Refresh the student list after adding new student
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        if (resultCode == Activity.RESULT_OK && requestCode == MY_REQUEST_CODE ) {
-            boolean needRefresh = data.getBooleanExtra("needRefresh",true);
-            // Refresh ListView
-            if(needRefresh)
-            {
-                this.studentList.clear();
-                MyDatabaseHelperStudent db = new MyDatabaseHelperStudent(this);
-                List<Student> list=  db.getStudentWithCourse(courseServerId);
-                this.studentList.addAll(list);
-                // Notify data changed to grid view
-                this.gridViewAdapter.notifyDataSetChanged();
             }
         }
     }

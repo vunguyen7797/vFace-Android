@@ -61,6 +61,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -462,7 +463,7 @@ public class GroupCheckActivity extends AppCompatActivity
     public void setDate(TextView view)
     {
         Date today = Calendar.getInstance().getTime();
-        SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy");
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.US);
         String date = formatter.format(today);
         view.setText(date);
     }
@@ -503,13 +504,11 @@ public class GroupCheckActivity extends AppCompatActivity
                 // add 10 faces as an element in faceIds List, since Microsoft sdk limits 10 faces can be identified at one
                 if (count < 10)
                 {
-                    Log.i("EXECUTE" ," FACES NUMBER LESS THAN 10");
                     faceIdList.get(totalTurn).add(face.faceId);
                     count++;
                 }
                 else if (count == 10)
                 {
-                    Log.i("EXECUTE" ," FACES NUMBER REACH 10");
                     totalTurn++;    // one set added, move to the next set if necessary
                     count = 0;      // reset count counter
                     faceIdList.get(totalTurn).add(face.faceId);
@@ -531,16 +530,15 @@ public class GroupCheckActivity extends AppCompatActivity
         }
     }
 
-
-
-
-    // Background task of face identification.
+    /**
+     * This class is to identify faces after the detection process, running in background.
+     */
     class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]>
     {
         private boolean succeed = true;
         String courseServerId;
         int identifyTurn;   // Index of  this task being executed
-        int totalTurn;      // How many times this task being executed
+        int totalTurn;      // How many times maximum this task being executed
         List<Pair<Bitmap, String>> studentIdentity = new ArrayList<>();
         Student student;
 
@@ -548,42 +546,33 @@ public class GroupCheckActivity extends AppCompatActivity
         {
             this.courseServerId = courseServerId;
             this.identifyTurn = identifyTurn;
-            Log.i("EXECUTE" ," IDENTIFY TURN: " + identifyTurn);
             this.totalTurn = totalTurn;
         }
 
         @Override
         protected IdentifyResult[] doInBackground(UUID... params)
         {
-            String logString = "Request: Identifying faces ";
-            for (UUID faceId: params) {
-                logString += faceId.toString() + ", ";
-            }
-            logString += " in group " + courseServerId;
-            Log.i("EXECUTE", logString);
-
-            // Get an instance of face service client to detect faces in image.
+            // Connect to server
             FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
             try
             {
                 publishProgress("Getting course status...");
-
                 TrainingStatus trainingStatus = faceServiceClient.getLargePersonGroupTrainingStatus(
                         this.courseServerId);
-                if (trainingStatus.status != TrainingStatus.Status.Succeeded) {
+                if (trainingStatus.status != TrainingStatus.Status.Succeeded)
+                {
                     publishProgress("Course training status is " + trainingStatus.status);
                     succeed = false;
                     return null;
                 }
 
-
                 publishProgress("Identifying...");
                 Log.i("EXECUTE", "IDENTIFYING...");
-                // Start identification.
+                // Start identification process
                 return faceServiceClient.identityInLargePersonGroup(
-                        this.courseServerId,   /* personGroupId */
-                        params,                  /* faceIds */
-                        1);  /* maxNumOfCandidatesReturned */
+                        this.courseServerId,
+                        params,             // faceId
+                        1);              // maximum of candidates can be returned for one student
             }
             catch (Exception e)
             {
@@ -600,22 +589,26 @@ public class GroupCheckActivity extends AppCompatActivity
             startProgressDialog();
         }
 
-
         @Override
-        protected void onProgressUpdate(String... values) {
-            // Show the status of background detection task on screen.a
+        protected void onProgressUpdate(String... values)
+        {
+            // Show the status of background identify task on screen
             duringTaskProgressDialog(values[0]);
         }
 
+        // Working on student information to display after identify
         @Override
         protected void onPostExecute(IdentifyResult[] result)
         {
-            if (result != null) {
+            if (result != null)
+            {
                 identifyResultsList.add(result);
 
-                for (IdentifyResult identifyResult : result) {
+                for (IdentifyResult identifyResult : result)
+                {
                     DecimalFormat formatter = new DecimalFormat("#0.00");
-                    if (identifyResult.candidates.size() > 0) {
+                    if (identifyResult.candidates.size() > 0)
+                    {
                         String studentServerId =
                                 identifyResult.candidates.get(0).personId.toString();
 
@@ -623,6 +616,7 @@ public class GroupCheckActivity extends AppCompatActivity
                         student = db_student.getAStudentWithId(studentServerId, courseServerId);
                         if (student != null)
                         {
+                            // Get information for each identified student
                             String studentIdNumber = student.getStudentIdNumber();
                             String course = spinCourses.getSelectedItem().toString();
                             String studentName = student.getStudentName();
@@ -631,47 +625,52 @@ public class GroupCheckActivity extends AppCompatActivity
                                     + "Course: " + course +"\n"
                                     + "Confidence: " + confidence;
 
+                            // set flag YES to indicate that this student is identified successfully
+                            student.setStudentIdentifyFlag("YES");
+
+                            // Process duplicate information for similar faces from different people
                             for (int i = 0; i < detectedDetailsList.size(); i++)
                             {
-
+                                // Only compared with other identified students available in data
                                 if (!detectedDetailsList.get(i).equalsIgnoreCase("UNKNOWN STUDENT"))
                                 {
                                     int length = detectedDetailsList.get(i).length();
-                                    Log.i("EXECUTE", "STRING: " + detectedDetailsList.get(i));
-                                    Log.i("EXECUTE", "COMPARED: " + detectedDetailsList
-                                            .get(i).substring(length - 4, length));
+                                    // get the confidence to compare
                                     String comparedConfidence = detectedDetailsList
                                             .get(i).substring(length - 4, length);
-
-                                    Log.i("EXECUTE", "COMPARED: " + comparedConfidence);
-                                    if (detectedDetailsList.get(i).contains(studentName.toUpperCase())) {
-
-                                        if (comparedConfidence.compareToIgnoreCase(confidence) < 0) {
+                                    // if there is a duplicate name
+                                    if (detectedDetailsList.get(i).contains(studentName.toUpperCase()))
+                                    {
+                                        // available confidence < this student confidence
+                                        // means that the available student was identified wrong
+                                        if (comparedConfidence.compareToIgnoreCase(confidence) < 0)
+                                        {
+                                            // set the student in list as UNKNOWN STUDENT
                                             detectedDetailsList.set(i, "UNKNOWN STUDENT");
-                                            Log.i("EXECUTE", "SET UNKNOWN");
-                                            student.setStudentIdentifyFlag("YES");
 
-                                        } else if (comparedConfidence.compareToIgnoreCase(confidence) > 0) {
+                                        }
+                                        else if (comparedConfidence.compareToIgnoreCase(confidence) > 0)
+                                        {
+                                            // if the confidence less than the student in list
+                                            // this student is identified as unknown
                                             identity = "UNKNOWN STUDENT";
-                                            student.setStudentIdentifyFlag("NO");
-                                            Log.i("EXECUTE", "NO SET");
                                         }
                                     }
-
                                 }
                             }
 
-                            detectedDetailsList.add(identity);
-                            db_student.updateStudent(student);
-
+                            Log.i("EXECUTE", identity + "\n" + student.getStudentIdentifyFlag());
+                            db_student.updateStudent(student);  // update student flag
+                            detectedDetailsList.add(identity);  // add new student identity into list
                         }
                         else
                             Log.i("EXECUTE", "STUDENT NULL");
-
                     } else
                         detectedDetailsList.add("UNKNOWN STUDENT");
                 }
 
+
+                // process when all the face sets are identified
                 if (identifyTurn == totalTurn)
                 {
                     int i = 0;
@@ -680,19 +679,18 @@ public class GroupCheckActivity extends AppCompatActivity
                         Pair<Bitmap, String> pair = new Pair<Bitmap, String>(detectedFacesList.get(i), info);
                         if (info.equals("UNKNOWN STUDENT"))
                         {
-                            Log.i("EXECUTE", "UNKNOWN ADD");
+                            // add unknown student to unknown list
                             identifyUnknownList.add(pair);
                         }
                         else
                         {
-                            Log.i("EXECUTE", "PAIR ADD");
+                            // add identified student to identified student list
                             studentIdentity.add(pair);
                         }
-
                         i++;
                     }
 
-                    identifyTaskDone = true;
+                    identifyTaskDone = true; // identify process is done for all faces
                     studentIdentityList = studentIdentity;
                     setUiAfterIdentification(succeed, studentIdentity);
                 }
@@ -705,23 +703,132 @@ public class GroupCheckActivity extends AppCompatActivity
 
     }
 
+    // display the data on list view
     private void setUiAfterIdentification(boolean succeed, List<Pair<Bitmap, String>> studentIdentityList)
     {
         if (succeed)
         {
             progressDialog.dismiss();
             listViewAdapter = new FaceListViewAdapter(studentIdentityList);
-
             ListView listView = findViewById(R.id.lvIdentifiedFaces);
             listView.setAdapter(listViewAdapter);
         }
     }
 
+    /**
+     * This class is a background task to detect faces from the photo
+     */
+    class DetectionTask extends AsyncTask<InputStream, String, Face[]>
+    {
+        @Override
+        protected Face[] doInBackground(InputStream... params)
+        {
+            // Connect to server
+            FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
+            try
+            {
+                publishProgress("Detecting...");
+                Log.i("EXECUTE", "DETECTING FACE");
+
+                // Start detection process
+                return faceServiceClient.detect(
+                        params[0],  // stream of image to detect
+                        true,    // return face ID
+                        false,  // don't return face landmarks
+                        null);
+            }
+            catch (Exception e)
+            {
+                publishProgress(e.getMessage());
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPreExecute()
+        {
+            startProgressDialog();
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values)
+        {
+            // Show the status of background detection task on screen
+            duringTaskProgressDialog(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Face[] result)
+        {
+            if (result != null)
+            {
+                for (Face face : result)
+                {
+                    try
+                    {
+                        // generate thumbnails of faces and add to the list
+                        detectedFacesList.add(ImageEditor.generateFaceThumbnail(bitmapImage, face.faceRectangle));
+
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+
+                facesList = Arrays.asList(result);
+
+                if (result.length == 0)
+                {
+                    detected = false;
+                    Log.i("EXECUTE", "NO FACE DETECTED!");
+                }
+                else
+                {
+                    Log.i("EXECUTE", "FACE DETECTED!");
+                    detected = true;
+                    progressDialog.dismiss();
+                    identify(); // start identify process for these detected face
+                }
+            }
+            else
+            {
+                detected = false;
+            }
+        }
+    }
+
+
+    // Click back button on navigation bar
+    @Override
+    public void onBackPressed()
+    {
+        Intent intent = new Intent(GroupCheckActivity.this, DashBoardActivity.class);
+        intent.putExtra("ACCOUNT", account);
+        startActivity(intent);
+    }
+
+    // display the progress dialog when a task is processing
+    private void startProgressDialog()
+    {
+        progressDialog.show();
+    }
+
+    private void duringTaskProgressDialog(String progress)
+    {
+        progressDialog.setMessage(progress);
+    }
+
+
+    /**
+     * This class is a customize adapter to display identified students
+     * after detection and identification
+     */
     class FaceListViewAdapter implements ListAdapter
     {
         List<Bitmap> faceThumbnails;
         List<String> studentInfo;
-        //int requestCode;
+
         public FaceListViewAdapter()
         {
         }
@@ -730,7 +837,6 @@ public class GroupCheckActivity extends AppCompatActivity
         {
             faceThumbnails = new ArrayList<>();
             studentInfo = new ArrayList<>();
-            //this.requestCode = requestCode;
 
             if (studentIdentityList != null)
             {
@@ -738,49 +844,55 @@ public class GroupCheckActivity extends AppCompatActivity
                 {
                         faceThumbnails.add(pair.first);
                         studentInfo.add(pair.second);
-
                 }
             }
-
         }
 
         @Override
-        public boolean areAllItemsEnabled() {
+        public boolean areAllItemsEnabled()
+        {
             return false;
         }
 
         @Override
-        public boolean isEnabled(int position) {
+        public boolean isEnabled(int position)
+        {
             return true;
         }
 
         @Override
-        public void registerDataSetObserver(DataSetObserver observer) {
+        public void registerDataSetObserver(DataSetObserver observer)
+        {
 
         }
 
         @Override
-        public void unregisterDataSetObserver(DataSetObserver observer) {
+        public void unregisterDataSetObserver(DataSetObserver observer)
+        {
 
         }
 
         @Override
-        public int getCount() {
+        public int getCount()
+        {
             return faceThumbnails.size();
         }
 
         @Override
-        public Object getItem(int position) {
+        public Object getItem(int position)
+        {
             return faceThumbnails.get(position);
         }
 
         @Override
-        public long getItemId(int position) {
+        public long getItemId(int position)
+        {
             return position;
         }
 
         @Override
-        public boolean hasStableIds() {
+        public boolean hasStableIds()
+        {
             return false;
         }
 
@@ -805,118 +917,21 @@ public class GroupCheckActivity extends AppCompatActivity
         }
 
         @Override
-        public int getItemViewType(int position) {
+        public int getItemViewType(int position)
+        {
             return position;
         }
 
         @Override
-        public int getViewTypeCount() {
+        public int getViewTypeCount()
+        {
             return 1;
         }
 
         @Override
-        public boolean isEmpty() {
+        public boolean isEmpty()
+        {
             return false;
         }
     }
-
-
-    // Background task of face detection.
-    class DetectionTask extends AsyncTask<InputStream, String, Face[]>
-    {
-        @Override
-        protected Face[] doInBackground(InputStream... params) {
-            // Get an instance of face service client to detect faces in image.
-            FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
-            try{
-                publishProgress("Detecting...");
-                Log.i("EXECUTE", "DETECTING FACE");
-
-                // Start detection.
-                return faceServiceClient.detect(
-                        params[0],  /* Input stream of image to detect */
-                        true,       /* Whether to return face ID */
-                        false,       /* Whether to return face landmarks */
-                        null);
-            }  catch (Exception e) {
-                publishProgress(e.getMessage());
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPreExecute()
-        {
-            startProgressDialog();
-        }
-
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            // Show the status of background detection task on screen.a
-            duringTaskProgressDialog(values[0]);
-        }
-
-        @Override
-        protected void onPostExecute(Face[] result) {
-
-            if (result != null)
-            {
-                for (Face face : result)
-                {
-                    try
-                    {
-                        detectedFacesList.add(ImageEditor.generateFaceThumbnail(bitmapImage, face.faceRectangle));
-
-                    }
-                    catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-
-                facesList = Arrays.asList(result);
-
-                if (result.length == 0) {
-                    detected = false;
-                    Log.i("EXECUTE", "NO FACE DETECTED!");
-                }
-                else
-                {
-                        Log.i("EXECUTE", "FACE DETECTED!");
-                    detected = true;
-                    progressDialog.dismiss();
-                    identify();
-                }
-
-            }
-            else
-            {
-                detected = false;
-            }
-        }
-    }
-
-
-
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(GroupCheckActivity.this, DashBoardActivity.class);
-        intent.putExtra("ACCOUNT", account);
-        startActivity(intent);
-    }
-
-    private void startProgressDialog()
-    {
-        progressDialog.show();
-    }
-
-    private void duringTaskProgressDialog(String progress)
-    {
-        progressDialog.setMessage(progress);
-    }
-
-
-
-
 }

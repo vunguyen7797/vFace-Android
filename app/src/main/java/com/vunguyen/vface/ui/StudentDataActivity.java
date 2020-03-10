@@ -1,9 +1,10 @@
+/*
+ * StudentDataActivity.java
+ */
 package com.vunguyen.vface.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -27,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.microsoft.projectoxford.face.FaceServiceClient;
@@ -43,39 +45,283 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * This class implements functions for a student profile activity
+ */
 public class StudentDataActivity extends AppCompatActivity
 {
-    // Background task of adding a student to a course.
+    String student_serverId = null;
+    private String account;
+    private String courseServerId;
+    String studentNumberId;
+    String studentName;
+    Student student;
+    int courseId;
+
+    private TextInputEditText etStudentID;
+    private TextInputEditText etStudentName;
+    GridView gvStudentFace;
+    TextInputLayout outlinedTextStudentId;
+
+    // request code
+    private static final int MODE_ADD = 1;
+    private static final int MODE_EDIT = 2;
+    private static final int REQUEST_SELECT_IMAGE = 0;
+    private static final int MENU_ITEM_DELETE = 111;
+    private boolean needRefresh;
+    private int mode;
+    boolean newStudent;
+
+    MyDatabaseHelperFace db_face;
+    List<Face> faceList = new ArrayList<>();
+    private ArrayAdapter<Face> faceArrayAdapter;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+
+        // Set no notification bar on activity
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setContentView(R.layout.activity_student_data);
+
+        outlinedTextStudentId = findViewById(R.id.outlinedTextStudentId);
+        etStudentID = findViewById(R.id.etStudentId);
+        etStudentName = findViewById(R.id.etStudentName);
+        gvStudentFace = findViewById(R.id.gvStudentFace);
+
+        // initialize face database
+        db_face = new MyDatabaseHelperFace(this);
+
+        // Get student information to edit
+        Intent intent_info = this.getIntent();
+        this.student = (Student) intent_info.getSerializableExtra("student");
+
+        if (student != null)
+        {
+            this.mode = MODE_EDIT;
+            // Display current student output information
+            this.etStudentID.setText(student.getStudentIdNumber());
+            this.etStudentName.setText(student.getStudentName());
+
+            // get current student information
+            courseServerId = intent_info.getStringExtra("courseServerId");
+            courseId = intent_info.getIntExtra("courseId", 0);
+            account = intent_info.getStringExtra("account");
+
+            student_serverId = student.getStudentServerId();
+            Log.i("EXECUTE", "Edit Student: " + student_serverId + " in Group: " + courseServerId);
+        }
+        else
+        {
+            Bundle bundle = getIntent().getBundleExtra("CourseId");
+            courseId = bundle.getInt("courseId");
+            account = bundle.getString("account");
+            courseServerId = bundle.getString("courseServerId");
+            this.mode = MODE_ADD;
+            studentNumberId = etStudentID.getText().toString();
+            studentName = etStudentName.getText().toString();
+            newStudent = true; // flag
+        }
+        displayGridView(student_serverId, 0);
+    }
+
+    // Click event for Done button
+    public void btnDoneClick(View view)
+    {
+
+        if (student_serverId == null)
+        {
+            // add student to server when profile is saved
+            new AddStudentTask(false).execute(courseServerId);
+        }
+        else
+        {
+            saveData(); // if student is already available on server, save changed data.
+        }
+    }
+
+    // save data for student profile
+    private void saveData()
+    {
+        MyDatabaseHelperStudent db = new MyDatabaseHelperStudent(this);
+        // get input from textbox
+        String number_id = this.etStudentID.getText().toString();
+        String name = this.etStudentName.getText().toString();
+
+        if(number_id.equals("") || name.equals(""))
+        {
+            Toast.makeText(getApplicationContext(),
+                    "Please enter student ID & student name.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if(mode == MODE_ADD )
+        {
+            Log.i ("EXECUTE", " Add Student Server id: " + student_serverId + " to group: " + courseServerId);
+            this.student = new Student(number_id, courseServerId, name, student_serverId);
+            db.addStudent(student);
+        }
+        else
+        {
+            this.student.setStudentIdNumber(number_id);
+            this.student.setStudentName(name);
+            db.updateStudent(student);
+        }
+
+        // Train the course after a student is added or modified.
+        new TrainCourseTask().execute(courseServerId);
+        this.needRefresh = true;
+
+        // Back to previous activity
+        onBackPressed();
+    }
+
+    // Delete a student from database
+    private void deleteFace(Face face)
+    {
+        db_face.deleteFace(face);
+        this.faceList.remove(face);
+        // Refresh ListView.
+        this.faceArrayAdapter.notifyDataSetChanged();
+        // Delete face from server
+        new DeleteFaceTask(courseServerId, student_serverId).execute(face.getStudentFaceServerId());
+    }
+
+    // Button Add Face click event
+    public void btnAddFace(View view)
+    {
+        if (etStudentName.getText().toString().equals("") && etStudentID.getText().toString().equals(""))
+        {
+            Toast.makeText(getApplicationContext(), "Enter student ID & student name\n to add face.",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        else if (!etStudentName.getText().toString().equals("") && !etStudentID.getText().toString().equals(""))
+        {
+            if (student_serverId == null)
+            {
+                // generate a new student on server
+                new AddStudentTask(true).execute(courseServerId);
+            }
+            else
+            {
+                btnAddFace();  // if student is available on sever, just save data
+            }
+        }
+    }
+
+    // go to select image screen activity
+    private void btnAddFace()
+    {
+        Intent intent = new Intent(this, SelectImageActivity.class);
+        Log.i("EXECUTE", "START ADDING FACE");
+        startActivityForResult(intent, REQUEST_SELECT_IMAGE);
+    }
+
+    @Override // response after photo is selected or taken from camera
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        switch (requestCode)
+        {
+            case REQUEST_SELECT_IMAGE:
+                if (resultCode == RESULT_OK)
+                {
+                    Log.i("EXECUTE", "PHOTO IS AVAILABLE");
+                    Uri uriImagePicked = data.getData();
+                    Bitmap bitmapImage = ImageEditor.loadSizeLimitedBitmapFromUri(
+                            uriImagePicked, getContentResolver());
+                    // add face to student
+                    AddFaceToStudent addFaceToStudent = new AddFaceToStudent(bitmapImage, student_serverId,
+                            courseServerId, db_face, getApplicationContext(), StudentDataActivity.this);
+                    addFaceToStudent.addFaceToPerson();
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    // click event for back button on navigation bar
+    @Override
+    public void onBackPressed()
+    {
+        if (!this.etStudentID.getText().toString().equals("") || !this.etStudentName.getText().toString().equals(""))
+        {
+            Toast.makeText(this, "Please save data", Toast.LENGTH_SHORT).show();
+        }
+        else if (this.etStudentID.getText().toString().equals("")
+                && this.etStudentName.getText().toString().equals(""))
+        {
+            Intent intent = new Intent(StudentDataActivity.this, StudentManagerActivity.class);
+            intent.putExtra("ACCOUNT", account);
+            startActivity(intent);
+            finish();
+        }
+    }
+
+    // Implement actions for menu item
+    @Override
+    public boolean onContextItemSelected(MenuItem item)
+    {
+        AdapterView.AdapterContextMenuInfo
+                info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+
+        // Get selected student to apply action
+        final Face selectedFace = (Face) this.gvStudentFace.getItemAtPosition(info.position);
+
+        if(item.getItemId() == MENU_ITEM_DELETE)
+        {
+            // Confirmation dialog before delete
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle("VFACE - STUDENT PROFILE")
+                    .setMessage("Are you sure you want to delete this face?")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes", (dialog, id) -> deleteFace(selectedFace))
+                    .setNegativeButton("No", null)
+                    .show();
+        }
+        else
+        {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * This class is a background task to add a new student to the server
+     * into a large person group (Course).
+     */
     class AddStudentTask extends AsyncTask<String, String, String>
     {
         // Indicate the next step is to add face in this student, or finish editing this student.
-        boolean mAddFace;
+        boolean addFace;
 
         AddStudentTask (boolean addFace) {
-            mAddFace = addFace;
+            this.addFace = addFace;
         }
 
         @Override
         protected String doInBackground(String... params)
         {
-            // Get an instance of face service client.
+            // Connect to server
             FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
             try
             {
                 Log.i("EXECUTE","Request: Creating Student in the course" + params[0]);
 
-                // Start the request to creating a person on server.
+                // Request of creating a new person (student) in large person group
                 CreatePersonResult createPersonResult = faceServiceClient.createPersonInLargePersonGroup(
                         params[0],
                         getString(R.string.user_provided_person_name),
                         getString(R.string.user_provided_description_data));
                 Log.i("EXECUTE","Create Student Done");
-
                 return createPersonResult.personId.toString();
             }
             catch (Exception e)
             {
-                publishProgress(e.getMessage());
+                Log.i("EXECUTE", "Error: " + e.getMessage());
                 return null;
             }
         }
@@ -87,17 +333,22 @@ public class StudentDataActivity extends AppCompatActivity
             {
                 Log.i("EXECUTE","Response: Success. Student " + result + " created.");
                 student_serverId = result;
-
-                if (mAddFace)
+                if (addFace)
                 {
-                    addFace();
-                } else {
+                    btnAddFace();
+                }
+                else
+                {
                     saveData();
                 }
             }
         }
     }
 
+    /**
+     * This class is a background task to delete a face from a person (Student)
+     * on server
+     */
     class DeleteFaceTask extends AsyncTask<String, String, String>
     {
         String courseServerId;
@@ -110,12 +361,12 @@ public class StudentDataActivity extends AppCompatActivity
         }
 
         @Override
-        protected String doInBackground(String... params) {
-            // Get an instance of face service client.
+        protected String doInBackground(String... params)
+        {
+            // Connect to server
             FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
             try
             {
-                publishProgress("Deleting selected faces...");
                 Log.i("EXECUTE","Request: Deleting face " + params[0]);
 
                 UUID faceId = UUID.fromString(params[0]);
@@ -124,8 +375,7 @@ public class StudentDataActivity extends AppCompatActivity
             }
             catch (Exception e)
             {
-                publishProgress(e.getMessage());
-                Log.i("EXECUTE","ERROR DELETE FACE: " + (e.getMessage()));
+                Log.i("EXECUTE","Error Delete face: " + (e.getMessage()));
                 return null;
             }
         }
@@ -133,34 +383,32 @@ public class StudentDataActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(String result)
         {
-            if (result != null) {
+            if (result != null)
+            {
                 Log.i("EXECUTE","Face " + result + " successfully deleted");
                 Toast.makeText(getApplicationContext(),"Face Deleted.", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
+    /**
+     * This class is a background task to train the course after data is updated on server
+     */
     class TrainCourseTask extends AsyncTask<String, String, String>
     {
-
         @Override
         protected String doInBackground(String... params)
         {
             Log.i("EXECUTE","Request: Training group " + params[0]);
-
-            // Get an instance of face service client.
             FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
             try
             {
-                publishProgress("Training person group...");
-
                 faceServiceClient.trainLargePersonGroup(params[0]);
                 return params[0];
             }
             catch (Exception e)
             {
-                publishProgress(e.getMessage());
-                Log.i("EXECUTE","ERROR TRAINING GROUP: " + e.getMessage());
+                Log.i("EXECUTE","Error training group: " + e.getMessage());
                 return null;
             }
         }
@@ -168,110 +416,17 @@ public class StudentDataActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(String result)
         {
-            if (result != null) {
+            if (result != null)
+            {
                 Log.i("EXECUTE","Response: Success. Course " + result + " training completed");
-                Toast.makeText(getApplicationContext(), "Response: Success. Course " + result + " trained", Toast.LENGTH_LONG).show();
-
                 finish();
             }
+            else
+                Toast.makeText(getApplicationContext(), "COURSE IS NOT TRAINED", Toast.LENGTH_SHORT).show();
         }
     }
 
-    String student_serverId = null;
-
-    private String account;
-    private String courseServerId;
-
-    private TextInputEditText etStudentID;
-    private TextInputEditText etStudentName;
-
-    private boolean needRefresh;
-    Student student;
-
-    private static final int MODE_ADD = 1;
-    private static final int MODE_EDIT = 2;
-    private int mode;
-    boolean newStudent;
-
-    String studentNumberId;
-    String studentName;
-
-    private static final int REQUEST_SELECT_IMAGE = 0;
-    private static final int MENU_ITEM_DELETE = 111;
-
-    int courseId;
-    GridView gvStudentFace;
-    MyDatabaseHelperFace db_face;
-    List<Face> faceList = new ArrayList<>();
-    private ArrayAdapter<Face> gridViewAdapter;
-    List<Boolean> faceChecked;
-
-    TextInputLayout outlinedTextStudentId;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-
-        // Set no notification bar on activity
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-        setContentView(R.layout.activity_student_data);
-
-        outlinedTextStudentId = findViewById(R.id.outlinedTextStudentId);
-
-        // initialize face database
-        db_face = new MyDatabaseHelperFace(this);
-
-        etStudentID = findViewById(R.id.etStudentId);
-        etStudentName = findViewById(R.id.etStudentName);
-        faceChecked = new ArrayList<>();
-
-        // Get student information to edit
-        Intent intent_info = this.getIntent();
-        this.student = (Student) intent_info.getSerializableExtra("student");
-
-        if (student != null)
-        {
-            this.mode = MODE_EDIT;
-            // Display current student information
-            this.etStudentID.setText(student.getStudentIdNumber());
-            this.etStudentName.setText(student.getStudentName());
-
-            courseServerId = intent_info.getStringExtra("courseServerId");
-            courseId = intent_info.getIntExtra("courseId", 0);
-            account = intent_info.getStringExtra("account");
-
-            student_serverId = student.getStudentServerId();
-            Log.i("EXECUTE", "Edit Student: " + student_serverId + " in Group: " + courseServerId);
-
-            List<Face> faceList ;
-            db_face = new MyDatabaseHelperFace(this);
-            faceList = db_face.getFaceWithStudent(student_serverId);
-            Log.i("EXECUTE", "Face list SIZE: " + faceList.size());
-
-            gvStudentFace = findViewById(R.id.gvStudentFace);
-            displayGridView(student_serverId, 0);
-        }
-        else
-        {
-            Bundle bundle = getIntent().getBundleExtra("CourseId");
-            courseId = bundle.getInt("courseId");
-            account = bundle.getString("account");
-            courseServerId = bundle.getString("courseServerId");
-
-            this.mode = MODE_ADD;
-            gvStudentFace = findViewById(R.id.gvStudentFace);
-            displayGridView(student_serverId, 0);
-            studentNumberId = etStudentID.getText().toString();
-            studentName = etStudentName.getText().toString();
-            newStudent = true; // flag
-        }
-    }
-
-
-
+    // on resume activity, display the faces available for this student
     @Override
     protected void onResume()
     {
@@ -292,36 +447,35 @@ public class StudentDataActivity extends AppCompatActivity
         outState.putString("account", account);
     }
 
-
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState)
     {
         super.onRestoreInstanceState(savedInstanceState);
 
         student_serverId = savedInstanceState.getString("StudentServerId");
-        Log.i("EXECUTE", "RESTORE STUDENT SV ID: " + student_serverId);
         courseServerId = savedInstanceState.getString("CourseServerId");
         etStudentID.setText(savedInstanceState.getString("StudentId"));
         etStudentName.setText(savedInstanceState.getString("StudentName"));
         account = savedInstanceState.getString("account");
     }
 
-
+    // display faces on grid view
     private void displayGridView(String student_serverId, int request)
     {
-        if (student_serverId != null && (request == 0 || newStudent == true))
+        if (student_serverId != null && (request == 0 || newStudent))
         {
             List<Face> listFace =  db_face.getFaceWithStudent(student_serverId);
             this.faceList.addAll(listFace);
 
-            gridViewAdapter = new ArrayAdapter<Face>(this,
+            faceArrayAdapter = new ArrayAdapter<Face>(this,
                     android.R.layout.simple_list_item_activated_1, android.R.id.text1, faceList)
             {
                 @NonNull
                 @Override
                 public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent)
                 {
-                    if (convertView == null) {
+                    if (convertView == null)
+                    {
                         LayoutInflater layoutInflater
                                 = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                         convertView = layoutInflater.inflate(
@@ -336,22 +490,22 @@ public class StudentDataActivity extends AppCompatActivity
                 }
             };
 
-            if (newStudent == true)
+            if (newStudent)
             {
                 newStudent = false;
             }
 
             // Register Adapter cho ListView.
-            this.gvStudentFace.setAdapter(this.gridViewAdapter);
+            this.gvStudentFace.setAdapter(this.faceArrayAdapter);
             registerForContextMenu(this.gvStudentFace);
         }
         else if (student_serverId != null && request != 0)
         {
             this.faceList.clear();
-            MyDatabaseHelperFace db = new MyDatabaseHelperFace(this);
-            List<Face> list = db.getFaceWithStudent(student_serverId);
+            MyDatabaseHelperFace db_face = new MyDatabaseHelperFace(this);
+            List<Face> list = db_face.getFaceWithStudent(student_serverId);
             this.faceList.addAll(list);
-            this.gridViewAdapter.notifyDataSetChanged();
+            this.faceArrayAdapter.notifyDataSetChanged();
             registerForContextMenu(this.gvStudentFace);
         }
     }
@@ -360,220 +514,17 @@ public class StudentDataActivity extends AppCompatActivity
     public void onCreateContextMenu(ContextMenu menu, View view,
                                     ContextMenu.ContextMenuInfo menuInfo)
     {
-
         super.onCreateContextMenu(menu, view, menuInfo);
-
-        // groupId, itemId, order, title
         menu.add(0, MENU_ITEM_DELETE, 0, "Delete Student");
-
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item)
-    {
-        AdapterView.AdapterContextMenuInfo
-                info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-
-        // Get selected student to apply action
-        final Face selectedFace = (Face) this.gvStudentFace.getItemAtPosition(info.position);
-
-        if(item.getItemId() == MENU_ITEM_DELETE)
-        {
-            // Confirmation dialog before delete
-            new AlertDialog.Builder(this)
-                    .setMessage("Are you sure you want to delete this face?")
-                    .setCancelable(false)
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener()
-                    {
-                        public void onClick(DialogInterface dialog, int id) {
-                            deleteFace(selectedFace);
-                        }
-                    })
-                    .setNegativeButton("No", null)
-                    .show();
-        }
-        else
-        {
-            return false;
-        }
-        return true;
-    }
-
-    // Delete a student from database
-    private void deleteFace(Face face)
-    {
-        MyDatabaseHelperFace db = new MyDatabaseHelperFace(this);
-        db.deleteFace(face);
-        this.faceList.remove(face);
-        // Refresh ListView.
-        this.gridViewAdapter.notifyDataSetChanged();
-        new DeleteFaceTask(courseServerId, student_serverId).execute(face.getStudentFaceServerId());
-    }
-
-    // Button Add Face click event
-    public void addFace(View view)
-    {
-        if (etStudentName.getText().toString().equals("") && etStudentID.getText().toString().equals(""))
-        {
-            Toast.makeText(getApplicationContext(), "Enter student ID & student name\n to add face.",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-        else if (!etStudentName.getText().toString().equals("") && !etStudentID.getText().toString().equals(""))
-        {
-            if (student_serverId == null)
-            {
-                new AddStudentTask(true).execute(courseServerId);
-            }
-            else
-            {
-                addFace();
-            }
-        }
-    }
-
-    private void addFace()
-    {
-        Intent intent = new Intent(this, SelectImageActivity.class);
-        Log.i("EXECUTE", "START ADDING FACE");
-        startActivityForResult(intent, REQUEST_SELECT_IMAGE);
-    }
-
-    @Override // Send intent to Add face activity
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        switch (requestCode)
-        {
-            case REQUEST_SELECT_IMAGE:
-                if (resultCode == RESULT_OK)
-                {
-                    Log.i("EXECUTE", "GOT PHOTO FROM CAMERA");
-                    Uri uriImagePicked = data.getData();
-                    Bitmap mBitmap = ImageEditor.loadSizeLimitedBitmapFromUri(
-                            uriImagePicked, getContentResolver());
-
-                    Intent intent = new Intent(this, AddFaceActivity.class);
-                    intent.putExtra("StudentServerId", student_serverId);
-
-                    intent.putExtra("CourseServerId", courseServerId);
-                    intent.putExtra("ImageUriStr", uriImagePicked.toString());
-                    //startActivity(intent);
-                    AddFaceToStudent addFaceToStudent = new AddFaceToStudent(mBitmap, student_serverId,
-                            courseServerId, db_face, getApplicationContext(), StudentDataActivity.this);
-                    addFaceToStudent.addFaceToPerson();
-
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    // Click event for Done button
-    public void btnDoneClick(View view)
-    {
-
-        if (student_serverId == null)
-        {
-            new AddStudentTask(false).execute(courseServerId);
-        }
-        else
-            saveData();
-/*MyDatabaseHelperStudent db = new MyDatabaseHelperStudent(this);
-        // get input
-        String number_id = this.etStudentID.getText().toString();
-        String name = this.etStudentName.getText().toString();
-
-        if(number_id.equals("") || name.equals("")) {
-            Toast.makeText(getApplicationContext(),
-                    "Please enter student ID & student name.", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        if(mode == MODE_ADD )
-        {
-            if (student_serverId == null)
-                new AddStudentTask(false).execute(courseServerId);
-            Log.i ("EXECUTE", " Add Student Server id: " + student_serverId + " to group: " + courseServerId);
-            this.student = new Student(number_id, courseServerId, name, student_serverId);
-            db.addStudent(student);
-        }
-        else
-        {
-            this.student.setStudentIdNumber(number_id);
-            this.student.setStudentName(name);
-            db.updateStudent(student);
-        }
-
-        new TrainCourseTask().execute(courseServerId);
-
-        this.needRefresh = true;
-
-        // Back to current activity
-        Intent intent = new Intent(StudentDataActivity.this, StudentManagerActivity.class);
-        intent.putExtra("ACCOUNT", account);
-        startActivity(intent); */
-
-    }
-
-    private void saveData()
-    {
-        MyDatabaseHelperStudent db = new MyDatabaseHelperStudent(this);
-        // get input
-        String number_id = this.etStudentID.getText().toString();
-        String name = this.etStudentName.getText().toString();
-
-        if(number_id.equals("") || name.equals("")) {
-            Toast.makeText(getApplicationContext(),
-                    "Please enter student ID & student name.", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        if(mode == MODE_ADD )
-        {
-            Log.i ("EXECUTE", " Add Student Server id: " + student_serverId + " to group: " + courseServerId);
-            this.student = new Student(number_id, courseServerId, name, student_serverId);
-            db.addStudent(student);
-        }
-        else
-        {
-            this.student.setStudentIdNumber(number_id);
-            this.student.setStudentName(name);
-            db.updateStudent(student);
-        }
-
-        new TrainCourseTask().execute(courseServerId);
-
-        this.needRefresh = true;
-
-        // Back to current activity
-        onBackPressed();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (!this.etStudentID.getText().toString().equals("") || !this.etStudentName.getText().toString().equals(""))
-        {
-            Toast.makeText(this, "Save data before exit.", Toast.LENGTH_SHORT).show();
-        }
-        else if (this.etStudentID.getText().toString().equals("")
-                && this.etStudentName.getText().toString().equals(""))
-        {
-            Intent intent = new Intent(StudentDataActivity.this, StudentManagerActivity.class);
-            intent.putExtra("ACCOUNT", account);
-            startActivity(intent);
-
-        }
-
     }
 
     // Finish activity
     @Override
-    public void finish() {
-
+    public void finish()
+    {
         // Prepare Intent data
         Intent data = new Intent();
-        // Request the List Course refresh
+        // Request the grid view refresh
         data.putExtra("needRefresh", needRefresh);
 
         // Activity complete

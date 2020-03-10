@@ -4,7 +4,6 @@
 package com.vunguyen.vface.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -28,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
@@ -57,9 +57,10 @@ public class CourseManagerActivity extends AppCompatActivity
     private static final int MENU_ITEM_DELETE = 444;
 
     private static final int MY_REQUEST_CODE = 1000;
+    MyDatabaseHelperCourse db_course;
 
     //List contains the courses to display on screen
-    private final List<Course> courseList = new ArrayList<>();
+    private List<Course> courseList = new ArrayList<>();
     // Array adapter to connect ListView and data
     private ArrayAdapter<Course> courseArrayAdapter;
 
@@ -75,26 +76,31 @@ public class CourseManagerActivity extends AppCompatActivity
 
         // Get email account
         account = getIntent().getStringExtra("ACCOUNT");
-        Toast.makeText(this, "ACCOUNT COURSE MANAGER: " + account, Toast.LENGTH_SHORT).show();
 
         // Set event for the Add Course button
         btnAddCourse = findViewById(R.id.btnAddCourse);
-        btnAddCourse.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent(CourseManagerActivity.this, AddEditCourseActivity.class);
-                intent.putExtra("ACCOUNT", account);
-                startActivityForResult(intent, MY_REQUEST_CODE);
-            }
-        });
+        btnAddCourse.setOnClickListener(v -> actionAddCourse());
 
         // Open the course database, transfer all course from database to a course list
-        MyDatabaseHelperCourse db = new MyDatabaseHelperCourse(this);
-        List<Course> list=  db.getAllCourses(account);
-        this.courseList.addAll(list);
+        db_course = new MyDatabaseHelperCourse(this);
+        this.courseList = db_course.getAllCourses(account);
 
+        // Display courses on the list view
+        displayCourses();
+
+        // Set event for the Done button
+        btnDone = findViewById(R.id.btnDone);
+        btnDone.setOnClickListener(v -> {
+            Intent intent = new Intent(CourseManagerActivity.this, StudentCoursesActivity.class);
+            intent.putExtra("ACCOUNT", account);
+            startActivity(intent);
+            finish();
+        });
+    }
+
+    // This method to display courses on list view through adapter
+    public void displayCourses()
+    {
         // initialize list view
         lvCourses = findViewById(R.id.lvCourses);
 
@@ -120,19 +126,6 @@ public class CourseManagerActivity extends AppCompatActivity
         // Register the menu context for ListView.
         registerForContextMenu(this.lvCourses);
 
-        // Set event for the Done button
-        btnDone = findViewById(R.id.btnDone);
-        btnDone.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent(CourseManagerActivity.this, StudentCoursesActivity.class);
-                intent.putExtra("ACCOUNT", account);
-                startActivity(intent);
-                finish();
-            }
-        });
     }
 
     // Create Menu context for ListView
@@ -148,19 +141,21 @@ public class CourseManagerActivity extends AppCompatActivity
         menu.add(0, MENU_ITEM_DELETE, 4, "Delete Course");
     }
 
-    // Actions when menu selected
+    // Implement actions for each menu item
     @Override
     public boolean onContextItemSelected(MenuItem item)
     {
         AdapterView.AdapterContextMenuInfo
                 info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 
+        // get the selected course
         final Course selectedCourse = (Course) this.lvCourses.getItemAtPosition(info.position);
 
         if(item.getItemId() == MENU_ITEM_VIEW)
         {
             // Display a dialog with student information
-            new AlertDialog.Builder(this)
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle("VFACE - COURSE MANAGER")
                     .setMessage("Course ID Number: " + selectedCourse.getCourseIdNumber() +
                             "\nCourse Name: " + selectedCourse.getCourseName())
                     .setCancelable(false)
@@ -169,9 +164,7 @@ public class CourseManagerActivity extends AppCompatActivity
         }
         else if(item.getItemId() == MENU_ITEM_ADD)
         {
-            Intent intent = new Intent(this, AddEditCourseActivity.class);
-            intent.putExtra("ACCOUNT", account);
-            this.startActivityForResult(intent, MY_REQUEST_CODE);
+            actionAddCourse();
         }
         else if(item.getItemId() == MENU_ITEM_EDIT )
         {
@@ -183,36 +176,45 @@ public class CourseManagerActivity extends AppCompatActivity
         else if(item.getItemId() == MENU_ITEM_DELETE)
         {
             // Confirmation dialog before delete
-            new AlertDialog.Builder(this)
-                    .setMessage(selectedCourse.getCourseName() +". Are you sure you want to delete?")
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle("VFACE - COURSE MANAGER")
+                    .setMessage("Are you sure you want to delete " + selectedCourse.getCourseName() + "?")
                     .setCancelable(false)
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener()
                     {
-                        public void onClick(DialogInterface dialog, int id) {
+                        public void onClick(DialogInterface dialog, int id)
+                        {
                             deleteCourse(selectedCourse);
                         }
                     })
                     .setNegativeButton("No", null)
                     .show();
         }
-        else {
+        else
             return false;
-        }
         return true;
+    }
+
+    // This method to open the add/edit course screen
+    public void actionAddCourse()
+    {
+        Intent intent = new Intent(this, AddEditCourseActivity.class);
+        intent.putExtra("ACCOUNT", account);
+        this.startActivityForResult(intent, MY_REQUEST_CODE);
     }
 
     // Delete the course if the user accepts
     private void deleteCourse(Course course)
     {
-        MyDatabaseHelperCourse db = new MyDatabaseHelperCourse(this);
         String courseServerId = course.getCourseServerId();
-        db.deleteCourse(course);
-        this.courseList.remove(course);
-        new DeleteCourseTask().execute(courseServerId);
+        db_course.deleteCourse(course); // delete course from database
+        this.courseList.remove(course); // delete course from the list
+        new DeleteCourseTask().execute(courseServerId); // delete course from server
         MyDatabaseHelperStudent db_student = new MyDatabaseHelperStudent(this);
         MyDatabaseHelperFace db_face = new MyDatabaseHelperFace(this);
+        // delete all students in the course
         db_student.deleteStudentWithCourse(courseServerId, db_face);
-        Log.i("EXECUTE", "DELETE COURSE " + courseServerId);
+        Log.i("EXECUTE", "Deleted course: " + courseServerId);
         // Refresh ListView.
         this.courseArrayAdapter.notifyDataSetChanged();
     }
@@ -230,8 +232,7 @@ public class CourseManagerActivity extends AppCompatActivity
             if (needRefresh)
             {
                 this.courseList.clear();
-                MyDatabaseHelperCourse db = new MyDatabaseHelperCourse(this);
-                List<Course> list = db.getAllCourses(account);
+                List<Course> list = db_course.getAllCourses(account);
                 this.courseList.addAll(list);
                 // Notify the change of data to refresh the listview
                 this.courseArrayAdapter.notifyDataSetChanged();
@@ -240,12 +241,16 @@ public class CourseManagerActivity extends AppCompatActivity
     }
 
     // Deleting a course from server - running background
+
+    /**
+     * This class is to remove a course from server running in background
+     */
     private class DeleteCourseTask extends AsyncTask<String, String, String>
     {
         @Override
         protected String doInBackground(String... params)
         {
-            // Connect to FaceA Cognitive server
+            // Connect to server
             FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
             try
             {
@@ -259,13 +264,19 @@ public class CourseManagerActivity extends AppCompatActivity
             }
         }
 
-        // Execute after the background task is completed.
         @Override
         protected void onPostExecute(String result)
         {
             if (result != null)
             {
-                Toast.makeText(getApplicationContext(),"The group has been deleted.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),
+                        "The course has been deleted.", Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                Toast.makeText(getApplicationContext(),
+                        "This course has not been deleted. Please try again.",
+                        Toast.LENGTH_SHORT).show();
             }
         }
     }

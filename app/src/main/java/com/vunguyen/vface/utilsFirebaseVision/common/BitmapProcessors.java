@@ -87,19 +87,5 @@ public class BitmapProcessors
             return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
         }
     }
-
-    // get bitmap of a photo from the path
-    public static Bitmap getBitmapByPath(String path , String fileName)
-    {
-        try
-        {
-            File f=new File(path, fileName);
-            return BitmapFactory.decodeStream(new FileInputStream(f));
-        }
-        catch (FileNotFoundException e)
-        {
-            return null;
-        }
-    }
 }
 

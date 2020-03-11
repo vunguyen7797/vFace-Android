@@ -5,6 +5,7 @@ package com.vunguyen.vface.ui;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
@@ -20,6 +21,7 @@ import com.microsoft.projectoxford.face.contract.FaceRectangle;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
+import com.vunguyen.vface.helper.StorageHelper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -78,24 +80,13 @@ class AddFaceToStudent extends ActivityCompat {
         }
     }
 
-    // return Uri of the bitmap image
-    public Uri getImageUri(Context context, Bitmap bitmapImage)
-    {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(context.getContentResolver(),
-                bitmapImage, "Title", null);
-
-        return Uri.parse(path);
-    }
-
     // This method to save face into database if detected
     private void savingData(Boolean result)
     {
         if (result)
         {
             String faceIdStr = faceId.toString();
-            Uri uri = getImageUri(context, faceThumbnail);
+            Uri uri = StorageHelper.saveToInternalStorageUri(faceThumbnail, faceIdStr+".png", context);
             com.vunguyen.vface.bean.Face studentFace = new com.vunguyen.vface.bean.Face(studentServerId, faceIdStr, uri.toString());
 
             // saving face URI to face database of a student

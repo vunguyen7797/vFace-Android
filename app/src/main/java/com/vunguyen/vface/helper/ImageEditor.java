@@ -36,6 +36,8 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.util.Log;
 
 import com.microsoft.projectoxford.face.contract.FaceRectangle;
 
@@ -216,27 +218,5 @@ public class ImageEditor
         img.recycle();
         return rotatedImg;
     }
-
-    // save the image
-    public static String saveToInternalStorage(Bitmap bitmapImage,String fileName, Context mContext)
-    {
-        File directory = mContext.getDir("imageDir", Context.MODE_PRIVATE);
-        File imgPath = new File(directory, fileName);
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(imgPath);
-            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return directory.getAbsolutePath();
-    }
-
 }
 

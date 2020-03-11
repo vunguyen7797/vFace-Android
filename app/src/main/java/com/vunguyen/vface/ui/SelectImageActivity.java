@@ -4,10 +4,8 @@
 package com.vunguyen.vface.ui;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -16,9 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.vunguyen.vface.R;
-import com.vunguyen.vface.utilsFirebaseVision.common.BitmapProcessors;
-
-import java.io.ByteArrayOutputStream;
 
 /**
  * This class implements events for taking photo and choosing photo options
@@ -85,13 +80,7 @@ public class SelectImageActivity extends AppCompatActivity
             case REQUEST_TAKE_PHOTO:
                 if (resultCode == RESULT_OK)
                 {
-                    String path = data.getStringExtra("PATH");
-                    Bitmap imageBitmap = BitmapProcessors.getBitmapByPath(path, "image.png");
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                    String newPath = MediaStore.Images.Media.insertImage(getContentResolver(), imageBitmap, "Photo", null);
-                    Uri imageUri = Uri.parse(newPath);
-
+                    Uri imageUri = data.getData();
                     setResult(imageUri);
                 }
             case REQUEST_SELECT_IMAGE_IN_ALBUM:
@@ -122,4 +111,5 @@ public class SelectImageActivity extends AppCompatActivity
         setResult(RESULT_OK, intent);
         finish();
     }
+
 }

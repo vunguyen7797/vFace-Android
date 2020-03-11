@@ -5,6 +5,7 @@ package com.vunguyen.vface.ui;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
@@ -19,6 +20,7 @@ import androidx.core.content.ContextCompat;
 import com.google.firebase.ml.vision.face.FirebaseVisionFace;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.helper.ImageEditor;
+import com.vunguyen.vface.helper.StorageHelper;
 import com.vunguyen.vface.utilsFirebaseVision.base.BaseActivity;
 import com.vunguyen.vface.utilsFirebaseVision.base.PermissionProcessors;
 import com.vunguyen.vface.utilsFirebaseVision.common.CameraSource;
@@ -177,9 +179,9 @@ public class RealTimeFaceDetectActivity extends BaseActivity
         // When image is cropped , respond back to the SelectImage activity for other tasks
         if (croppedImage != null)
         {
-            String path = ImageEditor.saveToInternalStorage(croppedImage, "image.png", this);
+            Uri uriImage = StorageHelper.saveToInternalStorageUri(croppedImage, "image.png", this);
             Intent intent = new Intent();
-            intent.putExtra("PATH", path);
+            intent.setData(uriImage);
             setResult(RESULT_OK, intent);
             finish();
         }

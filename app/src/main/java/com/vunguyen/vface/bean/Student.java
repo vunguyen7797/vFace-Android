@@ -15,7 +15,7 @@ public class Student implements Serializable
     private String studentName;         // Student name from input
     private String studentIdNumber;     // Real student ID number from input
     private String studentServerId;     // Student unique ID string to work with server tasks
-    private String studentIdentifyFlag;
+    private String studentIdentifyFlag; // Indicator if the student is identified or not.
 
     public Student()
     {

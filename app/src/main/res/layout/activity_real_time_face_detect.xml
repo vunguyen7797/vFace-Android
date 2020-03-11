@@ -7,14 +7,14 @@
     tools:context=".ui.RealTimeFaceDetectActivity"
     android:background="#35363B">
 
-    <com.vunguyen.vface.utils.common.CameraSourcePreview
+    <com.vunguyen.vface.utilsFirebaseVision.common.CameraSourcePreview
         android:id="@+id/cameraPreview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.vunguyen.vface.utils.common.GraphicOverlay
+        <com.vunguyen.vface.utilsFirebaseVision.common.GraphicOverlay
             android:id="@+id/graphicFaceOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
@@ -29,7 +29,7 @@
             android:scaleType="fitXY"
             android:src="@drawable/face_shape"
             android:tint="#000000" />
-    </com.vunguyen.vface.utils.common.CameraSourcePreview>
+    </com.vunguyen.vface.utilsFirebaseVision.common.CameraSourcePreview>
 
     <TextView
         android:id="@+id/btnTakePhoto"

@@ -5,13 +5,10 @@ package com.vunguyen.vface.ui;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -21,21 +18,19 @@ import androidx.core.content.ContextCompat;
 
 import com.google.firebase.ml.vision.face.FirebaseVisionFace;
 import com.vunguyen.vface.R;
-import com.vunguyen.vface.utils.base.BaseActivity;
-import com.vunguyen.vface.utils.base.Cons;
-import com.vunguyen.vface.utils.base.PublicMethods;
-import com.vunguyen.vface.utils.common.CameraSource;
-import com.vunguyen.vface.utils.common.CameraSourcePreview;
-import com.vunguyen.vface.utils.common.FrameMetadata;
-import com.vunguyen.vface.utils.common.GraphicOverlay;
-import com.vunguyen.vface.utils.interfaces.FaceDetectStatus;
-import com.vunguyen.vface.utils.interfaces.FrameReturn;
-import com.vunguyen.vface.utils.models.RectModel;
-import com.vunguyen.vface.utils.visions.FaceDetectionProcessor;
+import com.vunguyen.vface.helper.ImageEditor;
+import com.vunguyen.vface.utilsFirebaseVision.base.BaseActivity;
+import com.vunguyen.vface.utilsFirebaseVision.base.PermissionProcessors;
+import com.vunguyen.vface.utilsFirebaseVision.common.CameraSource;
+import com.vunguyen.vface.utilsFirebaseVision.common.CameraSourcePreview;
+import com.vunguyen.vface.utilsFirebaseVision.common.FrameMetadata;
+import com.vunguyen.vface.utilsFirebaseVision.common.GraphicOverlay;
+import com.vunguyen.vface.utilsFirebaseVision.interfaces.FaceDetectStatus;
+import com.vunguyen.vface.utilsFirebaseVision.interfaces.FrameReturn;
+import com.vunguyen.vface.utilsFirebaseVision.models.RectModel;
+import com.vunguyen.vface.utilsFirebaseVision.visions.FaceDetectionProcessor;
 
 import java.io.IOException;
-
-import static com.vunguyen.vface.utils.base.Cons.IMG_EXTRA_KEY;
 
 /**
  * This class will open the camera and automatically detect the face to fit the quality standard
@@ -67,13 +62,13 @@ public class RealTimeFaceDetectActivity extends BaseActivity
         ivFaceFrame = findViewById(R.id.faceFrame);
         graphicOverlay = findViewById(R.id.graphicFaceOverlay);
 
-        if (PublicMethods.allPermissionsGranted(this))
+        if (PermissionProcessors.allPermissionsAccepted(this))
         {
             createCameraSource();
         }
         else
         {
-            PublicMethods.getRuntimePermissions(this);
+            PermissionProcessors.getRuntimePermissions(this);
         }
 
 
@@ -152,7 +147,7 @@ public class RealTimeFaceDetectActivity extends BaseActivity
     public void onRequestPermissionsResult(
             int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
     {
-        if (PublicMethods.allPermissionsGranted(this))
+        if (PermissionProcessors.allPermissionsAccepted(this))
         {
             createCameraSource();
         }
@@ -182,7 +177,7 @@ public class RealTimeFaceDetectActivity extends BaseActivity
         // When image is cropped , respond back to the SelectImage activity for other tasks
         if (croppedImage != null)
         {
-            String path = PublicMethods.saveToInternalStorage(croppedImage, Cons.IMG_FILE, mActivity);
+            String path = ImageEditor.saveToInternalStorage(croppedImage, "image.png", this);
             Intent intent = new Intent();
             intent.putExtra("PATH", path);
             setResult(RESULT_OK, intent);

@@ -6,6 +6,7 @@ package com.vunguyen.vface.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -32,6 +33,7 @@ public class WelcomeScreenActivity extends AppCompatActivity
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_welcome_screen);
 
+        openLoginWindow();
         // event for login button
         Button btnLogin = findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(v -> openLoginWindow());
@@ -47,8 +49,13 @@ public class WelcomeScreenActivity extends AppCompatActivity
     // Open login window for username and password
     public void openLoginWindow()
     {
-        Intent intent = new Intent(this, LoginActivity.class);
-        startActivity(intent);
-        finish();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(WelcomeScreenActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        }, 2000);
     }
 }

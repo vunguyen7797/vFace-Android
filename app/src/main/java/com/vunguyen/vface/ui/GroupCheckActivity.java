@@ -247,7 +247,14 @@ public class GroupCheckActivity extends AppCompatActivity
                         absenceStudentList = db_student.getAbsenceStudent(course.getCourseServerId());
                         if (absenceStudentList.size() != 0)
                         {
-                            getAbsentStudentList(course);
+                            try
+                            {
+                                getAbsentStudentList(course);
+                            }
+                            catch (IOException e)
+                            {
+                                e.printStackTrace();
+                            }
 
                             listViewAdapter = new FaceListViewAdapter(absenceStudentDisplayList);
                             studentListChanged = true;
@@ -272,8 +279,7 @@ public class GroupCheckActivity extends AppCompatActivity
     }
 
     // This method is used to get absent students to store in a list for displaying
-    private void getAbsentStudentList(Course course)
-    {
+    private void getAbsentStudentList(Course course) throws IOException {
         for (int i = 0; i < absenceStudentList.size(); i++)
         {
             Bitmap faceThumbnail;
@@ -292,8 +298,8 @@ public class GroupCheckActivity extends AppCompatActivity
             // set the first face as the thumbnail
             if (faceList.size() > 0)
             {
-                faceThumbnail = ImageEditor.loadSizeLimitedBitmapFromUri(Uri.parse(faceList.get(0)
-                                .getStudentFaceUri()), getContentResolver());
+                faceThumbnail = ImageEditor.handlePhotoAndRotationBitmap(getApplicationContext(),Uri.parse(faceList.get(0)
+                        .getStudentFaceUri()));
             } else
                 faceThumbnail = null; // no face is found
 

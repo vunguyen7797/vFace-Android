@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,6 +42,7 @@ import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -230,8 +232,15 @@ public class StudentDataActivity extends AppCompatActivity
                 {
                     Log.i("EXECUTE", "PHOTO IS AVAILABLE");
                     Uri uriImagePicked = data.getData();
-                    Bitmap bitmapImage = ImageEditor.loadSizeLimitedBitmapFromUri(
-                            uriImagePicked, getContentResolver());
+                    Bitmap bitmapImage = null;
+                    try
+                    {
+                        bitmapImage = ImageEditor.handlePhotoAndRotationBitmap(getApplicationContext(), uriImagePicked);
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
                     // add face to student
                     AddFaceToStudent addFaceToStudent = new AddFaceToStudent(bitmapImage, student_serverId,
                             courseServerId, db_face, getApplicationContext(), StudentDataActivity.this);

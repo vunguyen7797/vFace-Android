@@ -9,16 +9,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.vunguyen.vface.R;
-import com.vunguyen.vface.utils.base.PublicMethods;
+import com.vunguyen.vface.utilsFirebaseVision.common.BitmapProcessors;
 
 import java.io.ByteArrayOutputStream;
-
-import static com.vunguyen.vface.utils.base.Cons.IMG_FILE;
 
 /**
  * This class implements events for taking photo and choosing photo options
@@ -36,6 +36,9 @@ public class SelectImageActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_select_image);
     }
 
@@ -83,7 +86,7 @@ public class SelectImageActivity extends AppCompatActivity
                 if (resultCode == RESULT_OK)
                 {
                     String path = data.getStringExtra("PATH");
-                    Bitmap imageBitmap = PublicMethods.getBitmapByPath(path, IMG_FILE);
+                    Bitmap imageBitmap = BitmapProcessors.getBitmapByPath(path, "image.png");
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                     String newPath = MediaStore.Images.Media.insertImage(getContentResolver(), imageBitmap, "Photo", null);

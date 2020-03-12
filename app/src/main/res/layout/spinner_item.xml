@@ -3,7 +3,7 @@
     android:id="@+id/tvSpinner"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:textSize="15dp"
+    android:textSize="15sp"
     android:fontFamily="@font/assistant_bold"
     android:gravity="left|center"
     android:textColor="#ffffff"

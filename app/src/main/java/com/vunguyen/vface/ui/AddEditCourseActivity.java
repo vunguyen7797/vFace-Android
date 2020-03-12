@@ -60,12 +60,7 @@ public class AddEditCourseActivity extends AppCompatActivity
 
         // Set event for Cancel button
         btnCancel = findViewById(R.id.btnCancel);
-        btnCancel.setOnClickListener(v -> {
-            // Go back to the Course Manager activity
-            Intent intent = new Intent (AddEditCourseActivity.this, CourseManagerActivity.class);
-            intent.putExtra("ACCOUNT", account);
-            startActivity(intent);
-        });
+        btnCancel.setOnClickListener(v -> goPreviousActivity());
 
         etCourseID = findViewById(R.id.etCourseID);
         etCourseName = findViewById(R.id.etCourseName);
@@ -93,6 +88,13 @@ public class AddEditCourseActivity extends AppCompatActivity
         progressDialog.setTitle("V.FACE");
     }
 
+    public void goPreviousActivity()
+    {
+        // Go back to the Course Manager activity
+        Intent intent = new Intent (AddEditCourseActivity.this, CourseManagerActivity.class);
+        intent.putExtra("ACCOUNT", account);
+        startActivity(intent);
+    }
 
     // Set click event for Save button
     public void btnSaveClick(View view)
@@ -152,6 +154,11 @@ public class AddEditCourseActivity extends AppCompatActivity
         // Activity complete
         this.setResult(Activity.RESULT_OK, data);
         super.finish();
+    }
+
+    public void btnBackClick(View view)
+    {
+        goPreviousActivity();
     }
 
     /**

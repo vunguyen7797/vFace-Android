@@ -4,8 +4,6 @@
 package com.vunguyen.vface.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -22,6 +20,8 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,7 +73,8 @@ public class StudentManagerActivity extends AppCompatActivity
     Button btnDone;
     Button btnAddStudent;
     AutoCompleteTextView courseMenu;
-    GridView gvStudents;
+    ListView lvStudents;
+    ImageView ivWaiting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -97,43 +98,54 @@ public class StudentManagerActivity extends AppCompatActivity
         ArrayAdapter<Course> tvArrayAdapter = new ArrayAdapter<Course>(this, R.layout.dropdown_menu_popup_item, courseList);
         courseMenu.setAdapter(tvArrayAdapter);
 
-        // initialize student gridview and student database
-        gvStudents = findViewById(R.id.gvStudents);
+        // initialize student list view and student database
+        lvStudents = findViewById(R.id.lvStudents);
+        lvStudents.setVisibility(View.GONE);
         db_student = new MyDatabaseHelperStudent(this);
         btnAddStudent = findViewById(R.id.btnAddStudent);
-        btnAddStudent.setEnabled(false);
+        btnAddStudent.setVisibility(View.GONE);
+        btnDone = findViewById(R.id.btnDoneStudentsManager);
+        btnDone.setVisibility(View.GONE);
+        ivWaiting = findViewById(R.id.ivWaiting);
 
         if (courseList.size() != 0)
         {
             // set default
-            displayGridView("",0);
+            displayListView("",0);
             courseMenu.setOnItemClickListener((parent, view, position, id) ->
             {
                 courseId = (int) parent.getItemIdAtPosition(position);  // get the course id database
                 Course course = (Course) parent.getItemAtPosition(position);
                 courseServerId = course.getCourseServerId();            // get course id on server
-                displayGridView(courseServerId, 1);   // request 1 to notify that selection is changed
-                btnAddStudent.setEnabled(true);
+                displayListView(courseServerId, 1);   // request 1 to notify that selection is changed
+                ivWaiting.setVisibility(View.GONE);
+                btnAddStudent.setVisibility(View.VISIBLE);
+                btnDone.setVisibility(View.VISIBLE);
+                lvStudents.setVisibility(View.VISIBLE);
+
 
             });
 
             // Button Add Student event, send the course ids to the student profile activity
             btnAddStudent.setOnClickListener(v ->
                     addStudent());
+            // Button Done Click Event
+            btnDone.setOnClickListener(v ->
+                    onBackPressed());
         }
         else
         {
             // If there is no course, the button is disable and show notification
+            btnDone.setEnabled(false);
             btnAddStudent.setEnabled(false);
             btnAddStudent.setOnClickListener(v ->
                     Toast.makeText(getApplicationContext(), "Addd a course before adding students.",
                             Toast.LENGTH_SHORT).show());
         }
 
-        // Button Done Click Event
-        btnDone = findViewById(R.id.btnDoneStudentsManager);
-        btnDone.setOnClickListener(v ->
-                onBackPressed());
+
+
+
     }
 
     // Event for clicking the back button on navigation bar
@@ -166,7 +178,7 @@ public class StudentManagerActivity extends AppCompatActivity
                 info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 
         // Get selected student to apply action
-        final Student selectedStudent = (Student) this.gvStudents.getItemAtPosition(info.position);
+        final Student selectedStudent = (Student) this.lvStudents.getItemAtPosition(info.position);
 
         if(item.getItemId() == MENU_ITEM_VIEW)
         {
@@ -256,15 +268,16 @@ public class StudentManagerActivity extends AppCompatActivity
     }
 
     // Display the information of student on GridView based on course selection
-    private void displayGridView(String courseServerId, int request)
+    private void displayListView(String courseServerId, int request)
     {
         if (request == 0) // default data is the student of first course in the list
         {
             List<Student> listStudents =  db_student.getStudentWithCourse(courseServerId);
+
             this.studentList.addAll(listStudents);
 
             studentArrayAdapter = new ArrayAdapter<Student>(this,
-                    android.R.layout.simple_list_item_activated_1, android.R.id.text1, studentList)
+                    android.R.layout.simple_list_item_1, android.R.id.text1, studentList)
             {
                 @NonNull
                 @Override
@@ -273,16 +286,16 @@ public class StudentManagerActivity extends AppCompatActivity
                     View view = super.getView(position, convertView, parent);
                     TextView tv = view.findViewById(android.R.id.text1);
                     tv.setTextColor(Color.WHITE);
-                    tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                    tv.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
                     tv.setAllCaps(true);
                     return view;
                 }
             };
 
             // Register Adapter cho ListView.
-            this.gvStudents.setAdapter(this.studentArrayAdapter);
+            this.lvStudents.setAdapter(this.studentArrayAdapter);
             // Register the menu context
-            registerForContextMenu(this.gvStudents);
+            registerForContextMenu(this.lvStudents);
         }
         else if (request == 1) // data changed after user selected another course
         {
@@ -294,6 +307,11 @@ public class StudentManagerActivity extends AppCompatActivity
 
         }
 
+    }
+
+    public void btnBackArrow(View view)
+    {
+        onBackPressed();
     }
 
     /**

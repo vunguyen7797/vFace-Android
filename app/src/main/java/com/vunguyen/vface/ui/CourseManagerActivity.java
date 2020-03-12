@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +20,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -90,12 +92,7 @@ public class CourseManagerActivity extends AppCompatActivity
 
         // Set event for the Done button
         btnDone = findViewById(R.id.btnDone);
-        btnDone.setOnClickListener(v -> {
-            Intent intent = new Intent(CourseManagerActivity.this, StudentCoursesActivity.class);
-            intent.putExtra("ACCOUNT", account);
-            startActivity(intent);
-            finish();
-        });
+        btnDone.setOnClickListener(v -> setBtnDone());
     }
 
     // This method to display courses on list view through adapter
@@ -103,7 +100,11 @@ public class CourseManagerActivity extends AppCompatActivity
     {
         // initialize list view
         lvCourses = findViewById(R.id.lvCourses);
-
+        if (courseList.size() == 0)
+        {
+            ImageView ivWaiting = findViewById(R.id.ivWaitingCourse);
+            ivWaiting.setVisibility(View.VISIBLE);
+        }
         // create adapter for list view of courses
         this.courseArrayAdapter = new ArrayAdapter<Course>(this,
                 android.R.layout.simple_list_item_activated_1, android.R.id.text1, this.courseList)
@@ -216,6 +217,11 @@ public class CourseManagerActivity extends AppCompatActivity
         db_student.deleteStudentWithCourse(courseServerId, db_face);
         Log.i("EXECUTE", "Deleted course: " + courseServerId);
         // Refresh ListView.
+        if (courseList.size() == 0)
+        {
+            ImageView ivWaiting = findViewById(R.id.ivWaitingCourse);
+            ivWaiting.setVisibility(View.VISIBLE);
+        }
         this.courseArrayAdapter.notifyDataSetChanged();
     }
 
@@ -238,6 +244,21 @@ public class CourseManagerActivity extends AppCompatActivity
                 this.courseArrayAdapter.notifyDataSetChanged();
             }
         }
+    }
+
+    // Click event arrow button
+    public void btnBackArrow(View view)
+    {
+        setBtnDone();
+    }
+
+    // Finish activity and go to previous activity
+    public void setBtnDone()
+    {
+        Intent intent = new Intent(CourseManagerActivity.this, StudentCoursesActivity.class);
+        intent.putExtra("ACCOUNT", account);
+        startActivity(intent);
+        finish();
     }
 
     // Deleting a course from server - running background

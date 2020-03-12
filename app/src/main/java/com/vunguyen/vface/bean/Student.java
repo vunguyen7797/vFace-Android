@@ -112,6 +112,6 @@ public class Student implements Serializable
     @Override
     public String toString()
     {
-        return this.studentName + "\n" + this.studentIdNumber;
+        return this.studentIdNumber + " - " + this.studentName;
     }
 }

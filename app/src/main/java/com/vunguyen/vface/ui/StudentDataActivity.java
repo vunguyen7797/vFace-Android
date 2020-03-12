@@ -298,6 +298,11 @@ public class StudentDataActivity extends AppCompatActivity
         return true;
     }
 
+    public void btnBackClick(View view)
+    {
+        onBackPressed();
+    }
+
     /**
      * This class is a background task to add a new student to the server
      * into a large person group (Course).
@@ -493,6 +498,7 @@ public class StudentDataActivity extends AppCompatActivity
                     convertView.setId(position);
 
                     Uri uri = Uri.parse(faceList.get(position).getStudentFaceUri());
+
                     ((ImageView)convertView.findViewById(R.id.image_face)).setImageURI(uri);
 
                     return convertView;

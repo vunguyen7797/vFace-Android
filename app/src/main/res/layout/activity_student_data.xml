@@ -8,134 +8,171 @@
     android:background="#35363B"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tvTitleStudent"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/advent_pro_bold"
-        android:text="STUDENT PROFILE"
-        android:textSize="25dp"
-        android:layout_marginTop="40dp"
-        android:textColor="#ffffff"
-        android:gravity="center"/>
+        android:orientation="horizontal"
+        android:layout_marginTop="40dp">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="20dp">
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/outlinedTextStudentId"
-            style="@style/MyTextInputLayout2"
-            android:layout_width="300dp"
-            android:layout_height="match_parent"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="start|center"
+            android:onClick="btnBackClick"
+            android:src="@drawable/back_button"
             android:layout_marginStart="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginRight="20dp"
-            android:hint="STUDENT ID">
+            android:contentDescription="@string/descriptionBack" />
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="@string/title_student_profile"
+            android:textSize="20sp"
+            android:layout_gravity="center"
+            android:textColor="#ffffff"
+            android:gravity="center"
+            android:layout_marginEnd="50dp"/>
+    </LinearLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etStudentId"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:textColor="#ffffff"
-                android:maxLength="8"/>
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-
-    </RelativeLayout>
-
-    <RelativeLayout
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="20dp"
-        android:layout_marginBottom="30dp">
+        android:layout_marginBottom="20dp"
+        app:cardCornerRadius="10dp"
+        app:cardBackgroundColor="@color/common_google_signin_btn_text_dark_disabled"
+        app:cardElevation="0dp">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/outlinedTextStudentName"
-            android:layout_width="300dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            style="@style/MyTextInputLayout2"
-            android:hint="STUDENT NAME"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-
-            android:layout_marginStart="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginEnd="20dp">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etStudentName"
+            android:orientation="vertical">
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:textColor="#ffffff" />
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/outlinedTextStudentId"
+                    style="@style/MyTextInputLayout2"
+                    android:layout_width="300dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:hint="@string/hint_student_id">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etStudentId"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textColor="#ffffff"
+                        android:maxLength="8"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </RelativeLayout>
 
-        </com.google.android.material.textfield.TextInputLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp">
 
-    </RelativeLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/outlinedTextStudentName"
+                    android:layout_width="300dp"
+                    android:layout_height="match_parent"
+                    style="@style/MyTextInputLayout2"
+                    android:hint="@string/hint_student_name"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp">
 
-    <TextView
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etStudentName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textColor="#ffffff" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </RelativeLayout>
+    </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/CVFace"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="STUDENT FACES: "
-        android:textSize="15dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="20dp"
         android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="20dp"
-        android:textColor="#ffffff"/>
+        app:cardBackgroundColor="@color/common_google_signin_btn_text_dark_disabled"
+        app:cardCornerRadius="15dp"
+        style="@style/Widget.MaterialComponents.CardView"
+        app:cardElevation="0dp">
 
-    <GridView
-        android:id="@+id/gvStudentFace"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:numColumns="3"
-        android:gravity="center" />
-
-    <LinearLayout
-        android:id="@+id/btnButtonBarStudentProfile"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp">
-
-        <Button
-            android:id="@+id/btnAddFace"
-            android:layout_width="0dp"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="ADD FACE"
-            android:onClick="btnAddFace"
-            android:textColor="#ffffff"
-            android:background="@drawable/button"
-            android:layout_marginRight="20dp"/>
+            android:orientation="vertical">
+            <GridView
+                android:id="@+id/gvStudentFace"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="80dp"
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+                android:numColumns="3"
+                android:columnWidth="40dp"
+                android:verticalSpacing="10dp"
+                android:horizontalSpacing="10dp"
+                android:gravity="center" />
 
-        <Button
-            android:id="@+id/btnDoneProfile"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="SAVE"
-            android:textColor="#ffffff"
-            android:onClick = "btnDoneClick"
-            android:background="@drawable/button" />
+            <LinearLayout
+                android:id="@+id/btnButtonBarStudentProfile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="20dp">
 
-    </LinearLayout>
+                <Button
+                    android:id="@+id/btnAddFace"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/btn_add_face"
+                    android:onClick="btnAddFace"
+                    android:textColor="#ffffff"
+                    android:background="@drawable/button"
+                    android:layout_marginRight="20dp"/>
+
+                <Button
+                    android:id="@+id/btnDoneProfile"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/btn_save"
+                    android:textColor="#ffffff"
+                    android:onClick = "btnDoneClick"
+                    android:background="@drawable/button" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>

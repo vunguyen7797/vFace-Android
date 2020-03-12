@@ -199,15 +199,11 @@ public class MyDatabaseHelperStudent extends SQLiteOpenHelper
     public void resetStudentFlag(List<Student> studentList)
     {
         Log.i("EXECUTE", "MyDatabaseHelperStudent.getResetFlag ...");
-        for (Student student: studentList)
+        Log.i("EXECUTE", "SIZE: " + Integer.toString(studentList.size()));
+        for (int i = 0; i < studentList.size(); i++ )
         {
-            SQLiteDatabase db = this.getWritableDatabase();
-            ContentValues values = new ContentValues();
-            values.put(COLUMN_STUDENT_IDENTIFY_FLAG, "NO");
-
-            // updating row
-            db.update(TABLE_STUDENT, values, COLUMN_STUDENT_ID + " = ?",
-                    new String[]{String.valueOf(student.getStudentId())});
+            studentList.get(i).setStudentIdentifyFlag("NO");
+            updateStudent(studentList.get(i));
         }
     }
 

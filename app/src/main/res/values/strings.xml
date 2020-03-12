@@ -21,23 +21,64 @@
     <string name="done">Done</string>
 
     <string name="course_available">COURSES MANAGER</string>
-    <string name="courses_tip">Long tap to open actions menu.</string>
+    <string name="courses_tip">Long tap on a course to open actions menu.</string>
     <string name="add_courses">ADD COURSE</string>
 
     <!-- Add Edit Course activities -->
-    <string name="Information">Add courses you are teaching to manage the students.</string>
+    <string name="Information">Add a course you are teaching to manage the students.</string>
     <string name="title">ADD OR EDIT COURSE</string>
     <string name="save">SAVE</string>
     <string name="cancel">CANCEL</string>
-    <string name="add_students">ADD A STUDENT</string>
+    <string name="add_students">ADD STUDENT</string>
+    <string name="courseId">COURSE ID</string>
+    <string name="courseName">COURSE NAME</string>
+    <string name="descriptionBack">Going Back</string>
+
+    <!-- Courses Student Menu activities -->
+    <string name="menuAddCourse">COURSES MANAGER</string>
+    <string name="menuAddStudent">STUDENTS MANAGER</string>
+    <string name="descriptionCourseStudentBack">Going Back</string>
 
     <!-- Students management activities -->
     <string name="students_available">STUDENTS MANAGER</string>
+    <string name="title_student_profile">STUDENT DATABASE</string>
+    <string name="hint_student_id">STUDENT ID</string>
+    <string name="hint_student_name">STUDENT NAME</string>
+    <string name="btn_add_face">ADD FACE</string>
+    <string name="btn_save">SAVE</string>
 
     <!-- Warning Message -->
     <string name="user_provided_person_group_name">Course name</string>
     <string name="user_provided_person_group_description_data">User data</string>
     <string name="user_provided_person_name">Student name</string>
     <string name="user_provided_description_data">User data</string>
+
+    <!-- Dashboard -->
+    <string name="titleDashboard">MY DASHBOARD</string>
+    <string name="sloganDashboard">Welcome to VFace!</string>
+    <string name="groupCheck">Group-check</string>
+    <string name="selfCheck">Self-check</string>
+    <string name="attendance">Attendance</string>
+    <string name="studentCourse">Data Managers</string>
+    <string name="setting">Settings</string>
+    <string name="about">About</string>
+
+    <!-- Group check -->
+    <string name="titleGroupCheck">GROUP CHECK</string>
+    <string name="hintChooseCourse">CHOOSE A COURSE</string>
+    <string name="hintChooseList">LIST OF STUDENTS</string>
+    <string name="takePhoto">TAKE A PHOTO</string>
+    <string name="pickImage">FROM GALLERY</string>
+    <string name="title_activity_group_check_with_navigation">GroupCheckWithNavigation</string>
+    <string name="title_homeCheck">GROUP CHECK</string>
+
+    <string name="title_inclass">IN-CLASS</string>
+    <string name="title_absent">ABSENT</string>
+    <string name="title_unknown">UNKNOWN</string>
+
+    <!-- Attendance -->
+    <string name="title_attendance">ATTENDANCE MANAGER</string>
+    <string name="title_date">DATE OF CLASS</string>
+    <string name="icon_description">Pick Date</string>
 
 </resources>

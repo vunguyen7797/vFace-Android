@@ -11,8 +11,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,6 +26,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -79,6 +81,9 @@ public class GroupCheckActivity extends AppCompatActivity
     Bitmap bitmapImage; // face image thumbnail
     TextView tvDate;
     ProgressDialog progressDialog;
+    AutoCompleteTextView courseMenu;
+    Button btnTakePhoto;
+    Button btnPickImage;
 
     // Request codes
     private static final int REQUEST_IMAGE_CAPTURE = 101;
@@ -97,6 +102,7 @@ public class GroupCheckActivity extends AppCompatActivity
     boolean identifyTaskDone = false;
     String courseServerId;
     String account;
+    Course course;
 
     // Data Adapter
     ArrayAdapter<Course> spinnerArrayAdapter;
@@ -130,8 +136,7 @@ public class GroupCheckActivity extends AppCompatActivity
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_group_check);
 
-        // get account to identify database
-        account = getIntent().getStringExtra("ACCOUNT");
+
 
         // initialize all data lists
         identifyResultsList = new ArrayList<>();
@@ -144,6 +149,10 @@ public class GroupCheckActivity extends AppCompatActivity
         courseList = new ArrayList<>();
         studentIdentityList = new ArrayList<>();
         identifyUnknownList = new ArrayList<>();
+
+        // initialize buttons
+        btnTakePhoto = findViewById(R.id.btnTakePhoto);
+        btnPickImage = findViewById(R.id.btnGallery);
 
         // set display date
         tvDate = findViewById(R.id.tvDate);
@@ -158,18 +167,20 @@ public class GroupCheckActivity extends AppCompatActivity
         this.courseList = db_course.getAllCourses(account);
 
         // display data on spinners
-        displayCourseSpinner(courseList);
+        displayCourseMenu(courseList);
         displayStudentListOptionSpinner();
 
         ivClass = findViewById(R.id.ivClassImage);
         lvIdentifiedFaces = findViewById(R.id.lvIdentifiedFaces);
 
-        // get all students in the course
-        studentList = db_student.getStudentWithCourse(courseServerId);
-
         // initialize the progress dialog
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("V.FACE");
+    }
+
+    public void btnBackClick(View view)
+    {
+        onBackPressed();
     }
 
     // This method is used to display student list options on spinner
@@ -242,10 +253,10 @@ public class GroupCheckActivity extends AppCompatActivity
 
                     if (identifyTaskDone)
                     {
-                        Course course = (Course) spinCourses.getSelectedItem(); // get selected course
                         // get all absent student who has identify flag is NO in database
-                        absenceStudentList = db_student.getAbsenceStudent(course.getCourseServerId());
-                        if (absenceStudentList.size() != 0)
+                        absenceStudentList = db_student.getAbsenceStudent(courseServerId);
+
+                        if (absenceStudentList.size() > 0)
                         {
                             try
                             {
@@ -272,14 +283,16 @@ public class GroupCheckActivity extends AppCompatActivity
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+            public void onNothingSelected(AdapterView<?> parent)
+            {
 
             }
         });
     }
 
     // This method is used to get absent students to store in a list for displaying
-    private void getAbsentStudentList(Course course) throws IOException {
+    private void getAbsentStudentList(Course course) throws IOException
+    {
         for (int i = 0; i < absenceStudentList.size(); i++)
         {
             Bitmap faceThumbnail;
@@ -287,7 +300,7 @@ public class GroupCheckActivity extends AppCompatActivity
             // Student information
             String studentIdNumber = absenceStudentList.get(i).getStudentIdNumber();
             String studentName = absenceStudentList.get(i).getStudentName();
-            String identity = "Student: " + studentName.toUpperCase() + "\n"
+            String identity = studentName + "\n"
                     + "Student ID: " + studentIdNumber + "\n"
                     + "Course: " + course;
 
@@ -300,8 +313,9 @@ public class GroupCheckActivity extends AppCompatActivity
             {
                 faceThumbnail = ImageEditor.handlePhotoAndRotationBitmap(getApplicationContext(),Uri.parse(faceList.get(0)
                         .getStudentFaceUri()));
-            } else
-                faceThumbnail = null; // no face is found
+            }
+            else
+                faceThumbnail = null;
 
             // add pair of a thumbnail and student information to the display list
             Pair<Bitmap, String> pair = new Pair<Bitmap, String>(faceThumbnail, identity);
@@ -311,37 +325,28 @@ public class GroupCheckActivity extends AppCompatActivity
 
     }
 
-    // This method is used to display course list on spinner
-    private void displayCourseSpinner(List<Course> courseList)
+    // This method is used to display course list on menu
+    private void displayCourseMenu(List<Course> courseList)
     {
-        spinCourses = findViewById(R.id.spinClass);
-        spinnerArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, courseList);
-        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_item);
-        spinCourses.setAdapter(spinnerArrayAdapter);
+        // initialize course menu
+        courseMenu = findViewById(R.id.filled_exposed_dropdown);
+        ArrayAdapter<Course> tvArrayAdapter = new ArrayAdapter<Course>(this, R.layout.dropdown_menu_popup_item, courseList);
+        courseMenu.setAdapter(tvArrayAdapter);
 
         if (courseList.size() > 0)
         {
-            // set the default selection of spinner as the first course in the database
-            spinCourses.setSelection(0);
-            Course course = (Course) spinCourses.getItemAtPosition(0);
-            courseServerId = course.getCourseServerId();
-
-            // set event when other items on spinner get selected
-            spinCourses.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+            courseMenu.setOnItemClickListener((parent, view, position, id) ->
             {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-                {
-                    Course course = (Course) parent.getItemAtPosition(position);
-                    courseServerId = course.getCourseServerId();    // get course id on server
-                    Log.i("EXECUTE", "Course Selected: " + courseServerId);
-                }
+                course = (Course) parent.getItemAtPosition(position);
+                courseServerId = course.getCourseServerId();    // get course id on server
 
-                @Override
-                public void onNothingSelected(AdapterView<?> parent)
-                {
+                btnTakePhoto.setEnabled(true);
 
-                }
+                btnPickImage.setEnabled(true);
+                // get all students in the course
+                studentList = db_student.getStudentWithCourse(courseServerId);
+                Log.i("EXECUTE", "Course Selected: " + courseServerId);
+
             });
         }
         else
@@ -536,6 +541,7 @@ public class GroupCheckActivity extends AppCompatActivity
         }
     }
 
+
     /**
      * This class is to identify faces after the detection process, running in background.
      */
@@ -624,12 +630,8 @@ public class GroupCheckActivity extends AppCompatActivity
                         {
                             // Get information for each identified student
                             String studentIdNumber = student.getStudentIdNumber();
-                            String course = spinCourses.getSelectedItem().toString();
                             String studentName = student.getStudentName();
-                            String identity = "Student: " + studentName.toUpperCase() + "\n"
-                                    + "Student ID: " + studentIdNumber + "\n"
-                                    + "Course: " + course +"\n"
-                                    + "Confidence: " + confidence;
+                            String identity = studentName+ "\n" + confidence;
 
                             // set flag YES to indicate that this student is identified successfully
                             student.setStudentIdentifyFlag("YES");
@@ -645,7 +647,7 @@ public class GroupCheckActivity extends AppCompatActivity
                                     String comparedConfidence = detectedDetailsList
                                             .get(i).substring(length - 4, length);
                                     // if there is a duplicate name
-                                    if (detectedDetailsList.get(i).contains(studentName.toUpperCase()))
+                                    if (detectedDetailsList.get(i).contains(studentName))
                                     {
                                         // available confidence < this student confidence
                                         // means that the available student was identified wrong
@@ -812,6 +814,7 @@ public class GroupCheckActivity extends AppCompatActivity
         Intent intent = new Intent(GroupCheckActivity.this, DashBoardActivity.class);
         intent.putExtra("ACCOUNT", account);
         startActivity(intent);
+        finish();
     }
 
     // display the progress dialog when a task is processing
@@ -846,9 +849,22 @@ public class GroupCheckActivity extends AppCompatActivity
 
             if (studentIdentityList != null)
             {
+                Log.i("EXECUTE", Integer.toString(studentIdentityList.size()));
                 for (Pair<Bitmap, String> pair : studentIdentityList)
                 {
+
+                    if (pair.first != null)
+                        faceThumbnails.add(ImageEditor.getRoundedCornerThumbnails(pair.first, 20));
+                    else
                         faceThumbnails.add(pair.first);
+
+                    if (!pair.second.equalsIgnoreCase("UNKNOWN STUDENT"))
+                    {
+                        int index = pair.second.indexOf('\n');
+                        studentInfo.add(pair.second.substring(0, index));
+                        Log.i("EXECUTE", pair.second.substring(0, index));
+                    }
+                    else
                         studentInfo.add(pair.second);
                 }
             }

@@ -56,6 +56,6 @@ public class WelcomeScreenActivity extends AppCompatActivity
                 startActivity(intent);
                 finish();
             }
-        }, 2000);
+        }, 500);
     }
 }

@@ -12,16 +12,34 @@
     tools:context=".ui.GroupCheckActivity">
 
 
-    <TextView
-        android:id="@+id/tvTitle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:textStyle="bold"
-        android:text="GROUP CHECK"
-        android:textAlignment="center"
-        android:textColor="#ffffff"
-        android:textSize="25dp" />
+        android:orientation="horizontal"
+        android:layout_marginTop="40dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="start|center"
+            android:onClick="btnBackClick"
+            android:src="@drawable/back_button"
+            android:layout_marginStart="20dp"
+            android:contentDescription="@string/descriptionBack" />
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="@string/titleGroupCheck"
+            android:textSize="20sp"
+            android:layout_gravity="center"
+            android:textColor="#ffffff"
+            android:gravity="center"
+            android:layout_marginEnd="50dp"/>
+    </LinearLayout>
+
 
     <TextView
         android:id="@+id/tvDate"
@@ -31,100 +49,149 @@
         android:layout_marginTop="5dp"
         android:textAlignment="center"
         android:textColor="#ffffff"
-        android:textSize="20dp"/>
+        android:textSize="15sp"/>
 
-    <ImageView
-        android:id="@+id/ivTest"
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:cardCornerRadius="10dp"
+        app:cardBackgroundColor="@color/common_google_signin_btn_text_dark_disabled"
+        app:cardElevation="0dp"
         android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        />
-
-    <ImageView
-        android:id="@+id/ivClassImage"
-        android:layout_width="330dp"
-        android:layout_height="200dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:src="@drawable/teacher1" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginTop="10dp">
-
-        <TextView
-            android:id="@+id/tvClass"
-            android:layout_width="79dp"
-            android:layout_height="49dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="1dp"
-            android:textStyle="bold"
-            android:text="COURSE:"
-            android:textColor="#ffffff"
-            android:gravity="left|center"
-            android:textSize="15dp" />
-
-        <Spinner
-            android:id="@+id/spinClass"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="20dp"
-            android:gravity="center"
-            android:textAlignment="center"
-            android:popupBackground="#35363B"
-            android:dropDownWidth="250dp"
-            />
-    </RelativeLayout>
-
-    <Button
-        android:id="@+id/btnTakePhoto"
-        android:layout_width="300dp"
-        android:layout_height="50dp"
-        android:text="Take A Photo"
-        android:layout_gravity="center"
-        android:background="@drawable/button"
-        android:textColor="#ffffff"
-        android:layout_marginTop="5dp"
-        android:onClick="btnTakePhoto"/>
-    <Button
-        android:id="@+id/btnGallery"
-        android:layout_width="300dp"
-        android:layout_height="50dp"
-        android:text="Choose from Gallery"
-        android:layout_gravity="center"
-        android:background="@drawable/button"
-        android:textColor="#ffffff"
-        android:layout_marginTop="10dp"
-        android:onClick="btnPickImage"/>
-
-
-    <Spinner
-        android:id="@+id/spinStudentList"
-        android:layout_width="wrap_content"
-        android:layout_height="49dp"
-        android:layout_alignParentRight="true"
-        android:layout_marginStart="3dp"
-        android:gravity="center"
-        android:textAlignment="center"
-        android:popupBackground="#35363B"
-        android:dropDownWidth="180dp"
-        />
-
-    <ListView
-        android:id="@+id/lvIdentifiedFaces"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
         android:layout_marginStart="20dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
         android:layout_marginEnd="20dp"
-        android:drawSelectorOnTop="false"/>
+        android:layout_marginTop="20dp">
+        <ImageView
+            android:id="@+id/ivClassImage"
+            android:layout_width="330dp"
+            android:layout_height="100dp"
+            android:src="@drawable/teacher1"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_gravity="center"
+            />
+    </com.google.android.material.card.MaterialCardView>
 
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="10dp"
+        app:cardBackgroundColor="@color/common_google_signin_btn_text_dark_disabled"
+        app:cardElevation="0dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:orientation="vertical">
 
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/MyTextInputLayout"
+                android:layout_width="325dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:hint="@string/hintChooseCourse"
+                android:textAlignment="center">
+
+                <AutoCompleteTextView
+                    android:id="@+id/filled_exposed_dropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:textStyle="bold"
+                    android:textColor="#ffffff" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal"
+                android:gravity="center">
+                <Button
+                    android:id="@+id/btnTakePhoto"
+                    android:layout_width="142.5dp"
+                    android:layout_height="50dp"
+                    android:text="@string/takePhoto"
+                    android:layout_gravity="center"
+                    android:background="@drawable/button"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:enabled="false"
+                    android:onClick="btnTakePhoto"/>
+                <Button
+                    android:id="@+id/btnGallery"
+                    android:layout_width="142.5dp"
+                    android:layout_height="50dp"
+                    android:textSize="12sp"
+                    android:text="@string/pickImage"
+                    android:layout_gravity="center"
+                    android:background="@drawable/button"
+                    android:textColor="#ffffff"
+                    android:layout_marginTop="10dp"
+                    android:enabled="false"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginStart="5dp"
+                    android:onClick="btnPickImage"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:cardCornerRadius="10dp"
+        app:cardBackgroundColor="@color/common_google_signin_btn_text_dark_disabled"
+        app:cardElevation="0dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Spinner
+                android:id="@+id/spinStudentList"
+                android:layout_width="match_parent"
+                android:layout_height="49dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:gravity="center"
+                android:textAlignment="center"
+                android:spinnerMode="dropdown"
+                android:dropDownVerticalOffset="40dp"
+                android:popupBackground="#35363B"
+                android:dropDownWidth="match_parent"
+                />
+
+            <ListView
+                android:id="@+id/lvIdentifiedFaces"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="15dp"
+                android:drawSelectorOnTop="false"
+                android:divider="#ffffff"
+                android:dividerHeight="0.5dp"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>

@@ -4,6 +4,7 @@
 package com.vunguyen.vface.ui;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Window;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.vunguyen.vface.R;
 
@@ -23,6 +25,7 @@ public class DashBoardActivity extends AppCompatActivity
 {
     TextView tvLogOut;
     CardView cvGroupCheck;
+    CardView cvAttendance;
     CardView cvAddStudentCourse;
     String account;
 
@@ -72,6 +75,12 @@ public class DashBoardActivity extends AppCompatActivity
 
         });
 
+        cvAttendance = findViewById(R.id.cvAttendance);
+        cvAttendance.setOnClickListener(v -> {
+            Intent intent = new Intent(DashBoardActivity.this, AttendanceActivity.class);
+            goToAFeature(intent);
+        });
+
     }
 
     // This method is used to go to other activities
@@ -79,5 +88,22 @@ public class DashBoardActivity extends AppCompatActivity
     {
         intent.putExtra("ACCOUNT", account);
         startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("VFACE")
+                .setMessage("Do you want to exit?")
+                .setNegativeButton("No",null)
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_HOME);
+                    startActivity(intent);
+                    int pid = android.os.Process.myPid();
+                    android.os.Process.killProcess(pid);
+                })
+                .show();
     }
 }

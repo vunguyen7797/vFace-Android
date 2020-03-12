@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.vunguyen.vface.bean.Course;
+import com.vunguyen.vface.bean.Student;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -162,5 +163,47 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
         db.delete(TABLE_COURSE, COLUMN_COURSE_ID + " = ?",
                 new String[] { String.valueOf(course.getCourseId()) });
         db.close();
+    }
+
+    // return a course object from its course server ID
+    public Course getACourseWithId(String courseServerId, String account)
+    {
+        Log.i("EXECUTE", "MyDatabaseHelperCourse.getCourseWithID ...");
+
+        String selectQuery = "SELECT * FROM " + TABLE_COURSE;
+
+        Course course = new Course();
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                Course course_tmp = new Course();
+                course.setCourseId(Integer.parseInt(cursor.getString(0)));
+                course.setCourseIdNumber(cursor.getString(1));
+                course.setCourseName(cursor.getString(2));
+                course.setCourseServerId(cursor.getString(3));
+                course.setCourseAccount(cursor.getString(4));
+
+                // student server ID matching from database and input
+                if ((cursor.getString(4)).equalsIgnoreCase(account)
+                        && cursor.getString(1).equalsIgnoreCase(courseServerId))
+                {
+                    course = course_tmp;
+                }
+                else
+                    Log.i("EXECUTE", "Error: Course server IDs do not mach");
+            } while (cursor.moveToNext());
+        }
+        else
+        {
+            Log.i("EXECUTE", "Response: No course is found.");
+        }
+
+        // return course object
+        return course;
     }
 }

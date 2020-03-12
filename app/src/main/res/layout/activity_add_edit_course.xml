@@ -8,131 +8,155 @@
     android:background="#35363B"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tvTitle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:text="@string/title"
-        android:textSize="25dp"
-        android:layout_marginTop="40dp"
-        android:textColor="#ffffff"
-        android:gravity="center"/>
+        android:orientation="horizontal"
+        android:layout_marginTop="40dp">
 
-    <androidx.cardview.widget.CardView
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="start|center"
+            android:onClick="btnBackClick"
+            android:src="@drawable/back_button"
+            android:layout_marginStart="20dp"
+            android:contentDescription="@string/descriptionBack" />
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="@string/title"
+            android:textSize="20sp"
+            android:layout_gravity="center"
+            android:textColor="#ffffff"
+            android:gravity="center"
+            android:layout_marginEnd="50dp"/>
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="20dp"
-        app:cardCornerRadius="20dp">
+        app:cardCornerRadius="10dp"
+        app:cardBackgroundColor="@color/common_google_signin_btn_text_dark_disabled"
+        app:cardElevation="0dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/Information"
-            android:textSize="20dp"
-            android:fontFamily="@font/assistant_bold"
+            android:textSize="15sp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"/>
+            android:layout_marginBottom="20dp"
+            android:textColor="#ffffff"/>
 
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="20dp">
 
-        <TextView
-            android:id="@+id/tvCourseID"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Course ID:"
-            android:textColor="#ffffff"
-            android:fontFamily="@font/assistant_bold"
-            android:textSize="20dp"
-            android:gravity="center"
-            android:layout_marginRight="42dp"/>
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etCourseID"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_toRightOf="@id/tvCourseID"
-            android:fontFamily="@font/assistant_light"
-            android:textSize="20dp"
-            android:textColor="#ffffff"
-            android:textColorHint="#ffffff"
-            android:hint="Enter ID number"
-            android:gravity="left|center"/>
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="20dp">
-
-        <TextView
-            android:id="@+id/tvCourseName"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Course Name:"
-            android:textColor="#ffffff"
-            android:fontFamily="@font/assistant_bold"
-            android:textSize="20dp"
-            android:gravity="center"
-            android:layout_marginRight="10dp"/>
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etCourseName"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_toRightOf="@id/tvCourseName"
-            android:fontFamily="@font/assistant_light"
-            android:textSize="20dp"
-            android:textColor="#ffffff"
-            android:textColorHint="#ffffff"
-            android:hint="Enter course name"
-            android:gravity="left|center"/>
-    </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/btnButtonBarAddEdit"
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp">
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        app:cardCornerRadius="10dp"
+        app:cardBackgroundColor="@color/common_google_signin_btn_text_dark_disabled"
+        app:cardElevation="0dp">
 
-        <Button
-            android:id="@+id/btnSave"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/save"
-            android:onClick="btnSaveClick"
-            android:textColor="#ffffff"
-            android:background="@drawable/button"
-            android:layout_marginRight="20dp"/>
+            android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="20dp">
 
-        <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/cancel"
-            android:textColor="#ffffff"
-            android:background="@drawable/button" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/outlinedTextStudentId"
+                style="@style/MyTextInputLayout2"
+                android:layout_width="300dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true"
+                android:hint="@string/courseId">
 
-    </LinearLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCourseID"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textColor="#ffffff" />
 
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/outlinedTextStudentName"
+                android:layout_width="300dp"
+                android:layout_height="match_parent"
+                style="@style/MyTextInputLayout2"
+                android:hint="@string/courseName"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCourseName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textColor="#ffffff" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/btnButtonBarAddEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp">
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/save"
+                android:onClick="btnSaveClick"
+                android:textColor="#ffffff"
+                android:background="@drawable/button"
+                android:layout_marginEnd="20dp"/>
+
+            <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/cancel"
+                android:textColor="#ffffff"
+                android:background="@drawable/button" />
+
+        </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>

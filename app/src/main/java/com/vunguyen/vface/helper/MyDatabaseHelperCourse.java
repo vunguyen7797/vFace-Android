@@ -97,7 +97,8 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        if (cursor.moveToFirst()) {
+        if (cursor.moveToFirst())
+        {
             do
             {
                 Course course = new Course();
@@ -106,7 +107,6 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
                 course.setCourseName(cursor.getString(2));
                 course.setCourseServerId(cursor.getString(3));
                 course.setCourseAccount(cursor.getString(4));
-
                 if ((cursor.getString(4)).equalsIgnoreCase(account))
                 {
                     // Add to the list

@@ -84,6 +84,7 @@
                 android:hint="@string/title_date"
                 app:endIconMode="custom"
                 app:endIconDrawable="@drawable/outline_today_24"
+                android:enabled="false"
                 app:endIconTint="@color/colorPrimary"
                 app:endIconContentDescription="@string/icon_description"
                 android:layout_marginTop="10dp">
@@ -99,6 +100,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/outlineStudentList"
                 style="@style/MyTextInputLayout"
                 android:layout_width="325dp"
                 android:layout_height="50dp"
@@ -132,10 +134,15 @@
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp">
 
-        <ListView
-            android:id="@+id/lvIdentifiedFaces"
+        <ImageView
+            android:id="@+id/ivAttendance"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/attendance"/>
+        <ListView
+            android:id="@+id/lvAttendance"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:layout_marginStart="15dp"
             android:layout_marginEnd="15dp"

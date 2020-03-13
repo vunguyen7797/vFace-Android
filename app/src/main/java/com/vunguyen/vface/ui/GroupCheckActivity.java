@@ -49,6 +49,7 @@ import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
+import com.vunguyen.vface.helper.MyDatabaseHelperDate;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 
@@ -94,6 +95,7 @@ public class GroupCheckActivity extends AppCompatActivity
     MyDatabaseHelperStudent db_student;
     MyDatabaseHelperFace db_face;
     MyDatabaseHelperCourse db_course;
+    MyDatabaseHelperDate db_date;
 
     // Data
     Uri uriImage;
@@ -105,7 +107,6 @@ public class GroupCheckActivity extends AppCompatActivity
     Course course;
 
     // Data Adapter
-    ArrayAdapter<Course> spinnerArrayAdapter;
     ArrayAdapter<String> spinnerListOptionArrayAdapter;
     FaceListViewAdapter listViewAdapter;
 
@@ -114,6 +115,7 @@ public class GroupCheckActivity extends AppCompatActivity
     List<Student> studentList;          // store list of students objects
     List<Student> absenceStudentList;   // store list of absent students objects
     List<Face> facesList;               // store face objects
+    List<Date> dateList;                // store date objects
 
     List<IdentifyResult[]> identifyResultsList; // store list of identify results after identify tasks
 
@@ -136,7 +138,8 @@ public class GroupCheckActivity extends AppCompatActivity
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_group_check);
 
-
+        // Get email account
+        account = getIntent().getStringExtra("ACCOUNT");
 
         // initialize all data lists
         identifyResultsList = new ArrayList<>();
@@ -162,6 +165,8 @@ public class GroupCheckActivity extends AppCompatActivity
         db_course = new MyDatabaseHelperCourse(this);
         db_face = new MyDatabaseHelperFace(this);
         db_student = new MyDatabaseHelperStudent(this);
+        db_date = new MyDatabaseHelperDate(this);
+
 
         // get all courses available
         this.courseList = db_course.getAllCourses(account);
@@ -667,6 +672,15 @@ public class GroupCheckActivity extends AppCompatActivity
                                 }
                             }
 
+                            if (!identity.equalsIgnoreCase("UNKNOWN STUDENT"))
+                            {
+                                Log.i("EXECUTE", "ADD DATE");
+                                String date_string = tvDate.getText().toString();
+                                com.vunguyen.vface.bean.Date date = new com.vunguyen.vface.bean.Date(courseServerId, studentServerId, date_string, student.getStudentIdentifyFlag());
+                                db_date.addDate(date);
+                                Log.i("EXECUTE", "ADD DATE" + date);
+                            }
+
                             Log.i("EXECUTE", identity + "\n" + student.getStudentIdentifyFlag());
                             db_student.updateStudent(student);  // update student flag
                             detectedDetailsList.add(identity);  // add new student identity into list
@@ -696,6 +710,16 @@ public class GroupCheckActivity extends AppCompatActivity
                             studentIdentity.add(pair);
                         }
                         i++;
+                    }
+
+                    List<Student> absentList = db_student.getAbsenceStudent(courseServerId);
+                    for (Student student : absentList)
+                    {
+                        Log.i("EXECUTE", "ADD DATE FOR ABSENT STUDENTS");
+                        String date_string = tvDate.getText().toString();
+                        com.vunguyen.vface.bean.Date date = new com.vunguyen.vface.bean.Date(courseServerId, student.getStudentServerId()
+                                , date_string, student.getStudentIdentifyFlag());
+                        db_date.addDate(date);
                     }
 
                     identifyTaskDone = true; // identify process is done for all faces

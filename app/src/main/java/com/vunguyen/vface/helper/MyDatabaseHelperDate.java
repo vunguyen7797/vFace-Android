@@ -208,4 +208,65 @@ public class MyDatabaseHelperDate extends SQLiteOpenHelper
         // return total absences
         return count;
     }
+
+    // Remove a date of a student
+    public void deleteDatesWithStudent(String studentServerId, String courseServerId)
+    {
+        Log.i("EXECUTE", "MyDatabaseHelperFace.deleteDate ...");
+
+        String selectQuery = "SELECT * FROM " + TABLE_DATE;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                if (cursor.getString(1).equalsIgnoreCase(studentServerId)
+                        && cursor.getString(2).equalsIgnoreCase(courseServerId))
+                {
+                    db.delete(TABLE_DATE, COLUMN_DATE_ID + " = ?",
+                            new String[] { String.valueOf(cursor.getInt(0)) });
+                }
+                else
+                    Log.i ("EXECUTE", "Error: Student server Ids do not match.");
+            } while (cursor.moveToNext());
+        }
+        else
+        {
+            Log.i("EXECUTE", "Response: No dates are found for this student.");
+        }
+        db.close();
+    }
+
+    public void deleteADate(String studentServerId, String courseServerId, String date)
+    {
+        String selectQuery = "SELECT * FROM " + TABLE_DATE;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                if (cursor.getString(1).equalsIgnoreCase(studentServerId)
+                        && cursor.getString(2).equalsIgnoreCase(courseServerId)
+                        && cursor.getString(3).equalsIgnoreCase(date))
+                {
+                    db.delete(TABLE_DATE, COLUMN_DATE_ID + " = ?",
+                            new String[] { String.valueOf(cursor.getInt(0)) });
+                }
+                else
+                    Log.i ("EXECUTE", "Error: Student server Ids do not match.");
+            } while (cursor.moveToNext());
+        }
+        else
+        {
+            Log.i("EXECUTE", "Response: No dates are found for this student.");
+        }
+        db.close();
+    }
+
 }

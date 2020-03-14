@@ -85,6 +85,7 @@ public class GroupCheckActivity extends AppCompatActivity
     AutoCompleteTextView courseMenu;
     Button btnTakePhoto;
     Button btnPickImage;
+    ImageView ivWaitingIdentify;
 
     // Request codes
     private static final int REQUEST_IMAGE_CAPTURE = 101;
@@ -105,6 +106,7 @@ public class GroupCheckActivity extends AppCompatActivity
     String courseServerId;
     String account;
     Course course;
+    String date;
 
     // Data Adapter
     ArrayAdapter<String> spinnerListOptionArrayAdapter;
@@ -156,10 +158,12 @@ public class GroupCheckActivity extends AppCompatActivity
         // initialize buttons
         btnTakePhoto = findViewById(R.id.btnTakePhoto);
         btnPickImage = findViewById(R.id.btnGallery);
+        ivWaitingIdentify = findViewById(R.id.ivWaitingIdentify);
 
         // set display date
         tvDate = findViewById(R.id.tvDate);
         setDate(tvDate);
+        date = tvDate.getText().toString();
 
         // open the databases
         db_course = new MyDatabaseHelperCourse(this);
@@ -170,6 +174,7 @@ public class GroupCheckActivity extends AppCompatActivity
 
         // get all courses available
         this.courseList = db_course.getAllCourses(account);
+        courseMenu = findViewById(R.id.filled_exposed_dropdown);
 
         // display data on spinners
         displayCourseMenu(courseList);
@@ -334,7 +339,6 @@ public class GroupCheckActivity extends AppCompatActivity
     private void displayCourseMenu(List<Course> courseList)
     {
         // initialize course menu
-        courseMenu = findViewById(R.id.filled_exposed_dropdown);
         ArrayAdapter<Course> tvArrayAdapter = new ArrayAdapter<Course>(this, R.layout.dropdown_menu_popup_item, courseList);
         courseMenu.setAdapter(tvArrayAdapter);
 
@@ -351,7 +355,6 @@ public class GroupCheckActivity extends AppCompatActivity
                 // get all students in the course
                 studentList = db_student.getStudentWithCourse(courseServerId);
                 Log.i("EXECUTE", "Course Selected: " + courseServerId);
-
             });
         }
         else
@@ -364,12 +367,18 @@ public class GroupCheckActivity extends AppCompatActivity
     // This method is used to reset all the lists or databases into the initial status for a new task
     private void resetAllData()
     {
+        ivWaitingIdentify.setVisibility(View.GONE);
         // reset data lists
         detectedDetailsList.clear();
         detectedFacesList.clear();
         identifyUnknownList.clear();
         absenceStudentDisplayList.clear();
         // reset student identify flag to "NO" value
+        if (tvDate.getText().toString().equalsIgnoreCase(date) && courseMenu.getText().toString().equalsIgnoreCase(course.getCourseName()))
+        {
+            for(Student student : studentList)
+                db_date.deleteADate(student.getStudentServerId(), student.getCourseServerId(), date);
+        }
         db_student.resetStudentFlag(studentList);
         // set default selection for spinner
         spinStudentList.setSelection(0);
@@ -742,6 +751,8 @@ public class GroupCheckActivity extends AppCompatActivity
         {
             progressDialog.dismiss();
             listViewAdapter = new FaceListViewAdapter(studentIdentityList);
+            if(studentIdentityList.size() == 0)
+                ivWaitingIdentify.setVisibility(View.VISIBLE);
             ListView listView = findViewById(R.id.lvIdentifiedFaces);
             listView.setAdapter(listViewAdapter);
         }

@@ -30,6 +30,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
@@ -47,10 +49,9 @@ import java.util.List;
  */
 public class CourseManagerActivity extends AppCompatActivity
 {
-    Button btnAddCourse;
-    Button btnDone;
     ListView lvCourses;
     String account;
+    FloatingActionButton fabAddCourse;
 
     // Request code for the menu
     private static final int MENU_ITEM_VIEW = 111;
@@ -80,8 +81,8 @@ public class CourseManagerActivity extends AppCompatActivity
         account = getIntent().getStringExtra("ACCOUNT");
 
         // Set event for the Add Course button
-        btnAddCourse = findViewById(R.id.btnAddCourse);
-        btnAddCourse.setOnClickListener(v -> actionAddCourse());
+        fabAddCourse = findViewById(R.id.floating_action_button);
+        fabAddCourse.setOnClickListener(v -> actionAddCourse());;
 
         // Open the course database, transfer all course from database to a course list
         db_course = new MyDatabaseHelperCourse(this);
@@ -89,10 +90,6 @@ public class CourseManagerActivity extends AppCompatActivity
 
         // Display courses on the list view
         displayCourses();
-
-        // Set event for the Done button
-        btnDone = findViewById(R.id.btnDone);
-        btnDone.setOnClickListener(v -> setBtnDone());
     }
 
     // This method to display courses on list view through adapter
@@ -249,11 +246,13 @@ public class CourseManagerActivity extends AppCompatActivity
     // Click event arrow button
     public void btnBackArrow(View view)
     {
-        setBtnDone();
+        onBackPressed();
     }
 
     // Finish activity and go to previous activity
-    public void setBtnDone()
+
+    @Override
+    public void onBackPressed()
     {
         Intent intent = new Intent(CourseManagerActivity.this, StudentCoursesActivity.class);
         intent.putExtra("ACCOUNT", account);

@@ -7,10 +7,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.DataSetObserver;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.Image;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -19,6 +26,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,10 +38,13 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.bean.Student;
+import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
 import com.vunguyen.vface.helper.MyDatabaseHelperDate;
+import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -64,9 +75,11 @@ public class AttendanceActivity extends AppCompatActivity
     MyDatabaseHelperCourse db_course;
     MyDatabaseHelperStudent db_student;
     MyDatabaseHelperDate db_date;
+    MyDatabaseHelperFace db_face;
 
     //adapter
     ArrayAdapter<Student> studentArrayAdapter;
+    FaceListViewAdapter studentListViewAdapter;
 
     // variables
     String account;
@@ -91,6 +104,7 @@ public class AttendanceActivity extends AppCompatActivity
         db_course = new MyDatabaseHelperCourse(this);
         db_student = new MyDatabaseHelperStudent(this);
         db_date = new MyDatabaseHelperDate(this);
+        db_face = new MyDatabaseHelperFace(this);
 
         //get all courses
         this.courseList = db_course.getAllCourses(account);
@@ -193,23 +207,8 @@ public class AttendanceActivity extends AppCompatActivity
             ivAttendance.setVisibility(View.GONE);
 
         // create adapter for list view of student
-        this.studentArrayAdapter = new ArrayAdapter<Student>(this,
-                android.R.layout.simple_list_item_1, android.R.id.text1, studentList)
-        {
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent)
-            {
-                View view = super.getView(position, convertView, parent);
-                TextView tv = view.findViewById(android.R.id.text1);
-                tv.setTextColor(Color.WHITE);
-                tv.setAllCaps(true);
-                return view;
-            }
-        };
-
-        // Register Adapter for ListView.
-        this.lvAttendance.setAdapter(this.studentArrayAdapter);
+        studentListViewAdapter = new FaceListViewAdapter(studentList);
+        lvAttendance.setAdapter(studentListViewAdapter);
     }
 
     // check the current mode that user is using to display student list
@@ -262,5 +261,140 @@ public class AttendanceActivity extends AppCompatActivity
         intent.putExtra("ACCOUNT", account);
         startActivity(intent);
         finish();
+    }
+
+    /**
+     * This class is a customize adapter to display students
+     * with face thumbnails
+     */
+    class FaceListViewAdapter implements ListAdapter
+    {
+        List<Bitmap> faceThumbnails;
+        List<String> studentInfo;
+        List<String> studentAbsence;
+
+        public FaceListViewAdapter()
+        {
+        }
+
+        public FaceListViewAdapter(List<Student> studentIdentityList)
+        {
+            faceThumbnails = new ArrayList<>();
+            studentInfo = new ArrayList<>();
+            studentAbsence = new ArrayList<>();
+
+
+            if (studentIdentityList != null)
+            {
+                Log.i("EXECUTE", Integer.toString(studentIdentityList.size()));
+                for (Student student : studentIdentityList)
+                {
+                    Uri uri = Uri.parse(db_face.getFaceWithStudent(student.getStudentServerId()).get(0).getStudentFaceUri());
+                    Bitmap bitmap = null;
+                    try
+                    {
+                        bitmap = ImageEditor.handlePhotoAndRotationBitmap(getApplicationContext(), uri);
+                        faceThumbnails.add(ImageEditor.getRoundedCornerThumbnails(bitmap, 10));
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    studentInfo.add(student.getStudentName());
+                    int totalAbsence = db_date.getTotalAbsence(student.getStudentServerId(), student.getCourseServerId());
+                    studentAbsence.add(Integer.toString(totalAbsence));
+                }
+            }
+        }
+
+        @Override
+        public boolean areAllItemsEnabled()
+        {
+            return false;
+        }
+
+        @Override
+        public boolean isEnabled(int position)
+        {
+            return true;
+        }
+
+        @Override
+        public void registerDataSetObserver(DataSetObserver observer)
+        {
+
+        }
+
+        @Override
+        public void unregisterDataSetObserver(DataSetObserver observer)
+        {
+
+        }
+
+        @Override
+        public int getCount()
+        {
+            return faceThumbnails.size();
+        }
+
+        @Override
+        public Object getItem(int position)
+        {
+            return faceThumbnails.get(position);
+        }
+
+        @Override
+        public long getItemId(int position)
+        {
+            return position;
+        }
+
+        @Override
+        public boolean hasStableIds()
+        {
+            return false;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent)
+        {
+            if (convertView == null)
+            {
+                LayoutInflater layoutInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                convertView = layoutInflater.inflate(R.layout.item_face_with_description_2, parent, false);
+            }
+
+            convertView.setId(position);
+
+            // set face
+            ((ImageView) convertView.findViewById(R.id.face_thumbnail)).setImageBitmap(faceThumbnails.get(position));
+            //set info
+            ((TextView) convertView.findViewById(R.id.tvDetectedFace)).setText(studentInfo.get(position));
+            ((TextView) convertView.findViewById(R.id.tvDetectedFace)).setTextColor(Color.WHITE);
+
+            //set info
+            ((TextView) convertView.findViewById(R.id.tvAbsence)).setText(studentAbsence.get(position));
+            ((TextView) convertView.findViewById(R.id.tvAbsence)).setTextColor(Color.WHITE);
+
+            return convertView;
+        }
+
+        @Override
+        public int getItemViewType(int position)
+        {
+            return position;
+        }
+
+        @Override
+        public int getViewTypeCount()
+        {
+            return 1;
+        }
+
+        @Override
+        public boolean isEmpty()
+        {
+            return false;
+        }
     }
 }

@@ -27,6 +27,7 @@ public class DashBoardActivity extends AppCompatActivity
     CardView cvGroupCheck;
     CardView cvAttendance;
     CardView cvAddStudentCourse;
+    CardView cvAboutUs;
     String account;
 
     @Override
@@ -78,6 +79,12 @@ public class DashBoardActivity extends AppCompatActivity
         cvAttendance = findViewById(R.id.cvAttendance);
         cvAttendance.setOnClickListener(v -> {
             Intent intent = new Intent(DashBoardActivity.this, AttendanceActivity.class);
+            goToAFeature(intent);
+        });
+
+        cvAboutUs = findViewById(R.id.cvAboutUs);
+        cvAboutUs.setOnClickListener(v -> {
+            Intent intent = new Intent(DashBoardActivity.this, AboutActivity.class);
             goToAFeature(intent);
         });
 

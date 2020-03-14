@@ -30,12 +30,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
+import com.vunguyen.vface.helper.MyDatabaseHelperDate;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 
@@ -70,8 +72,7 @@ public class StudentManagerActivity extends AppCompatActivity
     private static final int MY_REQUEST_CODE = 1000;
 
     // functions
-    Button btnDone;
-    Button btnAddStudent;
+    FloatingActionButton fabAddStudent;
     AutoCompleteTextView courseMenu;
     ListView lvStudents;
     ImageView ivWaiting;
@@ -102,12 +103,15 @@ public class StudentManagerActivity extends AppCompatActivity
         lvStudents = findViewById(R.id.lvStudents);
         lvStudents.setVisibility(View.GONE);
         db_student = new MyDatabaseHelperStudent(this);
-        btnAddStudent = findViewById(R.id.btnAddStudent);
-        btnAddStudent.setVisibility(View.GONE);
-        btnDone = findViewById(R.id.btnDoneStudentsManager);
-        btnDone.setVisibility(View.GONE);
+        fabAddStudent = findViewById(R.id.floating_action_button);
+        fabAddStudent.setVisibility(View.GONE);
         ivWaiting = findViewById(R.id.ivWaiting);
 
+        initializeSelection();
+    }
+    // initialize the list view data on the course selection
+    private void initializeSelection()
+    {
         if (courseList.size() != 0)
         {
             // set default
@@ -119,35 +123,24 @@ public class StudentManagerActivity extends AppCompatActivity
                 courseServerId = course.getCourseServerId();            // get course id on server
                 displayListView(courseServerId, 1);   // request 1 to notify that selection is changed
                 ivWaiting.setVisibility(View.GONE);
-                btnAddStudent.setVisibility(View.VISIBLE);
-                btnDone.setVisibility(View.VISIBLE);
+                fabAddStudent.setVisibility(View.VISIBLE);
                 lvStudents.setVisibility(View.VISIBLE);
 
 
             });
 
             // Button Add Student event, send the course ids to the student profile activity
-            btnAddStudent.setOnClickListener(v ->
-                    addStudent());
-            // Button Done Click Event
-            btnDone.setOnClickListener(v ->
-                    onBackPressed());
+            fabAddStudent.setOnClickListener(v -> addStudent());
         }
         else
         {
             // If there is no course, the button is disable and show notification
-            btnDone.setEnabled(false);
-            btnAddStudent.setEnabled(false);
-            btnAddStudent.setOnClickListener(v ->
+            fabAddStudent.setEnabled(false);
+            fabAddStudent.setOnClickListener(v ->
                     Toast.makeText(getApplicationContext(), "Addd a course before adding students.",
-                            Toast.LENGTH_SHORT).show());
+                    Toast.LENGTH_SHORT).show());
         }
-
-
-
-
     }
-
     // Event for clicking the back button on navigation bar
     @Override
     public void onBackPressed()
@@ -241,6 +234,8 @@ public class StudentManagerActivity extends AppCompatActivity
         // delete faces in database that belong to this student
         MyDatabaseHelperFace db_face = new MyDatabaseHelperFace(this);
         db_face.deleteFacesWithStudent(student.getStudentServerId());
+        MyDatabaseHelperDate db_date = new MyDatabaseHelperDate(this);
+        db_date.deleteDatesWithStudent(student.getStudentServerId(), student.getCourseServerId());
         // Refresh ListView.
         this.studentArrayAdapter.notifyDataSetChanged();
         // execute background task to delete student from server
@@ -252,14 +247,15 @@ public class StudentManagerActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (resultCode == Activity.RESULT_OK && requestCode == MY_REQUEST_CODE ) {
-            boolean needRefresh = data.getBooleanExtra("needRefresh",true);
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK && requestCode == MY_REQUEST_CODE) {
+            boolean needRefresh = data.getBooleanExtra("needRefresh", true);
+            account = data.getStringExtra("ACCOUNT");
             // Refresh ListView
-            if(needRefresh)
-            {
+            if (needRefresh) {
                 this.studentList.clear();
                 MyDatabaseHelperStudent db_student = new MyDatabaseHelperStudent(this);
-                List<Student> list=  db_student.getStudentWithCourse(courseServerId);
+                List<Student> list = db_student.getStudentWithCourse(courseServerId);
                 this.studentList.addAll(list);
                 // Notify data changed to grid view
                 this.studentArrayAdapter.notifyDataSetChanged();

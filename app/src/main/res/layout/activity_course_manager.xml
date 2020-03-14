@@ -1,126 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     tools:context=".ui.CourseManagerActivity"
-    android:background="#35363B"
-    android:orientation="vertical">
-
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="40dp">
-
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="start|center"
-            android:onClick="btnBackArrow"
-            android:src="@drawable/back_button"
-            android:layout_marginStart="20dp"
-            android:contentDescription="@string/descriptionBack" />
-        <TextView
-            android:id="@+id/tvTitle"
+        android:layout_height="match_parent"
+        android:background="#242424"
+        android:orientation="vertical">
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:text="@string/course_available"
-            android:textSize="20sp"
-            android:layout_gravity="center"
-            android:textColor="#ffffff"
-            android:gravity="center"
-            android:layout_marginEnd="50dp"/>
-    </LinearLayout>
+            android:orientation="horizontal"
+            android:layout_marginTop="40dp">
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cvCourses"
-        android:layout_width="match_parent"
-        android:layout_height="500dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp"
-        app:cardBackgroundColor="@color/common_google_signin_btn_text_dark_disabled"
-        app:cardCornerRadius="15dp"
-        style="@style/Widget.MaterialComponents.CardView"
-        app:cardElevation="0dp">
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="start|center"
+                android:onClick="btnBackArrow"
+                android:src="@drawable/back_button"
+                android:layout_marginStart="20dp"
+                android:contentDescription="@string/descriptionBack" />
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="@string/course_available"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:textColor="#ffffff"
+                android:gravity="center"
+                android:layout_marginEnd="50dp"/>
+        </LinearLayout>
 
-        <ImageView
-            android:id="@+id/ivWaitingCourse"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvCourses"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/course_waiting"
-            android:visibility="gone"/>
-
-        <ListView
-            android:id="@+id/lvCourses"
-            android:layout_width="wrap_content"
-            android:layout_height="450dp"
-            android:layout_above="@id/tvAddCourseTip"
-            android:layout_below="@id/tvTitle"
             android:layout_marginStart="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="30dp"
             android:layout_marginEnd="20dp"
-            android:layout_marginRight="20dp"
             android:layout_marginBottom="20dp"
-            android:background="@android:color/transparent"
-            android:divider="#ffffff"
-            android:dividerHeight="4px"
-            />
+            app:cardBackgroundColor="@color/common_google_signin_btn_text_dark_disabled"
+            app:cardCornerRadius="15dp"
+            style="@style/Widget.MaterialComponents.CardView"
+            app:cardElevation="0dp">
 
-    </com.google.android.material.card.MaterialCardView>
+            <ImageView
+                android:id="@+id/ivWaitingCourse"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/course_waiting"
+                android:visibility="gone"/>
+
+            <ListView
+                android:id="@+id/lvCourses"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_above="@id/tvAddCourseTip"
+                android:layout_below="@id/tvTitle"
+                android:layout_marginStart="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="20dp"
+                android:background="@android:color/transparent"
+                android:divider="#ffffff"
+                android:dividerHeight="4px"
+                />
+
+        </com.google.android.material.card.MaterialCardView>
 
 
 
-    <TextView
-        android:id="@+id/tvAddCourseTip"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="15sp"
-        android:fontFamily="@font/assistant_light"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:textAlignment="center"
-        android:textColor="#ffffff"
-        android:text="@string/courses_tip"/>
-
-    <LinearLayout
-        android:id="@+id/btnButtonBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp">
-
-        <Button
-            android:id="@+id/btnAddCourse"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/add_courses"
+        <TextView
+            android:id="@+id/tvAddCourseTip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:fontFamily="@font/assistant_light"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:textAlignment="center"
             android:textColor="#ffffff"
-            android:background="@drawable/button"
-            android:layout_marginRight="20dp" />
-
-        <Button
-            android:id="@+id/btnDone"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/done"
-            android:textColor="#ffffff"
-            android:background="@drawable/button" />
+            android:text="@string/courses_tip"/>
 
     </LinearLayout>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floating_action_button"
+        style="@style/Widget.MaterialComponents.FloatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="50dp"
+        android:layout_marginEnd="0dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:contentDescription="@string/extended_fab_content_desc"
+        android:text="@string/extended_fab_label"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:borderWidth="0dp"
+        app:icon="@drawable/ic_plus_24px"
+        app:iconPadding="5dp"
+        app:iconSize="30dp"
+        app:iconTint="@color/white"
+        app:srcCompat="@drawable/ic_plus_24px" />
 
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

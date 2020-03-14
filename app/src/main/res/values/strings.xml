@@ -19,6 +19,8 @@
     <!-- Courses management activities -->
     <string name="delete">Delete</string>
     <string name="done">Done</string>
+    <string name="extended_fab_content_desc">ADD A COURSE</string>
+    <string name="extended_fab_label">Add course</string>
 
     <string name="course_available">COURSES MANAGER</string>
     <string name="courses_tip">Long tap on a course to open actions menu.</string>
@@ -80,5 +82,19 @@
     <string name="title_attendance">ATTENDANCE MANAGER</string>
     <string name="title_date">DATE OF CLASS</string>
     <string name="icon_description">Pick Date</string>
+
+    <!-- About us -->
+    <string name="title_about">About us</string>
+    <string name="title_about_app">About App</string>
+    <string name="content_about_app">Version 1.0.0</string>
+    <string name="content_about_app_link">www.facebook.com/vu.nguyen7797</string>
+    <string name="content_email">vu.nguyen7797@gmail.com</string>
+    <string name="content_copyright">Created and developed by VU NGUYEN</string>
+    <string name="content_about_creator">About VU NGUYEN</string>
+    <string name="content_creator_name">VU DUC ANH NGUYEN \nVIET NAM \nJunior, Computer Science,\nArkansas State University</string>
+    <string name="content_creator_phone">Phone:</string>
+    <string name="content_creator_number">+1 (870) 273–8590</string>
+    <string name="title_email">Email:</string>
+
 
 </resources>

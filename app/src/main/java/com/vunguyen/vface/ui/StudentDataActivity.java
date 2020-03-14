@@ -175,7 +175,6 @@ public class StudentDataActivity extends AppCompatActivity
         // Train the course after a student is added or modified.
         new TrainCourseTask().execute(courseServerId);
         this.needRefresh = true;
-
         // Back to previous activity
         onBackPressed();
     }
@@ -256,6 +255,7 @@ public class StudentDataActivity extends AppCompatActivity
     @Override
     public void onBackPressed()
     {
+
         if (!this.etStudentID.getText().toString().equals("") || !this.etStudentName.getText().toString().equals(""))
         {
             Toast.makeText(this, "Please save data", Toast.LENGTH_SHORT).show();
@@ -263,9 +263,9 @@ public class StudentDataActivity extends AppCompatActivity
         else if (this.etStudentID.getText().toString().equals("")
                 && this.etStudentName.getText().toString().equals(""))
         {
-            Intent intent = new Intent(StudentDataActivity.this, StudentManagerActivity.class);
-            intent.putExtra("ACCOUNT", account);
-            startActivity(intent);
+            //Intent intent = new Intent(StudentDataActivity.this, StudentManagerActivity.class);
+           // intent.putExtra("ACCOUNT", account);
+            //startActivity(intent);
             finish();
         }
     }
@@ -300,6 +300,7 @@ public class StudentDataActivity extends AppCompatActivity
 
     public void btnBackClick(View view)
     {
+        // Back to previous activity
         onBackPressed();
     }
 
@@ -538,10 +539,10 @@ public class StudentDataActivity extends AppCompatActivity
     public void finish()
     {
         // Prepare Intent data
-        Intent data = new Intent();
+        Intent data = new Intent(StudentDataActivity.this, StudentManagerActivity.class);
         // Request the grid view refresh
         data.putExtra("needRefresh", needRefresh);
-
+        data.putExtra("ACCOUNT", account);
         // Activity complete
         this.setResult(Activity.RESULT_OK, data);
         super.finish();

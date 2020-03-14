@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#35363B"
+    android:background="#242424"
     tools:context="com.vunguyen.vface.ui.AttendanceActivity">
 
     <LinearLayout

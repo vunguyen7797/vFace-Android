@@ -39,10 +39,11 @@ if you are in "Android" mode, go to "res" directory -> "values" -> "string.xml",
 ![Image description](https://i.ibb.co/42bKRmX/Screenshot-2020-03-16-14-15-00-127-com-example-vface.jpg) 
 ![Image description](https://i.ibb.co/VpY8W3r/Screenshot-2020-03-16-13-57-04-852-com-example-vface.jpg) 
 ![Image description](https://i.ibb.co/Hn2RDZ3/Screenshot-2020-03-16-13-56-43-653-com-example-vface.jpg)
+
 ### Timeline
- * 1 / 15 / 2020: Come up with the idea, finish the prototypes.
- * 2 / 1 / 2020 - 2 / 15 / 2020: Started working on User Interface design. Finish the UI based on the prototypes.
- * 2 / 15 / 2020 - 2 / 29 / 2020: Working on the main features, implementing face detection API, database.
- * 2 / 29 / 2020 - 3 / 15 /2020: Most of the main features are working except for Self-check - has not been implemented yet.
+ * 01/15/2020: Come up with the idea, finish the prototypes.
+ * 02/01/2020 - 02/15/2020: Started working on User Interface design. Finish the UI based on the prototypes.
+ * 02/15/2020 - 02/29/2020: Working on the main features, implementing face detection API, database.
+ * 02/29/2020 - 03/15/2020: Most of the main features are working except for Self-check - has not been implemented yet.
  Creating Readme Github, update comments and organizing code to get ready for peer review.
- * 3 / 15 / 2020 - 3 / 30 / 2020: Implementing Self-check mode, and improve other features. Get ready for the first complete version.
+ * 03/15/2020 - 03/30/2020: Implementing Self-check mode, and improve other features. Get ready for the first complete version.

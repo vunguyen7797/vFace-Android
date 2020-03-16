@@ -133,11 +133,6 @@ public class GroupCheckActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
-        // Set no notification bar on activity
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_group_check);
 
         // Get email account
@@ -198,10 +193,7 @@ public class GroupCheckActivity extends AppCompatActivity
     {
         spinStudentList = findViewById(R.id.spinStudentList);
         // There are 3 options to display the student list after identify task
-        List<String> studentListOptions = new ArrayList<>();
-        studentListOptions.add("IN-CLASS STUDENTS");
-        studentListOptions.add("ABSENCE STUDENTS");
-        studentListOptions.add("UNKNOWN STUDENTS");
+        String[] studentListOptions = getResources().getStringArray(R.array.display_modes);
 
         // initialize Array adapter
         spinnerListOptionArrayAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, studentListOptions)
@@ -223,17 +215,18 @@ public class GroupCheckActivity extends AppCompatActivity
                                         ViewGroup parent)
             {
                 // TODO Auto-generated method stub
-                View mView = super.getDropDownView(position, convertView, parent);
-                TextView mTextView = (TextView) mView;
+                View view = super.getDropDownView(position, convertView, parent);
+                TextView textView = (TextView) view;
                 if ((identifyUnknownList.size() == 0 && position == 2))
                 {
-                    mTextView.setTextColor(Color.RED);
+                    textView.setTextColor(Color.RED);
                 }
                 else
                 {
-                    mTextView.setTextColor(Color.WHITE);
+                    textView.setTextColor(Color.BLACK);
                 }
-                return mView;
+                textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                return textView;
             }
         };
 

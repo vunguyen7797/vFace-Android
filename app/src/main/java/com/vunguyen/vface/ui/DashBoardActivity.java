@@ -28,16 +28,13 @@ public class DashBoardActivity extends AppCompatActivity
     CardView cvAttendance;
     CardView cvAddStudentCourse;
     CardView cvAboutUs;
+    CardView cvSettings;
     String account;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
-        //* Hide Notification bar
-        getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_dash_board);
 
         // email to identify database
@@ -85,6 +82,12 @@ public class DashBoardActivity extends AppCompatActivity
         cvAboutUs = findViewById(R.id.cvAboutUs);
         cvAboutUs.setOnClickListener(v -> {
             Intent intent = new Intent(DashBoardActivity.this, AboutActivity.class);
+            goToAFeature(intent);
+        });
+
+        cvSettings = findViewById(R.id.cvSetting);
+        cvSettings.setOnClickListener(v -> {
+            Intent intent = new Intent(DashBoardActivity.this, SettingsActivity.class);
             goToAFeature(intent);
         });
 

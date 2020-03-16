@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="display_modes">
+        <item>IN-CLASS STUDENTS</item>
+        <item>ABSENT STUDENTS</item>
+        <item>UNKNOWN STUDENTS</item>
+    </string-array>
+
+    <string-array name="setting_menu">
+        <item>Manage account</item>
+        <item>General settings</item>
+        <item>Notifications</item>
+        <item>Privacy</item>
+        <item><![CDATA[Help & Feedback]]></item>
+    </string-array>
+
+    <string-array name="display_modes_attendance">
+        <item>IN-CLASS STUDENTS</item>
+        <item>ABSENT STUDENTS</item>
+    </string-array>
+</resources>

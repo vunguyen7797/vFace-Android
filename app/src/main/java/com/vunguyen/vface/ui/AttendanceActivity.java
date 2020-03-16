@@ -3,25 +3,17 @@
  */
 package com.vunguyen.vface.ui;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.content.Intent;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
@@ -29,11 +21,10 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.maps.model.Dash;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputLayout;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
@@ -45,12 +36,8 @@ import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * This class implements methods to display in-class and absent students
@@ -78,7 +65,6 @@ public class AttendanceActivity extends AppCompatActivity
     MyDatabaseHelperFace db_face;
 
     //adapter
-    ArrayAdapter<Student> studentArrayAdapter;
     FaceListViewAdapter studentListViewAdapter;
 
     // variables
@@ -91,9 +77,6 @@ public class AttendanceActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        // Set no notification bar on activity
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_attendance);
 
         // Get email account
@@ -125,9 +108,7 @@ public class AttendanceActivity extends AppCompatActivity
     private void displayListMenu(AutoCompleteTextView listMenu)
     {
         // There are 3 options to display the student list after identify task
-        List<String> studentListOptions = new ArrayList<>();
-        studentListOptions.add("In-class students");
-        studentListOptions.add("Absent students");
+        String[] studentListOptions = getResources().getStringArray(R.array.display_modes_attendance);
         if (date.equalsIgnoreCase(""))
         {
             listMenu.setEnabled(false);

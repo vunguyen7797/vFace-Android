@@ -96,5 +96,9 @@
     <string name="content_creator_number">+1 (870) 273–8590</string>
     <string name="title_email">Email:</string>
 
+    <!-- About us -->
+    <string name="title_setting">Settings</string>
+    <string name="logOut">Log out</string>
+
 
 </resources>

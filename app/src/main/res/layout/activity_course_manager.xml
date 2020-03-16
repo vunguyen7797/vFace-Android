@@ -61,7 +61,7 @@
 
             <ListView
                 android:id="@+id/lvCourses"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_above="@id/tvAddCourseTip"
                 android:layout_below="@id/tvTitle"
@@ -73,12 +73,10 @@
                 android:layout_marginBottom="20dp"
                 android:background="@android:color/transparent"
                 android:divider="#ffffff"
-                android:dividerHeight="4px"
+                android:dividerHeight="0.5dp"
                 />
 
         </com.google.android.material.card.MaterialCardView>
-
-
 
         <TextView
             android:id="@+id/tvAddCourseTip"

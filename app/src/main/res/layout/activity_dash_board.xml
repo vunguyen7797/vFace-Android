@@ -206,6 +206,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvSetting"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:layout_rowWeight="1"

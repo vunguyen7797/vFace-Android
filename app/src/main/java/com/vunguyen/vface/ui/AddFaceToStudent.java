@@ -35,7 +35,8 @@ import java.util.UUID;
  * This class contains methods to detect a face, adding face to student on
  * server and local database.
  */
-class AddFaceToStudent extends ActivityCompat {
+class AddFaceToStudent extends ActivityCompat
+{
     private Bitmap bitmapImage;
     private Bitmap faceThumbnail;
 

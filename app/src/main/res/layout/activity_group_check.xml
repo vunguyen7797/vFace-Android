@@ -180,9 +180,9 @@
                 android:layout_marginEnd="20dp"
                 android:gravity="center"
                 android:textAlignment="center"
-                android:spinnerMode="dropdown"
+                android:spinnerMode="dialog"
                 android:dropDownVerticalOffset="40dp"
-                android:popupBackground="#35363B"
+                android:popupBackground="@color/backgroundPrimary"
                 android:dropDownWidth="match_parent"
                 />
 

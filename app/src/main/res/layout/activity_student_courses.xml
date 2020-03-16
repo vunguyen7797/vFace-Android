@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.StudentCoursesActivity"
-    android:background="#242424">
+    android:background="@color/backgroundPrimary">
 
     <ImageView
         android:id="@+id/ivBackArrow"
@@ -51,7 +51,7 @@
                 <ImageView
                     android:layout_width="212dp"
                     android:layout_height="153dp"
-                    android:src="@drawable/add_course"/>
+                    android:src="@drawable/course_manager_ic"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -83,7 +83,7 @@
                 <ImageView
                     android:layout_width="212dp"
                     android:layout_height="153dp"
-                    android:src="@drawable/add_face" />
+                    android:src="@drawable/student_waiting_ic" />
 
                 <TextView
                     android:layout_width="wrap_content"

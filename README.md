@@ -33,15 +33,18 @@ if you are in "Android" mode, go to "res" directory -> "values" -> "string.xml",
 * Then select menu "Build -> Make Project" to build the project.
 ```
 ### Run the app
-Once the project is executed and launched on your phone, go to Data Manager to add a course and add some students.
-Then go to group check to take a photo of a group of people including some students who were added in databases to check attendance.
+* Once the project is executed and launched on your phone, go to Data Manager to add a course and add some students.
+* Then go to group check to take a photo of a group of people including some students who were added in databases to check attendance.
+
 ![Image description](https://i.ibb.co/42bKRmX/Screenshot-2020-03-16-14-15-00-127-com-example-vface.jpg)
 
 ### Timeline:
- 1/15/2020: Come up with the idea, finish the prototypes.
- 2/1/2020 - 2/15/2020: * Started working on User Interface design.
-                       * Finish the UI based on the prototypes
- 2/15/2020 - 2/29/2020: * Working on the main features, implementing face detection API, database.
- 2/29/2020 - 3/15/2020: * Most of the main features are working except for Self-check - has not been implemented yet.
-                        * Creating Readme Github, update comments and organizing code to get ready for peer review.
- 3/15/2020 - 3/30/2020: Implementing Self-check mode, and improve other features. Get ready for the first complete version.
+ * 1/15/2020: Come up with the idea, finish the prototypes.
+ * 2/1/2020 - 2/15/2020: 
+ ** Started working on User Interface design.
+ ** Finish the UI based on the prototypes
+ * 2/15/2020 - 2/29/2020: Working on the main features, implementing face detection API, database.
+ * 2/29/2020 - 3/15/2020: 
+ ** Most of the main features are working except for Self-check - has not been implemented yet.
+ ** Creating Readme Github, update comments and organizing code to get ready for peer review.
+ * 3/15/2020 - 3/30/2020: Implementing Self-check mode, and improve other features. Get ready for the first complete version.

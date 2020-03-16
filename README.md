@@ -40,11 +40,8 @@ if you are in "Android" mode, go to "res" directory -> "values" -> "string.xml",
 
 ### Timeline:
  * 1/15/2020: Come up with the idea, finish the prototypes.
- * 2/1/2020 - 2/15/2020: 
- ** Started working on User Interface design.
- ** Finish the UI based on the prototypes
+ * 2/1/2020 - 2/15/2020: Started working on User Interface design. Finish the UI based on the prototypes.
  * 2/15/2020 - 2/29/2020: Working on the main features, implementing face detection API, database.
- * 2/29/2020 - 3/15/2020: 
- ** Most of the main features are working except for Self-check - has not been implemented yet.
- ** Creating Readme Github, update comments and organizing code to get ready for peer review.
+ * 2/29/2020 - 3/15/2020: Most of the main features are working except for Self-check - has not been implemented yet.
+ Creating Readme Github, update comments and organizing code to get ready for peer review.
  * 3/15/2020 - 3/30/2020: Implementing Self-check mode, and improve other features. Get ready for the first complete version.

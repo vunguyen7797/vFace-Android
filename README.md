@@ -33,7 +33,7 @@ if you are in "Android" mode, go to "res" directory -> "values" -> "string.xml",
 * Then select menu "Build -> Make Project" to build the project.
 ```
 ### Run the app
-* Once the project is executed and launched on your phone, go to Data Manager to add a course and add some students.
+* Once the project is executed and launched on your phone, sign up an account to login, then go to Data Manager to add a course and add some students.
 * Then go to "Group-check" mode to take a photo of a group of people including some students who were added in databases to check attendance.
 
 ![Image description](https://i.ibb.co/42bKRmX/Screenshot-2020-03-16-14-15-00-127-com-example-vface.jpg) 

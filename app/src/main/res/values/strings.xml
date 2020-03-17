@@ -10,7 +10,7 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
 
-    <string name="subscription_key">d4265de0ba6f464d91758400376e36ef</string>
+    <string name="subscription_key"></string>
     <string name="endpoint">https://vface2.cognitiveservices.azure.com/face/v1.0</string>
     <string name="add_subscription_key_tip_title">Subscription Key is Needed</string>
     <string name="add_subscription_key_tip">Please put your subscription key with its corresponding endpoint to source file \"app/res/values/strings.xml\" to enable Face API calls.</string>

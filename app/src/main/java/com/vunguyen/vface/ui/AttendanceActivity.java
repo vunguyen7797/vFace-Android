@@ -275,7 +275,7 @@ public class AttendanceActivity extends AppCompatActivity
                     try
                     {
                         bitmap = ImageEditor.handlePhotoAndRotationBitmap(getApplicationContext(), uri);
-                        faceThumbnails.add(ImageEditor.getRoundedCornerThumbnails(bitmap, 10));
+                        faceThumbnails.add(bitmap);
                     }
                     catch (IOException e)
                     {

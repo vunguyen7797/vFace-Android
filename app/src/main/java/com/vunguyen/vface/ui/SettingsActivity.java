@@ -3,20 +3,22 @@
  */
 package com.vunguyen.vface.ui;
 
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.os.Bundle;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
-
+import com.google.firebase.auth.FirebaseAuth;
 import com.vunguyen.vface.R;
 
 /**
@@ -28,6 +30,7 @@ public class SettingsActivity extends AppCompatActivity
     String[] settingMenu;
     ListView lvMenu;
     ArrayAdapter<String> menuAdapter;
+    Button btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -38,6 +41,13 @@ public class SettingsActivity extends AppCompatActivity
         account = getIntent().getStringExtra("ACCOUNT");
         settingMenu = getResources().getStringArray(R.array.setting_menu);
         displayMenu();
+        btnLogout = findViewById(R.id.btnLogout);
+        btnLogout.setOnClickListener(v -> {
+            FirebaseAuth.getInstance().signOut();
+            Intent intentWelcome = new Intent(SettingsActivity.this, WelcomeScreenActivity.class);
+            startActivity(intentWelcome);
+            finish();
+        });
     }
 
     // Display the menu
@@ -60,16 +70,29 @@ public class SettingsActivity extends AppCompatActivity
             }
         };
         lvMenu.setAdapter(menuAdapter);
+
+        lvMenu.setOnItemClickListener((parent, view, position, id) -> {
+            if (position == 0)
+            {
+                Intent intent = new Intent(SettingsActivity.this, ManageAccountActivity.class);
+                goToActivity(intent);
+            }
+        });
+    }
+
+    private void goToActivity(Intent intent)
+    {
+        intent.putExtra("ACCOUNT", account);
+        startActivity(intent);
+        finish();
     }
 
     // go back to previous activity
     @Override
     public void onBackPressed()
     {
-        Intent intent = new Intent(SettingsActivity.this, DashBoardActivity.class);
-        intent.putExtra("ACCOUNT", account);
-        startActivity(intent);
-        finish();
+        Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);
+        goToActivity(intent);
     }
 
     public void btnBackClick(View view)

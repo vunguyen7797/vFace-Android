@@ -8,4 +8,5 @@
     <color name="white">#ffffff</color>
     <color name="backgroundPrimary">#242424</color>
     <color name="cardViewBackground">#333435</color>
+    <color name="cornerColor">#1F2021</color>
 </resources>

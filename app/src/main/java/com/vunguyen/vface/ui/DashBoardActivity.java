@@ -6,9 +6,12 @@ package com.vunguyen.vface.ui;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,20 +19,27 @@ import androidx.cardview.widget.CardView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.vunguyen.vface.R;
+import com.vunguyen.vface.helper.ImageEditor;
+
+import java.io.IOException;
+import java.util.Objects;
 
 /**
  * This class is the implementations for the dash board screen
  */
 public class DashBoardActivity extends AppCompatActivity
 {
-    TextView tvLogOut;
     CardView cvGroupCheck;
     CardView cvAttendance;
     CardView cvAddStudentCourse;
     CardView cvAboutUs;
     CardView cvSettings;
     String account;
+    FirebaseUser user;
+    ImageView ivPhoto;
+    TextView tvDisplayName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -49,15 +59,27 @@ public class DashBoardActivity extends AppCompatActivity
                     .show();
         }
 
-        // set event for Log Out button
-        tvLogOut = findViewById(R.id.tvLogOut);
-        tvLogOut.setText(account +"\nTap here to log out?");
-        tvLogOut.setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            Intent intentWelcome = new Intent(DashBoardActivity.this, WelcomeScreenActivity.class);
-            startActivity(intentWelcome);
-            finish();
-        });
+        ivPhoto = findViewById(R.id.logo);
+        tvDisplayName = findViewById(R.id.tvDisplayName);
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.getPhotoUrl() != null)
+        {
+            ivPhoto.setImageURI(user.getPhotoUrl());
+        }
+        else
+            Log.i("EXECUTE", "NO PROFILE PHOTO");
+
+        if (user != null && user.getDisplayName() != null)
+        {
+            String welcome = "Hello " + user.getDisplayName() + "!";
+            tvDisplayName.setText(welcome);
+        }
+        else
+        {
+            String slogan = getResources().getString(R.string.sloganDashboard);
+            tvDisplayName.setText(slogan);
+        }
 
         // set event for each menu item
         cvGroupCheck = findViewById(R.id.cvGroupCheck);
@@ -98,6 +120,7 @@ public class DashBoardActivity extends AppCompatActivity
     {
         intent.putExtra("ACCOUNT", account);
         startActivity(intent);
+        finish();
     }
 
     @Override

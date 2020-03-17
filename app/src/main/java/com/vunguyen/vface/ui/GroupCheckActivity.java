@@ -880,11 +880,7 @@ public class GroupCheckActivity extends AppCompatActivity
                 Log.i("EXECUTE", Integer.toString(studentIdentityList.size()));
                 for (Pair<Bitmap, String> pair : studentIdentityList)
                 {
-
-                    if (pair.first != null)
-                        faceThumbnails.add(ImageEditor.getRoundedCornerThumbnails(pair.first, 20));
-                    else
-                        faceThumbnails.add(pair.first);
+                    faceThumbnails.add(pair.first);
 
                     if (!pair.second.equalsIgnoreCase("UNKNOWN STUDENT"))
                     {

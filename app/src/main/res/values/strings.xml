@@ -22,13 +22,13 @@
     <string name="extended_fab_content_desc">ADD A COURSE</string>
     <string name="extended_fab_label">Add course</string>
 
-    <string name="course_available">COURSES MANAGER</string>
+    <string name="course_available">Courses manager</string>
     <string name="courses_tip">Long tap on a course to open actions menu.</string>
     <string name="add_courses">ADD COURSE</string>
 
     <!-- Add Edit Course activities -->
     <string name="Information">Add a course you are teaching to manage the students.</string>
-    <string name="title">ADD OR EDIT COURSE</string>
+    <string name="title">Course profile</string>
     <string name="save">SAVE</string>
     <string name="cancel">CANCEL</string>
     <string name="add_students">ADD STUDENT</string>
@@ -42,7 +42,7 @@
     <string name="descriptionCourseStudentBack">Going Back</string>
 
     <!-- Students management activities -->
-    <string name="students_available">STUDENTS MANAGER</string>
+    <string name="students_available">Students managers</string>
     <string name="title_student_profile">STUDENT DATABASE</string>
     <string name="hint_student_id">STUDENT ID</string>
     <string name="hint_student_name">STUDENT NAME</string>
@@ -66,7 +66,7 @@
     <string name="about">About</string>
 
     <!-- Group check -->
-    <string name="titleGroupCheck">GROUP CHECK</string>
+    <string name="titleGroupCheck">Group-check</string>
     <string name="hintChooseCourse">CHOOSE A COURSE</string>
     <string name="hintChooseList">LIST OF STUDENTS</string>
     <string name="takePhoto">TAKE A PHOTO</string>
@@ -79,7 +79,7 @@
     <string name="title_unknown">UNKNOWN</string>
 
     <!-- Attendance -->
-    <string name="title_attendance">ATTENDANCE MANAGER</string>
+    <string name="title_attendance">Attendance manager</string>
     <string name="title_date">DATE OF CLASS</string>
     <string name="icon_description">Pick Date</string>
 
@@ -99,6 +99,15 @@
     <!-- About us -->
     <string name="title_setting">Settings</string>
     <string name="logOut">Log out</string>
+
+    <!-- Manage Account -->
+    <string name="title_manage_account">Manage Account</string>
+    <string name="hint_change_profile">Change profile picture</string>
+    <string name="hint_enter_display_name">Your name</string>
+
+    <string name="action_crop">Crop</string>
+    <string name="title_crop">Crop Image</string>
+    <string name="profile_updated">Profile updated</string>
 
 
 </resources>

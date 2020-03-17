@@ -21,7 +21,7 @@
             android:layout_gravity="start|center"
             android:onClick="btnBackClick"
             android:src="@drawable/back_button"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="30dp"
             android:contentDescription="@string/descriptionBack" />
         <TextView
             android:id="@+id/tvTitle"

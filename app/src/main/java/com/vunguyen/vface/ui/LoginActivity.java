@@ -5,21 +5,14 @@ package com.vunguyen.vface.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.vunguyen.vface.R;
@@ -33,10 +26,11 @@ public class LoginActivity extends AppCompatActivity
     Button btnLogin;
     TextView tvRegister;
     EditText emailID, password;
-    FirebaseAuth mFirebaseAuth;
+    FirebaseAuth firebaseAuth;
     TextView tvForgotPwd;
 
-    private FirebaseAuth.AuthStateListener mAuthStateListener;
+    private FirebaseAuth.AuthStateListener authStateListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -44,13 +38,13 @@ public class LoginActivity extends AppCompatActivity
         setContentView(R.layout.activity_login);
 
         // use firebase service for user authentication
-        mFirebaseAuth = FirebaseAuth.getInstance();
-        mAuthStateListener = firebaseAuth -> {
-            FirebaseUser mFirebaseUser = mFirebaseAuth.getCurrentUser();
-            if(mFirebaseUser != null)
+        firebaseAuth = FirebaseAuth.getInstance();
+        authStateListener = firebaseAuth ->
+        {
+            FirebaseUser firebaseUser = this.firebaseAuth.getCurrentUser();
+            if(firebaseUser != null)
             {
-                Toast.makeText(LoginActivity.this, "You are logged in", Toast.LENGTH_SHORT).show();
-                openDashBoard(mFirebaseUser.getEmail());
+                openDashBoard(firebaseUser.getEmail());
             }
             else
             {
@@ -65,7 +59,25 @@ public class LoginActivity extends AppCompatActivity
         ivBackArrow = findViewById(R.id.ivBackArrow);
         ivBackArrow.setOnClickListener(v -> openWelcomeScreen());
 
-        // event for login button
+        clickLogin();
+
+        // Register a new account button
+        tvRegister = findViewById(R.id.tvRegister);
+        tvRegister.setOnClickListener(v -> openRegister());
+
+        // forgot password text button
+        tvForgotPwd = findViewById(R.id.tvForgotPassword);
+        tvForgotPwd.setOnClickListener(v -> {
+            Intent intoReset = new Intent(LoginActivity.this, ResetPasswordActivity.class);
+            startActivity(intoReset);
+            finish();
+        });
+
+    }
+
+    // event for login button
+    private void clickLogin()
+    {
         btnLogin = findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(v -> {
             String email = emailID.getText().toString();
@@ -87,7 +99,7 @@ public class LoginActivity extends AppCompatActivity
             }
             else if (!email.isEmpty() && !pwd.isEmpty())
             {
-                mFirebaseAuth.signInWithEmailAndPassword(email,pwd).addOnCompleteListener(LoginActivity.this, task -> {
+                firebaseAuth.signInWithEmailAndPassword(email,pwd).addOnCompleteListener(LoginActivity.this, task -> {
                     if (!task.isSuccessful())
                     {
                         Toast.makeText(LoginActivity.this,
@@ -103,25 +115,13 @@ public class LoginActivity extends AppCompatActivity
                 Toast.makeText(LoginActivity.this, "Error Occurred!", Toast.LENGTH_SHORT).show();
             }
         });
-
-        // Register a new account button
-        tvRegister = findViewById(R.id.tvRegister);
-        tvRegister.setOnClickListener(v -> openRegister());
-
-        // forgot password text button
-        tvForgotPwd = findViewById(R.id.tvForgotPassword);
-        tvForgotPwd.setOnClickListener(v -> {
-            Intent intoReset = new Intent(LoginActivity.this, ResetPasswordActivity.class);
-            startActivity(intoReset);
-            finish();
-        });
-
     }
 
     @Override
-    protected void onStart() {
+    protected void onStart()
+    {
         super.onStart();
-        mFirebaseAuth.addAuthStateListener(mAuthStateListener);
+        firebaseAuth.addAuthStateListener(authStateListener);
     }
 
     public void openWelcomeScreen()

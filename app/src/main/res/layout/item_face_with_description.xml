@@ -1,14 +1,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="70dp">
 
-    <ImageView
+    <com.comix.rounded.RoundedCornerImageView
         android:id="@+id/face_thumbnail"
         android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
         android:layout_width="50dp"
         android:layout_height="50dp"
+        app:cornerRadius="5dp"
+        app:cornerColor="@color/cornerColor"
         />
 
     <TextView

@@ -5,9 +5,7 @@ package com.vunguyen.vface.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -19,12 +17,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.vunguyen.vface.R;
-
-import org.w3c.dom.Text;
 
 /**
  * This class is to implements the functions for Sign Up account activity
@@ -35,7 +31,7 @@ public class SignUpActivity extends AppCompatActivity
     TextView tvLogin;
     EditText emailID, password;
     Button btnSignUp;
-    FirebaseAuth mFirebaseAuth;
+    FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -44,7 +40,7 @@ public class SignUpActivity extends AppCompatActivity
         setContentView(R.layout.activity_sign_up);
 
         // register the account with firebase server
-        mFirebaseAuth = FirebaseAuth.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
         emailID = findViewById(R.id.emailID);
         password = findViewById(R.id.password);
 
@@ -70,7 +66,7 @@ public class SignUpActivity extends AppCompatActivity
             }
             else if (!email.isEmpty() && !pwd.isEmpty())
             {
-               mFirebaseAuth.createUserWithEmailAndPassword(email,pwd)
+               firebaseAuth.createUserWithEmailAndPassword(email,pwd)
                        .addOnCompleteListener(SignUpActivity.this, task ->
                        {
                            if (!task.isSuccessful())
@@ -82,6 +78,7 @@ public class SignUpActivity extends AppCompatActivity
                            {
                                Toast.makeText(SignUpActivity.this, "Registered Successful. Please log in."
                                        , Toast.LENGTH_SHORT).show();
+
                                startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
                            }
                        });

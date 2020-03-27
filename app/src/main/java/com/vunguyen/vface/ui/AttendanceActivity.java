@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -34,10 +35,18 @@ import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
 import com.vunguyen.vface.helper.MyDatabaseHelperDate;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * This class implements methods to display in-class and absent students
@@ -210,9 +219,18 @@ public class AttendanceActivity extends AppCompatActivity
     // event for the date picker
     private void setDatePicker()
     {
+        LocalDateTime local = LocalDateTime.now();
+        Object localTime = local.atZone(ZoneId.ofOffset("UTC", ZoneOffset.UTC)).toInstant().toEpochMilli();
         MaterialDatePicker.Builder builder = MaterialDatePicker.Builder.datePicker();
-        builder.setTitleText("SELECT A DATE");
+        builder.setTitleText("VFACE");
+
+
+        builder.setSelection(localTime);
+
+        Log.i("EXECUTE", "Time zone: " + local);
+
         materialDatePicker = builder.build();
+
 
         etDate = findViewById(R.id.etDate);
         textInputLayoutDate.setEndIconOnClickListener(v ->

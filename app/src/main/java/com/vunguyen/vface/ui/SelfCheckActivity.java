@@ -587,7 +587,6 @@ public class SelfCheckActivity extends AppCompatActivity
 
                             // set flag YES to indicate that this student is identified successfully
                             student.setStudentIdentifyFlag("YES");
-
                             // Process duplicate information for similar faces from different people
                             for (int i = 0; i < detectedDetailsList.size(); i++)
                             {
@@ -598,23 +597,12 @@ public class SelfCheckActivity extends AppCompatActivity
                                     // get the confidence to compare
                                     String comparedConfidence = detectedDetailsList
                                             .get(i).substring(length - 4, length);
+                                    Log.i("EXECUTE", "NEW CONFIDENCE: " + comparedConfidence + " CONFIDENCE: " + confidence);
                                     // if there is a duplicate name
                                     if (detectedDetailsList.get(i).contains(studentName))
                                     {
-                                        // available confidence < this student confidence
-                                        // means that the available student was identified wrong
-                                        if (comparedConfidence.compareToIgnoreCase(confidence) < 0)
-                                        {
-                                            // set the student in list as UNKNOWN STUDENT
-                                            detectedDetailsList.set(i, "UNKNOWN STUDENT");
-
-                                        }
-                                        else if (comparedConfidence.compareToIgnoreCase(confidence) > 0)
-                                        {
-                                            // if the confidence less than the student in list
-                                            // this student is identified as unknown
                                             identityInfo = "UNKNOWN STUDENT";
-                                        }
+                                            Toast.makeText(getApplicationContext(), "This student was already identified.", Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             }
@@ -630,13 +618,14 @@ public class SelfCheckActivity extends AppCompatActivity
 
                             Log.i("EXECUTE", identityInfo + "\n" + student.getStudentIdentifyFlag());
                             db_student.updateStudent(student);  // update student flag
-                           // detectedDetailsList.add(identity);  // add new student identity into list
+                            detectedDetailsList.add(identityInfo);  // add new student identity into list
                         }
                         else
                             Log.i("EXECUTE", "STUDENT NULL");
-                    } else
-                        //detectedDetailsList.add("UNKNOWN STUDENT");
+                    }
+                    else
                     {
+                        detectedDetailsList.add("UNKNOWN STUDENT");
                         identityInfo = "UNKNOWN STUDENT";
                         Log.i("EXECUTE", "UNKNOWN STUDENT");
                         progressDialog.dismiss();

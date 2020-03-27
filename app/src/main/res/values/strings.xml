@@ -108,6 +108,37 @@
     <string name="action_crop">Crop</string>
     <string name="title_crop">Crop Image</string>
     <string name="profile_updated">Profile updated</string>
+    <string name="attendance_waiting">attendance_waiting</string>
+    <string name="course_waiting">course_waiting</string>
+    <string name="group_check_icon">group_check_icon</string>
+    <string name="self_check_icon">Self check icon</string>
+    <string name="attendance_icon">Attendance icon</string>
+    <string name="data_manager_icon">Data manager icon</string>
+    <string name="setting_icon">Setting icon</string>
+    <string name="about_icon">About icon</string>
+    <string name="class_view_waiting">Class view waiting</string>
+    <string name="list_check_waiting">List check waiting</string>
+    <string name="go_back_button">Go Back button</string>
+    <string name="face_frame">Face frame</string>
+    <string name="course_manager_icon">Course manager icon</string>
+    <string name="student_manager_icon">Student manager icon</string>
+    <string name="student_list_waiting">Student list waiting</string>
+    <string name="logoflash">logoFlash</string>
+    <string name="face_icon">face_icon</string>
+    <string name="password">Password</string>
+    <string name="title_have_account">You have an account? Login here</string>>
+    <string name="please_sign_in">Please sign in</string>
+    <string name="login">Login</string>
+    <string name="you_are_not_a_member">You are not a member?</string>
+    <string name="register">Register.</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="put_your_face_in_the_frame">Put your face in the frame</string>
+    <string name="we_will_send_you_the_reset_link_to_your_email_please_enter_your_email">We will send you the reset link to your email. Please enter your email.</string>
+    <string name="hello_there">Hello there!</string>
+    <string name="sign_up_your_account">Sign up your account</string>
+    <string name="sign_up">Sign up</string>
+    <string name="title_self_check">Self-check</string>
+    <string name="btn_face_checkin">Face check-in</string>
 
 
 </resources>

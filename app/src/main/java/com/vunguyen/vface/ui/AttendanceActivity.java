@@ -124,7 +124,7 @@ public class AttendanceActivity extends AppCompatActivity
     {
         // initialize course menu
         courseMenu = findViewById(R.id.filled_exposed_dropdown);
-        ArrayAdapter<Course> tvArrayAdapter = new ArrayAdapter<Course>(this,
+        ArrayAdapter<Course> tvArrayAdapter = new ArrayAdapter<>(this,
                 R.layout.dropdown_menu_popup_item, courseList);
         courseMenu.setAdapter(tvArrayAdapter);
 
@@ -215,9 +215,8 @@ public class AttendanceActivity extends AppCompatActivity
         materialDatePicker = builder.build();
 
         etDate = findViewById(R.id.etDate);
-        textInputLayoutDate.setEndIconOnClickListener(v -> {
-            materialDatePicker.show(getSupportFragmentManager(), "DATE_PICKER");
-        });
+        textInputLayoutDate.setEndIconOnClickListener(v ->
+                materialDatePicker.show(getSupportFragmentManager(), "DATE_PICKER"));
 
         materialDatePicker.addOnPositiveButtonClickListener(selection -> {
             etDate.setText(materialDatePicker.getHeaderText());
@@ -271,10 +270,9 @@ public class AttendanceActivity extends AppCompatActivity
                 for (Student student : studentIdentityList)
                 {
                     Uri uri = Uri.parse(db_face.getFaceWithStudent(student.getStudentServerId()).get(0).getStudentFaceUri());
-                    Bitmap bitmap = null;
                     try
                     {
-                        bitmap = ImageEditor.handlePhotoAndRotationBitmap(getApplicationContext(), uri);
+                        Bitmap bitmap = ImageEditor.handlePhotoAndRotationBitmap(getApplicationContext(), uri);
                         faceThumbnails.add(bitmap);
                     }
                     catch (IOException e)

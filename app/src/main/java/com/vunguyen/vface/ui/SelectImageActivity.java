@@ -72,24 +72,19 @@ public class SelectImageActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        switch (requestCode)
-        {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
             case REQUEST_TAKE_PHOTO:
-                if (resultCode == RESULT_OK)
-                {
+                if (resultCode == RESULT_OK) {
                     Uri imageUri = data.getData();
                     setResult(imageUri);
                 }
             case REQUEST_SELECT_IMAGE_IN_ALBUM:
-                if (resultCode == RESULT_OK)
-                {
+                if (resultCode == RESULT_OK) {
                     Uri imageUri;
-                    if (data == null || data.getData() == null)
-                    {
+                    if (data == null || data.getData() == null) {
                         imageUri = uriTakenPhoto;
-                    }
-                    else
-                    {
+                    } else {
                         imageUri = data.getData();
                     }
 

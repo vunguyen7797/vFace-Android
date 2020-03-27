@@ -51,6 +51,7 @@
                 <ImageView
                     android:layout_width="212dp"
                     android:layout_height="153dp"
+                    android:contentDescription="@string/course_manager_icon"
                     android:src="@drawable/course_manager_ic"/>
 
                 <TextView
@@ -83,6 +84,7 @@
                 <ImageView
                     android:layout_width="212dp"
                     android:layout_height="153dp"
+                    android:contentDescription="@string/student_manager_icon"
                     android:src="@drawable/student_waiting_ic" />
 
                 <TextView

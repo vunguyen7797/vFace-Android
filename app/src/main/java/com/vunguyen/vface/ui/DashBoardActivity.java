@@ -36,6 +36,7 @@ public class DashBoardActivity extends AppCompatActivity
     CardView cvAddStudentCourse;
     CardView cvAboutUs;
     CardView cvSettings;
+    CardView cvSelfCheck;
     String account;
     FirebaseUser user;
     ImageView ivPhoto;
@@ -110,6 +111,12 @@ public class DashBoardActivity extends AppCompatActivity
         cvSettings = findViewById(R.id.cvSetting);
         cvSettings.setOnClickListener(v -> {
             Intent intent = new Intent(DashBoardActivity.this, SettingsActivity.class);
+            goToAFeature(intent);
+        });
+
+        cvSelfCheck = findViewById(R.id.cvSelfCheck);
+        cvSelfCheck.setOnClickListener(v -> {
+            Intent intent = new Intent(DashBoardActivity.this, SelfCheckActivity.class);
             goToAFeature(intent);
         });
 

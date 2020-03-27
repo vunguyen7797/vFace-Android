@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/linearLayout2"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:context="com.vunguyen.vface.ui.SelfCheckActivity"
     android:background="@color/backgroundPrimary"
-    android:orientation="vertical"
-    tools:context=".ui.GroupCheckActivity">
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -30,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/titleGroupCheck"
+            android:text="@string/title_self_check"
             android:textSize="20sp"
             android:layout_gravity="center"
             android:textColor="#ffffff"
@@ -38,40 +36,14 @@
             android:layout_marginEnd="50dp"/>
     </LinearLayout>
 
-
     <TextView
         android:id="@+id/tvDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
         android:layout_marginTop="5dp"
         android:textAlignment="center"
         android:textColor="#ffffff"
         android:textSize="15sp"/>
-
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="10dp"
-        app:cardBackgroundColor="@color/common_google_signin_btn_text_dark_disabled"
-        app:cardElevation="0dp"
-        android:layout_gravity="center"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="20dp">
-        <ImageView
-            android:id="@+id/ivClassImage"
-            android:layout_width="330dp"
-            android:layout_height="100dp"
-            android:src="@drawable/teacher1"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            android:layout_gravity="center"
-            android:contentDescription="@string/class_view_waiting"
-            />
-    </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="wrap_content"
@@ -117,10 +89,10 @@
                 android:orientation="horizontal"
                 android:gravity="center">
                 <Button
-                    android:id="@+id/btnTakePhoto"
+                    android:id="@+id/btnFaceCheck"
                     android:layout_width="142.5dp"
                     android:layout_height="50dp"
-                    android:text="@string/takePhoto"
+                    android:text="@string/btn_face_checkin"
                     android:layout_gravity="center"
                     android:background="@drawable/button"
                     android:textColor="#ffffff"
@@ -129,24 +101,11 @@
                     android:layout_marginEnd="5dp"
                     android:layout_marginBottom="10dp"
                     android:enabled="false"
-                    android:onClick="btnTakePhoto"/>
-                <Button
-                    android:id="@+id/btnGallery"
-                    android:layout_width="142.5dp"
-                    android:layout_height="50dp"
-                    android:textSize="12sp"
-                    android:text="@string/pickImage"
-                    android:layout_gravity="center"
-                    android:background="@drawable/button"
-                    android:textColor="#ffffff"
-                    android:layout_marginTop="10dp"
-                    android:enabled="false"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginStart="5dp"
-                    android:onClick="btnPickImage"/>
+                    android:onClick="btnFaceCheck"/>
             </LinearLayout>
-
         </LinearLayout>
+
+
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.card.MaterialCardView
@@ -166,27 +125,12 @@
             android:layout_height="match_parent"
             android:layout_marginTop="50dp"
             android:contentDescription="@string/list_check_waiting"
-            android:src="@drawable/group_check_waiting"/>
+            android:src="@drawable/self_check_sq_trans"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <Spinner
-                android:id="@+id/spinStudentList"
-                android:layout_width="match_parent"
-                android:layout_height="49dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:gravity="center"
-                android:textAlignment="center"
-                android:spinnerMode="dialog"
-                android:dropDownVerticalOffset="40dp"
-                android:popupBackground="@color/backgroundPrimary"
-                android:dropDownWidth="match_parent"
-                />
-
             <ListView
                 android:id="@+id/lvIdentifiedFaces"
                 android:layout_width="match_parent"

@@ -62,7 +62,6 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
                 android:gravity="center"
-                android:hint="@string/hintChooseCourse"
                 android:textAlignment="center">
 
                 <AutoCompleteTextView
@@ -70,6 +69,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
+                    android:hint="@string/hintChooseCourse"
                     android:textStyle="bold"
                     android:textColor="#ffffff" />
 
@@ -107,14 +107,13 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
                 android:gravity="center"
-                android:hint="@string/hintChooseList"
                 android:textAlignment="center">
-
                 <AutoCompleteTextView
                     android:id="@+id/filled_exposed_dropdown_2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
+                    android:hint="@string/hintChooseList"
                     android:textStyle="bold"
                     android:textColor="#ffffff" />
 
@@ -138,6 +137,7 @@
             android:id="@+id/ivAttendance"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:contentDescription="@string/attendance_waiting"
             android:src="@drawable/attendance"/>
         <ListView
             android:id="@+id/lvAttendance"
@@ -149,7 +149,7 @@
             android:layout_marginBottom="15dp"
             android:drawSelectorOnTop="false"
             android:divider="#ffffff"
-            android:dividerHeight="2px"/>
+            android:dividerHeight="0.5dp"/>
 
     </com.google.android.material.card.MaterialCardView>
 

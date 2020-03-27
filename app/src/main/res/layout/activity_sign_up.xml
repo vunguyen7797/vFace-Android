@@ -16,9 +16,9 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:fontFamily="@font/assistant_bold"
-        android:text="Hello there!"
+        android:text="@string/hello_there"
         android:textColor="#35363B"
-        android:textSize="40dp"
+        android:textSize="40sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,9 +32,9 @@
         android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:text="Sign up your account"
+        android:text="@string/sign_up_your_account"
         android:textColor="#CB4D4D"
-        android:textSize="25dp"
+        android:textSize="25sp"
         app:fontFamily="@font/assistant_light"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.502"
@@ -53,7 +53,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
-        android:hint="Password"
+        android:hint="@string/password"
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -61,8 +61,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/outlinedEmailId"
         app:layout_constraintVertical_bias="0.052"
-        app:endIconMode="password_toggle">>
-
+        app:endIconMode="password_toggle">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/password"
             android:layout_width="match_parent"
@@ -112,10 +111,10 @@
         android:layout_marginBottom="8dp"
         android:background="@drawable/button"
         android:fontFamily="@font/assistant_light"
-        android:text="Sign up"
+        android:text="@string/sign_up"
         android:textAllCaps="false"
         android:textColor="#ffffff"
-        android:textSize="20dp"
+        android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -126,6 +125,7 @@
 
     <ImageView
         android:id="@+id/ivBackArrow"
+        android:contentDescription="@string/go_back_button"
         android:layout_width="58dp"
         android:layout_height="49dp"
         android:layout_marginStart="8dp"
@@ -153,13 +153,13 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="20dp"
         android:fontFamily="@font/assistant_bold"
-        android:text="You have an account? Login here"
+        android:text="@string/title_have_account"
         android:textColor="#35363B"
-        android:textSize="20dp"
+        android:textSize="20sp"
         app:fontFamily="@font/assistant_light"
+        android:gravity="bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/signUpButton"
         app:layout_constraintVertical_bias="0.163" />
 </androidx.constraintlayout.widget.ConstraintLayout>

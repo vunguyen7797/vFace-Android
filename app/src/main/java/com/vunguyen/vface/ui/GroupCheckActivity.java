@@ -75,7 +75,6 @@ import java.util.UUID;
 public class GroupCheckActivity extends AppCompatActivity
 {
     // UI features
-    Spinner spinCourses;
     Spinner spinStudentList;
     private ImageView ivClass;
     ListView lvIdentifiedFaces;
@@ -202,11 +201,7 @@ public class GroupCheckActivity extends AppCompatActivity
             public boolean isEnabled(int position)
             {
                 // disable the unknown students option if no unknown found
-                if (identifyUnknownList.size() == 0 && position == 2)
-                {
-                    return false;
-                }
-                return true;
+                return identifyUnknownList.size() != 0 || position != 2;
             }
 
             // set the color change
@@ -409,16 +404,14 @@ public class GroupCheckActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode)
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        if (requestCode == PERMISSION_CODE)
         {
-            case PERMISSION_CODE:
-                {
-                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                        openCamera();
-                    else
-                        Toast.makeText(this, "Permission denied...", Toast.LENGTH_LONG).show();
-            }
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                openCamera();
+            else
+                Toast.makeText(this, "Permission denied...", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -439,18 +432,17 @@ public class GroupCheckActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)
     {
+        super.onActivityResult(requestCode, resultCode, data);
         detected = false;
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
-        {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             displayPhoto(uriImage);
-        }
-        else if (requestCode == GALLERY_REQUEST_CODE && resultCode == RESULT_OK)
-        {
-            Uri selectedImage = data.getData();
+        } else if (requestCode == GALLERY_REQUEST_CODE && resultCode == RESULT_OK) {
+            Uri selectedImage = null;
+            if (data != null) {
+                selectedImage = data.getData();
+            }
             displayPhoto(selectedImage);
-        }
-        else if (resultCode != RESULT_OK)
-        {
+        } else if (resultCode != RESULT_OK) {
             Log.i("EXECUTE", "NO IMAGE CHOSEN");
             recreate();
         }
@@ -700,7 +692,7 @@ public class GroupCheckActivity extends AppCompatActivity
                     int i = 0;
                     for (String info : detectedDetailsList)
                     {
-                        Pair<Bitmap, String> pair = new Pair<Bitmap, String>(detectedFacesList.get(i), info);
+                        Pair<Bitmap, String> pair = new Pair<>(detectedFacesList.get(i), info);
                         if (info.equals("UNKNOWN STUDENT"))
                         {
                             // add unknown student to unknown list

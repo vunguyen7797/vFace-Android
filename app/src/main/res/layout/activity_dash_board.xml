@@ -90,6 +90,7 @@
                         android:layout_width="100dp"
                         android:layout_height="90dp"
                         android:layout_marginBottom="10dp"
+                        android:contentDescription="@string/group_check_icon"
                         android:src="@drawable/group_check_waiting" />
 
                     <TextView
@@ -103,6 +104,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvSelfCheck"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:layout_rowWeight="1"
@@ -124,6 +126,7 @@
                     <ImageView
                         android:layout_width="100dp"
                         android:layout_height="100dp"
+                        android:contentDescription="@string/self_check_icon"
                         android:src="@drawable/self_check_sq" />
 
                     <TextView
@@ -159,6 +162,7 @@
                     <ImageView
                         android:layout_width="100dp"
                         android:layout_height="100dp"
+                        android:contentDescription="@string/attendance_icon"
                         android:src="@drawable/attendance" />
 
                     <TextView
@@ -194,6 +198,7 @@
                     <ImageView
                         android:layout_width="100dp"
                         android:layout_height="100dp"
+                        android:contentDescription="@string/data_manager_icon"
                         android:src="@drawable/data" />
 
                     <TextView
@@ -228,6 +233,7 @@
                     <ImageView
                         android:layout_width="100dp"
                         android:layout_height="100dp"
+                        android:contentDescription="@string/setting_icon"
                         android:src="@drawable/setting_new" />
 
                     <TextView
@@ -262,6 +268,7 @@
                     <ImageView
                         android:layout_width="100dp"
                         android:layout_height="100dp"
+                        android:contentDescription="@string/about_icon"
                         android:src="@drawable/vtranswhite" />
 
                     <TextView

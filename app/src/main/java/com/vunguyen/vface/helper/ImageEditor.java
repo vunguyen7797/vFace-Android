@@ -41,17 +41,9 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.util.Log;
-import android.view.Display;
 
 import com.microsoft.projectoxford.face.contract.FaceRectangle;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 

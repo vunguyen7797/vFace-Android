@@ -85,19 +85,16 @@ public class ManageAccountActivity extends AppCompatActivity
 
     // Response from picking image activities
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)
-    {
-        if (requestCode == GALLERY_REQUEST_CODE && resultCode == RESULT_OK)
-        {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == GALLERY_REQUEST_CODE && resultCode == RESULT_OK) {
             profileUri = data.getData();
             Log.i("EXECUTE", "URI PICKED: " + profileUri);
             // go to the crop image view activity to crop photo after image was picked
             Intent intent = new Intent(ManageAccountActivity.this, CropImageActivity.class);
             intent.setData(profileUri);
             goToActivity(intent);
-        }
-        else if (resultCode != RESULT_OK)
-        {
+        } else if (resultCode != RESULT_OK) {
             Log.i("EXECUTE", "NO IMAGE CHOSEN");
             recreate();
         }

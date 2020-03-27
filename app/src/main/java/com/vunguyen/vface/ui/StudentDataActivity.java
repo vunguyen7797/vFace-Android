@@ -218,22 +218,17 @@ public class StudentDataActivity extends AppCompatActivity
     }
 
     @Override // response after photo is selected or taken from camera
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        switch (requestCode)
-        {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
             case REQUEST_SELECT_IMAGE:
-                if (resultCode == RESULT_OK)
-                {
+                if (resultCode == RESULT_OK) {
                     Log.i("EXECUTE", "PHOTO IS AVAILABLE");
                     Uri uriImagePicked = data.getData();
                     Bitmap bitmapImage = null;
-                    try
-                    {
+                    try {
                         bitmapImage = ImageEditor.handlePhotoAndRotationBitmap(getApplicationContext(), uriImagePicked);
-                    }
-                    catch (IOException e)
-                    {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                     // add face to student

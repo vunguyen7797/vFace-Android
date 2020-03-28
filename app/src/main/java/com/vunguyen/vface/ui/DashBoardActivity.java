@@ -21,6 +21,7 @@ import androidx.cardview.widget.CardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.squareup.picasso.Picasso;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.LocaleHelper;
@@ -74,7 +75,7 @@ public class DashBoardActivity extends AppCompatActivity
         user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null && user.getPhotoUrl() != null)
         {
-            ivPhoto.setImageURI(user.getPhotoUrl());
+            Picasso.get().load(user.getPhotoUrl()).into(ivPhoto);
         }
         else
             Log.i("EXECUTE", "NO PROFILE PHOTO");

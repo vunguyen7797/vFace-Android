@@ -20,6 +20,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.storage.FirebaseStorage;
+import com.squareup.picasso.Picasso;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.helper.LocaleHelper;
 
@@ -35,6 +37,8 @@ public class ManageAccountActivity extends AppCompatActivity
     private static final int GALLERY_REQUEST_CODE = 1;
     Uri profileUri = null;
     FirebaseUser user;
+    boolean newProfilePhoto = false;
+    private static FirebaseStorage storage = FirebaseStorage.getInstance();
 
     @Override
     protected void attachBaseContext(Context newBase)
@@ -55,25 +59,33 @@ public class ManageAccountActivity extends AppCompatActivity
         etDisplayName = findViewById(R.id.etDisplayName);
         ivProfilePhoto = findViewById(R.id.ivProfilePhoto);
 
-        setPhotoAfterCropped();
-        displayInfo();  // dis play current information from database
+        newProfilePhoto = setPhotoAfterCropped();
+        if (newProfilePhoto)
+        {
+            displayInfo(0); // display without photo
+        }
+        else
+            displayInfo(1); // display with photo
     }
 
-    // after image being cropped, uri will be sent back to this activity after it recreated
-    // set the cropped image to image view
-    private void setPhotoAfterCropped()
+    // set the cropped image to image view for later update
+    private boolean setPhotoAfterCropped()
     {
-        // the the profile photo uri after being cropped
+        boolean indicator;
         profileUri = getIntent().getData();
+        Log.i("EXECUTE", "URI AFTER CROPPED: " + profileUri);
         if (profileUri != null)
-            ivProfilePhoto.setImageURI(profileUri);
+        {
+            Picasso.get().load(profileUri).into(ivProfilePhoto);
+            indicator = true;
+        }
         else
-            Log.i("EXECUTE", "FAILED PROFILE PICTURE");
-
+            indicator = false;
+        return indicator;
     }
 
     // display current information from database of the user
-    private void displayInfo()
+    private void displayInfo(int option)
     {
         if (user != null && user.getDisplayName() != null)
         {
@@ -82,10 +94,12 @@ public class ManageAccountActivity extends AppCompatActivity
         else
             Log.i("EXECUTE", "NAME IS NULL");
 
-        if (user!= null && user.getPhotoUrl() != null)
+        if (user!= null && user.getPhotoUrl() != null && option == 1)
         {
-            ivProfilePhoto.setImageURI(user.getPhotoUrl());
             profileUri = user.getPhotoUrl();
+            Log.i("EXECUTE", "LOADED URI: " + profileUri);
+            if (profileUri != null )
+                Picasso.get().load(profileUri).into(ivProfilePhoto);
         }
         else
             Log.i("EXECUTE", "PHOTO IS NULL");

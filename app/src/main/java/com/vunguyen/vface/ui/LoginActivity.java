@@ -115,7 +115,7 @@ public class LoginActivity extends AppCompatActivity
                                 "Login failed. Your email or password is incorrect. Please try again!", Toast.LENGTH_SHORT).show();
                     }
                     else {
-                        openDashBoard(email);
+                        openDashBoard(email.toLowerCase());
                     }
                 });
             }

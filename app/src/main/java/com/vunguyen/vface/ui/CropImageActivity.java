@@ -70,10 +70,9 @@ public class CropImageActivity extends AppCompatActivity
     // Button Crop event
     public void btnCrop(View view)
     {
-        Intent intent = new Intent(CropImageActivity.this, ManageAccountActivity.class);
-        intent.setData(StorageHelper.saveToInternalStorageUri(ivCrop.getCroppedImage(),
-                "profile_photo" + account, getApplicationContext())); // get URI of cropped image
-        startActivity(intent);
+        StorageHelper.uploadToFireBaseStorage(ivCrop.getCroppedImage(),
+                "profile_photo" + account,
+                CropImageActivity.this, account, "PROFILE");
     }
 
     // Back arrow button

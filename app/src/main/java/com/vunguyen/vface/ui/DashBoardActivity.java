@@ -4,6 +4,7 @@
 package com.vunguyen.vface.ui;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.Image;
@@ -22,6 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.helper.ImageEditor;
+import com.vunguyen.vface.helper.LocaleHelper;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -41,6 +43,12 @@ public class DashBoardActivity extends AppCompatActivity
     FirebaseUser user;
     ImageView ivPhoto;
     TextView tvDisplayName;
+
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -135,9 +143,9 @@ public class DashBoardActivity extends AppCompatActivity
     {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("VFACE")
-                .setMessage("Do you want to exit?")
-                .setNegativeButton("No",null)
-                .setPositiveButton("Yes", (dialog, which) -> {
+                .setMessage(getResources().getString(R.string.want_exit_dialog))
+                .setNegativeButton(getResources().getString(R.string.no_btn),null)
+                .setPositiveButton(getResources().getString(R.string.yes_btn), (dialog, which) -> {
                     Intent intent = new Intent(Intent.ACTION_MAIN);
                     intent.addCategory(Intent.CATEGORY_HOME);
                     startActivity(intent);

@@ -3,6 +3,7 @@
  */
 package com.vunguyen.vface.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -20,6 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.vunguyen.vface.R;
+import com.vunguyen.vface.helper.LocaleHelper;
 
 /**
  * This class implements methods to edit the user account profile
@@ -33,6 +35,12 @@ public class ManageAccountActivity extends AppCompatActivity
     private static final int GALLERY_REQUEST_CODE = 1;
     Uri profileUri = null;
     FirebaseUser user;
+
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

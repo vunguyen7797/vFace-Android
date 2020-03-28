@@ -139,6 +139,24 @@
     <string name="sign_up">Sign up</string>
     <string name="title_self_check">Self-check</string>
     <string name="btn_face_checkin">Face check-in</string>
-
-
+    <string name="general_settings">General settings</string>
+    <string name="languages">Languages</string>
+    <string name="choose_a_language">Choose a language</string>
+    <string name="linglin_niki_liu">LINGLIN (NIKI) LIU \nCHINA \nMaster of Science, Mathematics,\nArkansas State University</string>
+    <string name="btn_send">SEND</string>
+    <string name="email_address">Email Address</string>
+    <string name="please_log_in_toast">Please Log in</string>
+    <string name="want_exit_dialog">Do you want to exit?</string>
+    <string name="yes_btn">YES</string>
+    <string name="no_btn">NO</string>
+    <string name="menu_view_course">View Course Information</string>;
+    <string name="menu_add_course">Add Course</string>
+    <string name="menu_edit_course">Edit Course</string>
+    <string name="menu_delete_course">Delete Course</string>
+    <string name="menu_view_student">View Student Information</string>;
+    <string name="menu_add_student">Add Student</string>
+    <string name="menu_edit_student">Edit Student</string>
+    <string name="menu_delete_student">Delete Student</string>
+    <string name="please_save_data_toast">Please save data</string>
+    <string name="menu_delete_face">Delete Face</string>
 </resources>

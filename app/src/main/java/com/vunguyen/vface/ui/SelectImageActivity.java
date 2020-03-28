@@ -3,6 +3,7 @@
  */
 package com.vunguyen.vface.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.vunguyen.vface.R;
+import com.vunguyen.vface.helper.LocaleHelper;
 
 /**
  * This class implements events for taking photo and choosing photo options
@@ -26,6 +28,12 @@ public class SelectImageActivity extends AppCompatActivity
 
     // The URI of photo taken with camera
     private Uri uriTakenPhoto;
+
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

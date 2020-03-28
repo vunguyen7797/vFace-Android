@@ -39,6 +39,7 @@ import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
+import com.vunguyen.vface.helper.LocaleHelper;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 
@@ -77,6 +78,12 @@ public class StudentDataActivity extends AppCompatActivity
     MyDatabaseHelperFace db_face;
     List<Face> faceList = new ArrayList<>();
     private ArrayAdapter<Face> faceArrayAdapter;
+
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -249,7 +256,7 @@ public class StudentDataActivity extends AppCompatActivity
 
         if (!this.etStudentID.getText().toString().equals("") || !this.etStudentName.getText().toString().equals(""))
         {
-            Toast.makeText(this, "Please save data", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getResources().getString(R.string.please_save_data_toast), Toast.LENGTH_SHORT).show();
         }
         else if (this.etStudentID.getText().toString().equals("")
                 && this.etStudentName.getText().toString().equals(""))
@@ -522,7 +529,7 @@ public class StudentDataActivity extends AppCompatActivity
                                     ContextMenu.ContextMenuInfo menuInfo)
     {
         super.onCreateContextMenu(menu, view, menuInfo);
-        menu.add(0, MENU_ITEM_DELETE, 0, "Delete Student");
+        menu.add(0, MENU_ITEM_DELETE, 0, getResources().getString(R.string.menu_delete_face));
     }
 
     // Finish activity

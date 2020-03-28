@@ -18,4 +18,10 @@
         <item>IN-CLASS STUDENTS</item>
         <item>ABSENT STUDENTS</item>
     </string-array>
+
+    <string-array name="languages">
+        <item>English</item>
+        <item>Vietnamese (Tiếng Việt)</item>
+        <item>Chinese (中文）</item>
+    </string-array>
 </resources>

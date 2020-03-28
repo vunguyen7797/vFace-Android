@@ -48,6 +48,7 @@ import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
+import com.vunguyen.vface.helper.LocaleHelper;
 import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
 import com.vunguyen.vface.helper.MyDatabaseHelperDate;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
@@ -127,6 +128,11 @@ public class GroupCheckActivity extends AppCompatActivity
     List<Pair<Bitmap, String>> absenceStudentDisplayList;   // store detected Absent Students
     List<Pair<Bitmap, String>> identifyUnknownList;         // store detected Unknown Students
 
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

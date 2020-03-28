@@ -52,24 +52,53 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/lvSetting"
-            android:divider="#ffffff"
-            android:dividerHeight="0.5dp"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp">
         </ListView>
     </com.google.android.material.card.MaterialCardView>
 
-    <Button
-        android:id="@+id/btnLogout"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cvLogOut"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/logOut"
-        android:textSize="20sp"
-        android:textAlignment="center"
-        android:gravity="center"
-        android:layout_marginTop="50dp"
-        android:layout_marginEnd="20dp"
         android:layout_marginStart="20dp"
-        android:textAllCaps="true"/>
+        android:layout_marginTop="80dp"
+        android:layout_marginEnd="20dp"
+        app:cardBackgroundColor="@color/common_google_signin_btn_text_dark_disabled"
+        app:cardCornerRadius="15dp"
+        style="@style/Widget.MaterialComponents.CardView"
+        app:cardElevation="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/layoutLogOut"
+            android:orientation="horizontal"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp">
+            <ImageView
+                android:id="@+id/face_thumbnail"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_width="30dp"
+                android:layout_gravity="center"
+                android:src="@drawable/baseline_power_settings_new_24"
+                android:layout_height="30dp"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="left|center"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:text="@string/logOut"
+                android:textColor="@color/white"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginStart="15dp" />
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

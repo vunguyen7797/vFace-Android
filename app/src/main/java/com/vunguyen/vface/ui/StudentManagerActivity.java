@@ -4,6 +4,7 @@
 package com.vunguyen.vface.ui;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -36,6 +37,7 @@ import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
+import com.vunguyen.vface.helper.LocaleHelper;
 import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
 import com.vunguyen.vface.helper.MyDatabaseHelperDate;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
@@ -76,6 +78,12 @@ public class StudentManagerActivity extends AppCompatActivity
     AutoCompleteTextView courseMenu;
     ListView lvStudents;
     ImageView ivWaiting;
+
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -153,10 +161,10 @@ public class StudentManagerActivity extends AppCompatActivity
                                     ContextMenu.ContextMenuInfo menuInfo)
     {
         super.onCreateContextMenu(menu, view, menuInfo);
-        menu.add(0, MENU_ITEM_VIEW , 0, "View Student Information");
-        menu.add(0, MENU_ITEM_ADD , 1, "Add Student");
-        menu.add(0, MENU_ITEM_EDIT , 2, "Edit Student");
-        menu.add(0, MENU_ITEM_DELETE, 4, "Delete Student");
+        menu.add(0, MENU_ITEM_VIEW , 0, getResources().getString(R.string.menu_view_student));
+        menu.add(0, MENU_ITEM_ADD , 1, getResources().getString(R.string.menu_add_student));
+        menu.add(0, MENU_ITEM_EDIT , 2, getResources().getString(R.string.menu_edit_student));
+        menu.add(0, MENU_ITEM_DELETE, 4, getResources().getString(R.string.menu_delete_student));
     }
 
     // Set action for each item selected on menu

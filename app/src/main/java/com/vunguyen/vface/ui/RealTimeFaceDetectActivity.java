@@ -3,6 +3,7 @@
  */
 package com.vunguyen.vface.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -20,6 +21,7 @@ import androidx.core.content.ContextCompat;
 import com.google.firebase.ml.vision.face.FirebaseVisionFace;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.helper.ImageEditor;
+import com.vunguyen.vface.helper.LocaleHelper;
 import com.vunguyen.vface.helper.StorageHelper;
 import com.vunguyen.vface.utilsFirebaseVision.base.BaseActivity;
 import com.vunguyen.vface.utilsFirebaseVision.base.PermissionProcessors;
@@ -49,6 +51,12 @@ public class RealTimeFaceDetectActivity extends BaseActivity
     private GraphicOverlay graphicOverlay;
     private ImageView ivFaceFrame;
     private Bitmap croppedImage = null;
+
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

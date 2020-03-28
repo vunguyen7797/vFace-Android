@@ -5,11 +5,13 @@ package com.vunguyen.vface.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
 import com.vunguyen.vface.R;
+import com.vunguyen.vface.helper.LocaleHelper;
 
 
 /**
@@ -18,6 +20,13 @@ import com.vunguyen.vface.R;
 public class AboutActivity extends AppCompatActivity
 {
     String account;
+
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {

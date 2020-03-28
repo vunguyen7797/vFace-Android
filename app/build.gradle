@@ -56,5 +56,5 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:3.1.0'
     implementation 'com.github.zjywill:roundedcornerimageview:1.1.0'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
-
+    implementation 'io.paperdb:paperdb:2.5'
 }

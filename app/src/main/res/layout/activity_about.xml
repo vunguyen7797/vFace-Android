@@ -127,7 +127,28 @@
             android:layout_marginStart="10dp"/>
     </LinearLayout>
 
-
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="About Team"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="40dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chinese Translator"
+        android:textColor="@color/colorPrimary"
+        android:layout_marginStart="40dp"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/linglin_niki_liu"
+        android:textColor="@color/white"
+        android:layout_marginStart="40dp"/>
 
 
 

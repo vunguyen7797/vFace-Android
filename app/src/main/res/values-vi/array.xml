@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="display_modes">
+        <item>HỌC VIÊN CÓ MẶT</item>
+        <item>HỌC VIÊN VẮNG</item>
+        <item>HỌC VIÊN LẠ</item>
+    </string-array>
+
+    <string-array name="setting_menu">
+        <item>Quản lý tài khoản</item>
+        <item>Cài đặt chung</item>
+        <item>Thông báo </item>
+        <item>Chính sách riêng tư </item>
+        <item><![CDATA[Hỗ trợ và phản hồi]]></item>
+    </string-array>
+
+    <string-array name="display_modes_attendance">
+        <item>HỌC VIÊN CÓ MẶT</item>
+        <item>HỌC VIÊN VẮNG</item>
+    </string-array>
+
+    <string-array name="languages">
+        <item>Tiếng Anh (English)</item>
+        <item>Tiếng Việt (Tiếng Việt)</item>
+        <item>Tiếng  (中文）</item>
+    </string-array>
+</resources>

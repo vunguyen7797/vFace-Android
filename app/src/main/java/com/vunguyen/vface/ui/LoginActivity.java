@@ -3,6 +3,7 @@
  */
 package com.vunguyen.vface.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -16,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.vunguyen.vface.R;
+import com.vunguyen.vface.helper.LocaleHelper;
 
 /**
  * This class is to implement functions for the login screen activity
@@ -30,6 +32,12 @@ public class LoginActivity extends AppCompatActivity
     TextView tvForgotPwd;
 
     private FirebaseAuth.AuthStateListener authStateListener;
+
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -48,7 +56,8 @@ public class LoginActivity extends AppCompatActivity
             }
             else
             {
-                Toast.makeText(LoginActivity.this, "Please Log in", Toast.LENGTH_SHORT).show();
+
+                Toast.makeText(LoginActivity.this, getResources().getString(R.string.please_log_in_toast), Toast.LENGTH_SHORT).show();
             }
         };
 

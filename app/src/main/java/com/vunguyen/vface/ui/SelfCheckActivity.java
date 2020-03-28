@@ -37,6 +37,7 @@ import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
+import com.vunguyen.vface.helper.LocaleHelper;
 import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
 import com.vunguyen.vface.helper.MyDatabaseHelperDate;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
@@ -102,6 +103,12 @@ public class SelfCheckActivity extends AppCompatActivity
     private static final int REQUEST_TAKE_PHOTO = 0;
     // The URI of photo taken with camera
     private Uri uriTakenPhoto;
+
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

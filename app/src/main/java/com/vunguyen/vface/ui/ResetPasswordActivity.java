@@ -3,6 +3,7 @@
  */
 package com.vunguyen.vface.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.vunguyen.vface.R;
+import com.vunguyen.vface.helper.LocaleHelper;
 
 /**
  * This class implements functions for reset password activity features
@@ -30,6 +32,12 @@ public class ResetPasswordActivity extends AppCompatActivity
     Button btnSend;
     FirebaseAuth mFirebaseAuth;
     ImageView ivBackArrow;
+
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

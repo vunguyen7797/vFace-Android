@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="display_modes">
+        <item>已到学生</item>
+        <item>未到学生</item>
+        <item>无法识别</item>
+    </string-array>
+
+    <string-array name="setting_menu">
+        <item>账户中心</item>
+        <item>通用设置</item>
+        <item>通知</item>
+        <item>隐私政策</item>
+        <item><![CDATA[帮助&反馈]]></item>
+    </string-array>
+
+    <string-array name="display_modes_attendance">
+        <item>已到学生</item>
+        <item>未到学生</item>
+    </string-array>
+
+    <string-array name="languages">
+        <item>英文（English）</item>
+        <item>越语(Tiếng Việt)</item>
+        <item>中文 (中文）</item>
+    </string-array>
+</resources>

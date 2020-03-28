@@ -5,6 +5,7 @@ package com.vunguyen.vface.ui;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.helper.ApiConnector;
+import com.vunguyen.vface.helper.LocaleHelper;
 import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
 
 import java.util.UUID;
@@ -47,6 +49,12 @@ public class AddEditCourseActivity extends AppCompatActivity
     String account; // email address of the user
 
     private boolean needRefresh; // signal flag to refresh data
+
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

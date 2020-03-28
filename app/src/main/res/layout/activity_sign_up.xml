@@ -82,7 +82,7 @@
         android:layout_marginTop="252dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:hint="Emaill Address"
+        android:hint="@string/email_address"
 
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.506"
@@ -110,7 +110,6 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/button"
-        android:fontFamily="@font/assistant_light"
         android:text="@string/sign_up"
         android:textAllCaps="false"
         android:textColor="#ffffff"

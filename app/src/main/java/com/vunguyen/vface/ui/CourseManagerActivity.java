@@ -4,6 +4,7 @@
 package com.vunguyen.vface.ui;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -36,6 +37,7 @@ import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.helper.ApiConnector;
+import com.vunguyen.vface.helper.LocaleHelper;
 import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
@@ -66,6 +68,12 @@ public class CourseManagerActivity extends AppCompatActivity
     private List<Course> courseList = new ArrayList<>();
     // Array adapter to connect ListView and data
     private ArrayAdapter<Course> courseArrayAdapter;
+
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -129,10 +137,10 @@ public class CourseManagerActivity extends AppCompatActivity
     {
         super.onCreateContextMenu(menu, view, menuInfo);
 
-        menu.add(0, MENU_ITEM_VIEW , 0, "View Course Information");
-        menu.add(0, MENU_ITEM_ADD , 1, "Add Course");
-        menu.add(0, MENU_ITEM_EDIT , 2, "Edit Course");
-        menu.add(0, MENU_ITEM_DELETE, 4, "Delete Course");
+        menu.add(0, MENU_ITEM_VIEW , 0, getResources().getString(R.string.menu_view_course));
+        menu.add(0, MENU_ITEM_ADD , 1, getResources().getString(R.string.menu_add_course));
+        menu.add(0, MENU_ITEM_EDIT , 2, getResources().getString(R.string.menu_edit_course));
+        menu.add(0, MENU_ITEM_DELETE, 4, getResources().getString(R.string.menu_delete_course));
     }
 
     // Implement actions for each menu item
@@ -255,8 +263,6 @@ public class CourseManagerActivity extends AppCompatActivity
         startActivity(intent);
         finish();
     }
-
-    // Deleting a course from server - running background
 
     /**
      * This class is to remove a course from server running in background

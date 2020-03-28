@@ -3,6 +3,7 @@
  */
 package com.vunguyen.vface.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.helper.ImageEditor;
+import com.vunguyen.vface.helper.LocaleHelper;
 import com.vunguyen.vface.helper.StorageHelper;
 
 import java.io.IOException;
@@ -27,6 +29,12 @@ public class CropImageActivity extends AppCompatActivity
     CropImageView ivCrop;
     String account;
     Uri uri;
+
+    @Override
+    protected void attachBaseContext(Context newBase)
+    {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

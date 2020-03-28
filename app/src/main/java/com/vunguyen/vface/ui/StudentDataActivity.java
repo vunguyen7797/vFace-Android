@@ -34,6 +34,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.microsoft.projectoxford.face.contract.CreatePersonResult;
+import com.squareup.picasso.Picasso;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
@@ -240,7 +241,7 @@ public class StudentDataActivity extends AppCompatActivity
                     }
                     // add face to student
                     AddFaceToStudent addFaceToStudent = new AddFaceToStudent(bitmapImage, student_serverId,
-                            courseServerId, db_face, getApplicationContext(), StudentDataActivity.this);
+                            courseServerId, db_face, getApplicationContext(), StudentDataActivity.this, account);
                     addFaceToStudent.addFaceToPerson();
                 }
                 break;
@@ -498,7 +499,7 @@ public class StudentDataActivity extends AppCompatActivity
 
                     Uri uri = Uri.parse(faceList.get(position).getStudentFaceUri());
 
-                    ((ImageView)convertView.findViewById(R.id.image_face)).setImageURI(uri);
+                    Picasso.get().load(uri).into((ImageView)convertView.findViewById(R.id.image_face));
 
                     return convertView;
                 }

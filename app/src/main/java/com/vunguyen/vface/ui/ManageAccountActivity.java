@@ -38,7 +38,6 @@ public class ManageAccountActivity extends AppCompatActivity
     Uri profileUri = null;
     FirebaseUser user;
     boolean newProfilePhoto = false;
-    private static FirebaseStorage storage = FirebaseStorage.getInstance();
 
     @Override
     protected void attachBaseContext(Context newBase)

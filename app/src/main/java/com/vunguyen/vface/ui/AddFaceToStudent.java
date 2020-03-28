@@ -4,6 +4,7 @@
 package com.vunguyen.vface.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.Image;
 import android.net.Uri;
@@ -22,6 +23,7 @@ import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 import com.vunguyen.vface.helper.StorageHelper;
+import com.vunguyen.vface.helper.UriPhoto;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -49,9 +51,10 @@ class AddFaceToStudent extends ActivityCompat
     private MyDatabaseHelperFace db_face;
     private Context context;
     private StudentDataActivity activity;
+    private String account;
 
     AddFaceToStudent(Bitmap bitmapImage, String studentServerId, String courseServerId,
-                     MyDatabaseHelperFace db_face, Context context, StudentDataActivity activity)
+                     MyDatabaseHelperFace db_face, Context context, StudentDataActivity activity, String account)
     {
         this.bitmapImage = bitmapImage;
         this.studentServerId = studentServerId;
@@ -59,7 +62,7 @@ class AddFaceToStudent extends ActivityCompat
         this.db_face = db_face;
         this.context = context;
         this.activity = activity;
-
+        this.account = account;
     }
 
     // This method to detect face from a bitmap image,
@@ -87,21 +90,25 @@ class AddFaceToStudent extends ActivityCompat
         if (result)
         {
             String faceIdStr = faceId.toString();
-            Uri uri = StorageHelper.saveToInternalStorageUri(faceThumbnail, faceIdStr+".png", context);
-            com.vunguyen.vface.bean.Face studentFace = new com.vunguyen.vface.bean.Face(studentServerId, faceIdStr, uri.toString());
+          //  Uri uri = StorageHelper.saveToInternalStorageUri(faceThumbnail, faceIdStr+".png", context);
 
-            // saving face URI to face database of a student
-            db_face.addFace(studentFace);
-            Log.i("EXECUTE", "Response: Success. Face(s) " + faceIdStr + "added to student: " + studentServerId);
-
-            // Resume the StudentData activity after saving
-            activity.onResume();
-            Toast.makeText(context, "Face detected successfully.", Toast.LENGTH_SHORT).show();
+            StorageHelper.uploadToFireBaseStorage(new UriPhoto() {
+                @Override
+                public void getUriPhoto(Uri uriPhoto) {
+                    com.vunguyen.vface.bean.Face studentFace = new com.vunguyen.vface.bean.Face(studentServerId, faceIdStr, uriPhoto.toString());
+                    // saving face URI to face database of a student
+                    db_face.addFace(studentFace);
+                    Log.i("EXECUTE", "Response: Success. Face(s) " + faceIdStr + "added to student: " + studentServerId);
+                    // Resume the StudentData activity after saving
+                    activity.onResume();
+                    Toast.makeText(context, "Face detected successfully.", Toast.LENGTH_SHORT).show();
+                }
+            }, faceThumbnail, faceIdStr+".png", context, account, "face");
         }
         else
         {
             activity.onResume();
-            Toast.makeText(context, "An error occured. No face is saved.", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "An error occurred. No face is saved.", Toast.LENGTH_LONG).show();
         }
     }
 

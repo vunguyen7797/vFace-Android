@@ -4,7 +4,6 @@
 package com.vunguyen.vface.helper;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
@@ -18,7 +17,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.vunguyen.vface.ui.ManageAccountActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -35,12 +33,9 @@ public class StorageHelper
     private static StorageReference storageRef;
 
     // Upload Photo to Firebase Storage
-    public static void uploadToFireBaseStorage(Bitmap bitmapImage, String filename, Context context, String account, String request)
+    public static void uploadToFireBaseStorage(UriPhoto callback, Bitmap bitmapImage, String filename, Context context, String account, String request)
     {
-        if (request.equalsIgnoreCase("PROFILE"))
-            storageRef = storage.getReferenceFromUrl("gs://vface-a53e6.appspot.com/profile_photo");
-        else if (request.equalsIgnoreCase("FACE"))
-            storageRef = storage.getReferenceFromUrl("gs://vface-a53e6.appspot.com/face");
+        storageRef = storage.getReferenceFromUrl("gs://vface-a53e6.appspot.com/"+request);
         StorageReference croppedPhotoRef = storageRef.child(filename);
         // Get the data from an ImageView as bytes
         ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
@@ -65,19 +60,13 @@ public class StorageHelper
             public void onComplete(@NonNull Task<Uri> task) {
                 if (task.isSuccessful()) {
                     Uri uriCroppedImage = task.getResult();
-                    Log.i("EXECUTE", "DOWNLOAD SUCCESSFULLY " +uriCroppedImage);
-
-                    Intent intent = new Intent(context, ManageAccountActivity.class);
-                    intent.putExtra("FileName", filename);
-                    intent.putExtra("ACCOUNT", account);
-                    intent.setData(uriCroppedImage);
-                    Log.i("EXECUTE", "FILE NAME: " + filename);
-                    context.startActivity(intent);
+                    Log.i("EXECUTE", "UPLOAD SUCCESSFULLY " +uriCroppedImage);
+                    callback.getUriPhoto(uriCroppedImage);
 
                 } else {
                     // Handle failures
                     // ...
-                    Log.i("EXECUTE", "CANNOT DOWNLOAD PHOTO");
+                    Log.i("EXECUTE", "CANNOT UPLOAD PHOTO");
                 }
             }
         });

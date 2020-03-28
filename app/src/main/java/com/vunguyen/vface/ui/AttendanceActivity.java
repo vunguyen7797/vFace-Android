@@ -27,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputLayout;
+import com.squareup.picasso.Picasso;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.bean.Student;
@@ -274,7 +275,7 @@ public class AttendanceActivity extends AppCompatActivity
      */
     class FaceListViewAdapter implements ListAdapter
     {
-        List<Bitmap> faceThumbnails;
+        List<Uri> faceThumbnails;
         List<String> studentInfo;
         List<String> studentAbsence;
 
@@ -295,15 +296,9 @@ public class AttendanceActivity extends AppCompatActivity
                 for (Student student : studentIdentityList)
                 {
                     Uri uri = Uri.parse(db_face.getFaceWithStudent(student.getStudentServerId()).get(0).getStudentFaceUri());
-                    try
-                    {
-                        Bitmap bitmap = ImageEditor.handlePhotoAndRotationBitmap(getApplicationContext(), uri);
-                        faceThumbnails.add(bitmap);
-                    }
-                    catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
+                    //Bitmap bitmap = ImageEditor.handlePhotoAndRotationBitmap(getApplicationContext(), uri);
+                    faceThumbnails.add(uri);
+
                     studentInfo.add(student.getStudentName());
                     int totalAbsence = db_date.getTotalAbsence(student.getStudentServerId(), student.getCourseServerId());
                     studentAbsence.add(Integer.toString(totalAbsence));
@@ -371,7 +366,8 @@ public class AttendanceActivity extends AppCompatActivity
             convertView.setId(position);
 
             // set face
-            ((ImageView) convertView.findViewById(R.id.face_thumbnail)).setImageBitmap(faceThumbnails.get(position));
+            Picasso.get().load(faceThumbnails.get(position)).into(((ImageView) convertView.findViewById(R.id.face_thumbnail)));
+           // ((ImageView) convertView.findViewById(R.id.face_thumbnail)).setImageBitmap(faceThumbnails.get(position));
             //set info
             ((TextView) convertView.findViewById(R.id.tvDetectedFace)).setText(studentInfo.get(position));
             ((TextView) convertView.findViewById(R.id.tvDetectedFace)).setTextColor(Color.WHITE);

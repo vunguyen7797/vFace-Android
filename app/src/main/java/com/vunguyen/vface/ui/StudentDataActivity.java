@@ -81,7 +81,6 @@ public class StudentDataActivity extends AppCompatActivity
     private int mode;
     boolean newStudent;
 
-    MyDatabaseHelperFace db_face;
     List<Face> faceList = new ArrayList<>();
     private ArrayAdapter<Face> faceArrayAdapter;
 
@@ -105,10 +104,6 @@ public class StudentDataActivity extends AppCompatActivity
         etStudentID = findViewById(R.id.etStudentId);
         etStudentName = findViewById(R.id.etStudentName);
         gvStudentFace = findViewById(R.id.gvStudentFace);
-
-        // initialize face database
-        db_face = new MyDatabaseHelperFace(this);
-
 
         // Get student information to edit
         Intent intent_info = this.getIntent();
@@ -228,7 +223,6 @@ public class StudentDataActivity extends AppCompatActivity
     // Delete a student from database
     private void deleteFace(Face face)
     {
-        db_face.deleteFace(face);
         this.faceList.remove(face);
         mDatabase_Face.child(face.getStudentFaceServerId()).removeValue();
         StorageReference photoRef = mStorage.getReferenceFromUrl(face.getStudentFaceUri());

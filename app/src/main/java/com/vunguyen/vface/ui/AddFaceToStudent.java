@@ -45,7 +45,6 @@ class AddFaceToStudent extends ActivityCompat
     private String studentServerId;
     private String courseServerId;
 
-    private MyDatabaseHelperFace db_face;
     private Context context;
     private StudentDataActivity activity;
     private String account;

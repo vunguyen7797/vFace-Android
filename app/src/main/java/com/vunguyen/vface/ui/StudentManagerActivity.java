@@ -40,6 +40,7 @@ import com.google.firebase.storage.StorageReference;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
+import com.vunguyen.vface.bean.Date;
 import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
@@ -60,6 +61,7 @@ public class StudentManagerActivity extends AppCompatActivity
     DatabaseReference mDatabase_Course;
     DatabaseReference mDatabase_Student;
     DatabaseReference mDatabase_Face;
+    DatabaseReference mDatabase_Date;
 
     // variables
     String account;
@@ -98,6 +100,7 @@ public class StudentManagerActivity extends AppCompatActivity
         // get all courses belong to this account
         mDatabase_Student = FirebaseDatabase.getInstance().getReference().child(account).child("student");
         mDatabase_Face = FirebaseDatabase.getInstance().getReference().child(account).child("face");
+        mDatabase_Date = FirebaseDatabase.getInstance().getReference().child(account).child("date");
         getCourseList();
         // initialize student list view and student database
         lvStudents = findViewById(R.id.lvStudents);
@@ -282,6 +285,7 @@ public class StudentManagerActivity extends AppCompatActivity
         mDatabase_Student.child(student.getStudentName().toUpperCase()+"-"+student
                 .getStudentServerId()).removeValue();
         deleteAllFace(student.getStudentServerId());
+        deleteAllDate(student);
         this.studentArrayAdapter.notifyDataSetChanged();
         // execute background task to delete student from server
         new DeleteStudentTask(courseServerId).execute(student.getStudentServerId());
@@ -315,6 +319,29 @@ public class StudentManagerActivity extends AppCompatActivity
                     }
                 }
                 Log.i("EXECUTE","DSP Size: " + faceList.size());
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void deleteAllDate(Student student)
+    {
+        mDatabase_Date.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    Date date = dsp.getValue(Date.class);
+                    assert date != null;
+                    if (date.getStudentServerId().equalsIgnoreCase(student.getStudentServerId()))
+                    {
+                        mDatabase_Date.child(student.getStudentName().toUpperCase() + "-" +
+                                date.getStudent_date().replaceAll("[,]", "")).removeValue();
+                    }
+                }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {

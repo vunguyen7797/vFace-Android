@@ -11,16 +11,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -29,7 +25,6 @@ import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.LocaleHelper;
-import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
 
 import java.util.Objects;
 import java.util.UUID;

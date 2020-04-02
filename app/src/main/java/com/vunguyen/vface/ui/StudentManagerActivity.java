@@ -14,13 +14,9 @@ import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -48,10 +44,6 @@ import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.LocaleHelper;
-import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
-import com.vunguyen.vface.helper.MyDatabaseHelperDate;
-import com.vunguyen.vface.helper.MyDatabaseHelperFace;
-import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,17 +55,12 @@ import java.util.UUID;
  */
 public class StudentManagerActivity extends AppCompatActivity
 {
-    // data list
-    private List<Course> courseList = new ArrayList<>();
-    private List<Student> studentList = new ArrayList<>();
-
     // array adapter and database
     private ArrayAdapter<Student> studentArrayAdapter;
-    private MyDatabaseHelperStudent db_student;
-    private MyDatabaseHelperCourse db_course;
     DatabaseReference mDatabase_Course;
     DatabaseReference mDatabase_Student;
     DatabaseReference mDatabase_Face;
+
     // variables
     String account;
     private int courseId = 0;
@@ -86,7 +73,7 @@ public class StudentManagerActivity extends AppCompatActivity
     private static final int MENU_ITEM_DELETE = 444;
     private static final int MY_REQUEST_CODE = 1000;
 
-    // functions
+    // UI
     FloatingActionButton fabAddStudent;
     AutoCompleteTextView courseMenu;
     ListView lvStudents;
@@ -112,20 +99,12 @@ public class StudentManagerActivity extends AppCompatActivity
         mDatabase_Student = FirebaseDatabase.getInstance().getReference().child(account).child("student");
         mDatabase_Face = FirebaseDatabase.getInstance().getReference().child(account).child("face");
         getCourseList();
-
-        db_course = new MyDatabaseHelperCourse(this);
-        this.courseList = db_course.getAllCourses(account);
-
-
-
         // initialize student list view and student database
         lvStudents = findViewById(R.id.lvStudents);
         lvStudents.setVisibility(View.GONE);
-        db_student = new MyDatabaseHelperStudent(this);
         fabAddStudent = findViewById(R.id.floating_action_button);
         fabAddStudent.setVisibility(View.GONE);
         ivWaiting = findViewById(R.id.ivWaiting);
-
 
         //initializeSelection();
     }
@@ -299,15 +278,9 @@ public class StudentManagerActivity extends AppCompatActivity
     // Delete a student from database
     private void deleteStudent(Student student)
     {
-        db_student.deleteStudent(student);
-        this.studentList.remove(student);
-        // delete faces in database that belong to this student
-        MyDatabaseHelperFace db_face = new MyDatabaseHelperFace(this);
-        db_face.deleteFacesWithStudent(student.getStudentServerId());
-        MyDatabaseHelperDate db_date = new MyDatabaseHelperDate(this);
-        db_date.deleteDatesWithStudent(student.getStudentServerId(), student.getCourseServerId());
         // Refresh ListView.
-        mDatabase_Student.child(student.getStudentName().toUpperCase()+"-"+student.getStudentServerId()).removeValue();
+        mDatabase_Student.child(student.getStudentName().toUpperCase()+"-"+student
+                .getStudentServerId()).removeValue();
         deleteAllFace(student.getStudentServerId());
         this.studentArrayAdapter.notifyDataSetChanged();
         // execute background task to delete student from server
@@ -325,8 +298,9 @@ public class StudentManagerActivity extends AppCompatActivity
                     Log.i("EXECUTE","DSP: " + dsp.getValue(Student.class));
                     if (Objects.requireNonNull(dsp.getValue(Face.class)).getStudentServerId().equalsIgnoreCase(studentServerId))
                     {
-                        mDatabase_Face.child(dsp.getValue(Face.class).getStudentFaceServerId()).removeValue();
-                        StorageReference photoRef = FirebaseStorage.getInstance().getReferenceFromUrl(dsp.getValue(Face.class).getStudentFaceUri());
+                        mDatabase_Face.child(Objects.requireNonNull(dsp.getValue(Face.class)).getStudentFaceServerId()).removeValue();
+                        StorageReference photoRef = FirebaseStorage.getInstance()
+                                .getReferenceFromUrl(Objects.requireNonNull(dsp.getValue(Face.class)).getStudentFaceUri());
                         photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {

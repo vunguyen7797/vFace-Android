@@ -44,8 +44,6 @@ import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.LocaleHelper;
-import com.vunguyen.vface.helper.MyDatabaseHelperFace;
-import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 
 import java.util.ArrayList;
 import java.util.List;

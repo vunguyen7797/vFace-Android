@@ -19,7 +19,6 @@ import com.microsoft.projectoxford.face.contract.Face;
 import com.microsoft.projectoxford.face.contract.FaceRectangle;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
-import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 import com.vunguyen.vface.helper.StorageHelper;
 import com.vunguyen.vface.helper.callbackInterfaces.UriPhotoInterface;
 

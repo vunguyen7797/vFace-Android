@@ -42,13 +42,11 @@ import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.microsoft.projectoxford.face.contract.CreatePersonResult;
 import com.squareup.picasso.Picasso;
 import com.vunguyen.vface.R;
-import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.LocaleHelper;
-import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 
 import java.io.IOException;
 import java.util.ArrayList;

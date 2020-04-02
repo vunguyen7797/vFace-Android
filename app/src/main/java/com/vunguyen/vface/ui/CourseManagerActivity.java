@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,11 +15,8 @@ import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -30,20 +26,30 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
+import com.vunguyen.vface.bean.Face;
+import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.LocaleHelper;
-import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
 import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This activity class implements methods and events for the Course Manager feature.
@@ -61,13 +67,12 @@ public class CourseManagerActivity extends AppCompatActivity
     private static final int MENU_ITEM_ADD = 333;
     private static final int MENU_ITEM_DELETE = 444;
 
-    private static final int MY_REQUEST_CODE = 1000;
-    MyDatabaseHelperCourse db_course;
-
-    //List contains the courses to display on screen
-    private List<Course> courseList = new ArrayList<>();
+    private static final int MY_REQUEST_CODE = 1000;;
     // Array adapter to connect ListView and data
     private ArrayAdapter<Course> courseArrayAdapter;
+    DatabaseReference mDatabase_Course;
+    DatabaseReference mDatabase_Student;
+    DatabaseReference mDatabase_Face;
 
     @Override
     protected void attachBaseContext(Context newBase)
@@ -83,21 +88,42 @@ public class CourseManagerActivity extends AppCompatActivity
 
         // Get email account
         account = getIntent().getStringExtra("ACCOUNT");
-
+        Log.i("EXECUTE", "Account CM: " + account);
+        mDatabase_Course = FirebaseDatabase.getInstance().getReference().child(account).child("course");
+        mDatabase_Student = FirebaseDatabase.getInstance().getReference().child(account).child("student");
+        mDatabase_Face = FirebaseDatabase.getInstance().getReference().child(account).child("face");
         // Set event for the Add Course button
         fabAddCourse = findViewById(R.id.floating_action_button);
         fabAddCourse.setOnClickListener(v -> actionAddCourse());;
 
-        // Open the course database, transfer all course from database to a course list
-        db_course = new MyDatabaseHelperCourse(this);
-        this.courseList = db_course.getAllCourses(account);
+        getCourseList();
 
-        // Display courses on the list view
-        displayCourses();
+    }
+
+    public void getCourseList()
+    {
+        mDatabase_Course.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Course> courseList = new ArrayList<>();
+                for(DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    Log.i("EXECUTE","DSP: " + dsp.getValue(Course.class));
+                    courseList.add(dsp.getValue(Course.class));
+
+                }
+                displayCourses(courseList);;
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError)
+            {
+
+            }
+        });
     }
 
     // This method to display courses on list view through adapter
-    public void displayCourses()
+    public void displayCourses(List<Course> courseList)
     {
         // initialize list view
         lvCourses = findViewById(R.id.lvCourses);
@@ -108,7 +134,7 @@ public class CourseManagerActivity extends AppCompatActivity
         }
         // create adapter for list view of courses
         this.courseArrayAdapter = new ArrayAdapter<Course>(this,
-                android.R.layout.simple_list_item_activated_1, android.R.id.text1, this.courseList)
+                android.R.layout.simple_list_item_activated_1, android.R.id.text1, courseList)
         {
             @NonNull
             @Override
@@ -124,7 +150,6 @@ public class CourseManagerActivity extends AppCompatActivity
 
         // Register Adapter for ListView.
         this.lvCourses.setAdapter(this.courseArrayAdapter);
-
         // Register the menu context for ListView.
         registerForContextMenu(this.lvCourses);
 
@@ -209,8 +234,11 @@ public class CourseManagerActivity extends AppCompatActivity
     private void deleteCourse(Course course)
     {
         String courseServerId = course.getCourseServerId();
-        db_course.deleteCourse(course); // delete course from database
-        this.courseList.remove(course); // delete course from the list
+        //db_course.deleteCourse(course); // delete course from database
+        mDatabase_Course.child(course.getCourseName().toUpperCase() + "-" + courseServerId).removeValue();
+        deleteAllStudent(courseServerId);
+        Log.i("EXECUTE", "Deleted course: " + course.getCourseName() + "-" + courseServerId);
+        //this.courseList.remove(course); // delete course from the list
         new DeleteCourseTask().execute(courseServerId); // delete course from server
         MyDatabaseHelperStudent db_student = new MyDatabaseHelperStudent(this);
         MyDatabaseHelperFace db_face = new MyDatabaseHelperFace(this);
@@ -218,14 +246,68 @@ public class CourseManagerActivity extends AppCompatActivity
         db_student.deleteStudentWithCourse(courseServerId, db_face);
         Log.i("EXECUTE", "Deleted course: " + courseServerId);
         // Refresh ListView.
-        if (courseList.size() == 0)
-        {
-            ImageView ivWaiting = findViewById(R.id.ivWaitingCourse);
-            ivWaiting.setVisibility(View.VISIBLE);
-        }
         this.courseArrayAdapter.notifyDataSetChanged();
     }
 
+    private void deleteAllStudent(String courseServerId)
+    {
+        mDatabase_Student.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    if (Objects.requireNonNull(dsp.getValue(Student.class)).getCourseServerId().equalsIgnoreCase(courseServerId))
+                    {
+                        Student student = dsp.getValue(Student.class);
+                        String path = Objects.requireNonNull(student.getStudentName().toUpperCase())
+                                + "-" + Objects.requireNonNull(student.getStudentServerId());
+                        Log.i("EXECUTE", "Path Student: " + path);
+                        mDatabase_Student.child(path).removeValue();
+                        deleteAllFace(student.getStudentServerId());
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void deleteAllFace(String studentServerId)
+    {
+        mDatabase_Face.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Face> faceList = new ArrayList<>();
+                for(DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    Log.i("EXECUTE","DSP: " + dsp.getValue(Student.class));
+                    if (Objects.requireNonNull(dsp.getValue(Face.class)).getStudentServerId().equalsIgnoreCase(studentServerId))
+                    {
+                        mDatabase_Face.child(dsp.getValue(Face.class).getStudentFaceServerId()).removeValue();
+                        StorageReference photoRef = FirebaseStorage.getInstance().getReferenceFromUrl(dsp.getValue(Face.class).getStudentFaceUri());
+                        photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.i("EXECUTE", "Deleted face from Firebase Storage");
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.i("EXECUTE", "Cannot delete face from Firebase Storage");
+                            }
+                        });
+                    }
+                }
+                Log.i("EXECUTE","DSP Size: " + faceList.size());
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     // Response from AddEditCourse Activity
     @Override
@@ -238,10 +320,6 @@ public class CourseManagerActivity extends AppCompatActivity
             // Refresh ListView
             if (needRefresh)
             {
-                this.courseList.clear();
-                List<Course> list = db_course.getAllCourses(account);
-                this.courseList.addAll(list);
-                // Notify the change of data to refresh the listview
                 this.courseArrayAdapter.notifyDataSetChanged();
             }
         }

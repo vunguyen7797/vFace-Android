@@ -7,7 +7,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,8 +16,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
@@ -29,24 +26,34 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.microsoft.projectoxford.face.contract.CreatePersonResult;
 import com.squareup.picasso.Picasso;
 import com.vunguyen.vface.R;
+import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.LocaleHelper;
 import com.vunguyen.vface.helper.MyDatabaseHelperFace;
-import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -72,13 +79,17 @@ public class StudentDataActivity extends AppCompatActivity
     private static final int MODE_EDIT = 2;
     private static final int REQUEST_SELECT_IMAGE = 0;
     private static final int MENU_ITEM_DELETE = 111;
-    private boolean needRefresh;
+    private boolean needRefresh = true;
     private int mode;
     boolean newStudent;
 
     MyDatabaseHelperFace db_face;
     List<Face> faceList = new ArrayList<>();
     private ArrayAdapter<Face> faceArrayAdapter;
+
+    DatabaseReference mDatabase_Face;
+    DatabaseReference mDatabase_student;
+    FirebaseStorage mStorage = FirebaseStorage.getInstance();
 
     @Override
     protected void attachBaseContext(Context newBase)
@@ -99,6 +110,7 @@ public class StudentDataActivity extends AppCompatActivity
 
         // initialize face database
         db_face = new MyDatabaseHelperFace(this);
+
 
         // Get student information to edit
         Intent intent_info = this.getIntent();
@@ -130,7 +142,34 @@ public class StudentDataActivity extends AppCompatActivity
             studentName = etStudentName.getText().toString();
             newStudent = true; // flag
         }
-        displayGridView(student_serverId, 0);
+
+        //displayGridView(student_serverId, 0);
+        mDatabase_Face = FirebaseDatabase.getInstance().getReference().child(account).child("face");
+        mDatabase_student = FirebaseDatabase.getInstance().getReference().child(account).child("student");
+        getFaceList(student_serverId);
+    }
+
+    private void getFaceList(String student_serverId)
+    {
+        mDatabase_Face.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Face> faceList = new ArrayList<>();
+                for(DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    Log.i("EXECUTE","DSP: " + dsp.getValue(Student.class));
+                    if (Objects.requireNonNull(dsp.getValue(Face.class)).getStudentServerId().equalsIgnoreCase(student_serverId))
+                        faceList.add(dsp.getValue(Face.class));
+                }
+
+                displayGridView(faceList, student_serverId, 0);
+                Log.i("EXECUTE","DSP Size: " + faceList.size());
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     // Click event for Done button
@@ -151,10 +190,10 @@ public class StudentDataActivity extends AppCompatActivity
     // save data for student profile
     private void saveData()
     {
-        MyDatabaseHelperStudent db = new MyDatabaseHelperStudent(this);
+       // MyDatabaseHelperStudent db = new MyDatabaseHelperStudent(this);
         // get input from textbox
-        String number_id = this.etStudentID.getText().toString();
-        String name = this.etStudentName.getText().toString();
+        String number_id = Objects.requireNonNull(this.etStudentID.getText()).toString();
+        String name = Objects.requireNonNull(this.etStudentName.getText()).toString();
 
         if(number_id.equals("") || name.equals(""))
         {
@@ -166,14 +205,19 @@ public class StudentDataActivity extends AppCompatActivity
         if(mode == MODE_ADD )
         {
             Log.i ("EXECUTE", " Add Student Server id: " + student_serverId + " to group: " + courseServerId);
-            this.student = new Student(number_id, courseServerId, name, student_serverId);
-            db.addStudent(student);
+            this.student = new Student(number_id, courseServerId, name, student_serverId, "NO");
+            //db.addStudent(student);
+            mDatabase_student.child(name.toUpperCase() + "-" + student_serverId).setValue(student);
         }
         else
         {
+            if (!student.getStudentName().equalsIgnoreCase(name))
+            {
+                mDatabase_student.child(student.getStudentName().toUpperCase()+"-"+student_serverId).removeValue();
+            }
             this.student.setStudentIdNumber(number_id);
             this.student.setStudentName(name);
-            db.updateStudent(student);
+            mDatabase_student.child(name.toUpperCase() + "-" + student_serverId).setValue(student);
         }
 
         // Train the course after a student is added or modified.
@@ -188,10 +232,24 @@ public class StudentDataActivity extends AppCompatActivity
     {
         db_face.deleteFace(face);
         this.faceList.remove(face);
+        mDatabase_Face.child(face.getStudentFaceServerId()).removeValue();
+        StorageReference photoRef = mStorage.getReferenceFromUrl(face.getStudentFaceUri());
+        photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.i("EXECUTE", "Deleted face from Firebase Storage");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.i("EXECUTE", "Cannot delete face from Firebase Storage");
+            }
+        });
         // Refresh ListView.
         this.faceArrayAdapter.notifyDataSetChanged();
         // Delete face from server
         new DeleteFaceTask(courseServerId, student_serverId).execute(face.getStudentFaceServerId());
+
     }
 
     // Button Add Face click event
@@ -241,7 +299,7 @@ public class StudentDataActivity extends AppCompatActivity
                     }
                     // add face to student
                     AddFaceToStudent addFaceToStudent = new AddFaceToStudent(bitmapImage, student_serverId,
-                            courseServerId, db_face, getApplicationContext(), StudentDataActivity.this, account);
+                            courseServerId, mDatabase_Face, getApplicationContext(), StudentDataActivity.this, account);
                     addFaceToStudent.addFaceToPerson();
                 }
                 break;
@@ -446,7 +504,8 @@ public class StudentDataActivity extends AppCompatActivity
     {
         super.onResume();
         Log.i("EXECUTE", "Student on resume Id: " + student_serverId);
-        displayGridView(student_serverId, 1);
+        getFaceList(student_serverId);
+        //displayGridView(student_serverId, 0);
     }
 
     @Override
@@ -474,13 +533,10 @@ public class StudentDataActivity extends AppCompatActivity
     }
 
     // display faces on grid view
-    private void displayGridView(String student_serverId, int request)
+    private void displayGridView(List<Face> faceList, String student_serverId, int request)
     {
         if (student_serverId != null && (request == 0 || newStudent))
         {
-            List<Face> listFace =  db_face.getFaceWithStudent(student_serverId);
-            this.faceList.addAll(listFace);
-
             faceArrayAdapter = new ArrayAdapter<Face>(this,
                     android.R.layout.simple_list_item_activated_1, android.R.id.text1, faceList)
             {
@@ -512,15 +568,6 @@ public class StudentDataActivity extends AppCompatActivity
 
             // Register Adapter cho ListView.
             this.gvStudentFace.setAdapter(this.faceArrayAdapter);
-            registerForContextMenu(this.gvStudentFace);
-        }
-        else if (student_serverId != null && request != 0)
-        {
-            this.faceList.clear();
-            MyDatabaseHelperFace db_face = new MyDatabaseHelperFace(this);
-            List<Face> list = db_face.getFaceWithStudent(student_serverId);
-            this.faceList.addAll(list);
-            this.faceArrayAdapter.notifyDataSetChanged();
             registerForContextMenu(this.gvStudentFace);
         }
     }

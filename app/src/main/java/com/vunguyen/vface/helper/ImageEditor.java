@@ -41,11 +41,15 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.widget.ImageView;
 
 import com.microsoft.projectoxford.face.contract.FaceRectangle;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * This class contains the some methods to work on the bitmap image.
@@ -154,6 +158,8 @@ public class ImageEditor
         img = rotateImageIfRequired(context, img, selectedImage);
         return img;
     }
+
+
 
     /**
      * Calculate an inSampleSize for use in a {@link BitmapFactory.Options} object when decoding

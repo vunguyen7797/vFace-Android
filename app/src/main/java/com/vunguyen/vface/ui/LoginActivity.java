@@ -52,7 +52,7 @@ public class LoginActivity extends AppCompatActivity
             FirebaseUser firebaseUser = this.firebaseAuth.getCurrentUser();
             if(firebaseUser != null)
             {
-                openDashBoard(firebaseUser.getEmail());
+                openDashBoard(firebaseUser.getEmail().replaceAll("[.]",""));
             }
             else
             {
@@ -115,7 +115,7 @@ public class LoginActivity extends AppCompatActivity
                                 "Login failed. Your email or password is incorrect. Please try again!", Toast.LENGTH_SHORT).show();
                     }
                     else {
-                        openDashBoard(email.toLowerCase());
+                        openDashBoard(email.toLowerCase().replaceAll("[.]",""));
                     }
                 });
             }

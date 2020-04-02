@@ -5,50 +5,48 @@ package com.vunguyen.vface.ui;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.DataSetObserver;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
+import android.util.Pair;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputLayout;
-import com.squareup.picasso.Picasso;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
+import com.vunguyen.vface.bean.Date;
+import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
-import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.LocaleHelper;
-import com.vunguyen.vface.helper.MyDatabaseHelperCourse;
-import com.vunguyen.vface.helper.MyDatabaseHelperDate;
-import com.vunguyen.vface.helper.MyDatabaseHelperFace;
-import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
-import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
+import com.vunguyen.vface.helper.callbackInterfaces.CourseListInterface;
+import com.vunguyen.vface.helper.callbackInterfaces.DateInterface;
+import com.vunguyen.vface.helper.callbackInterfaces.FaceListInterface;
+import com.vunguyen.vface.helper.callbackInterfaces.StudentListInterface;
+import com.vunguyen.vface.helper.callbackInterfaces.TotalAbsenceInterface;
+import com.vunguyen.vface.helper.faceProcessors.FaceListViewAdapter;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 
 /**
  * This class implements methods to display in-class and absent students
@@ -62,18 +60,15 @@ public class AttendanceActivity extends AppCompatActivity
     TextInputLayout textInputLayoutStudentList;
     EditText etDate;
     AutoCompleteTextView courseMenu;
-    AutoCompleteTextView listMenu;
+    AutoCompleteTextView viewModesMenu;
     ListView lvAttendance;
     ImageView ivAttendance;
 
-    List<Course> courseList;    // store list of course objects
-    List<Student> studentList;  // store list of student in a course
-
     //database
-    MyDatabaseHelperCourse db_course;
-    MyDatabaseHelperStudent db_student;
-    MyDatabaseHelperDate db_date;
-    MyDatabaseHelperFace db_face;
+    DatabaseReference mDatabase_course;
+    DatabaseReference mDatabase_student;
+    DatabaseReference mDatabase_date;
+    DatabaseReference mDatabase_face;
 
     //adapter
     FaceListViewAdapter studentListViewAdapter;
@@ -99,30 +94,71 @@ public class AttendanceActivity extends AppCompatActivity
         // Get email account
         account = getIntent().getStringExtra("ACCOUNT");
 
-        // initialize data
-        courseList = new ArrayList<>();
-        db_course = new MyDatabaseHelperCourse(this);
-        db_student = new MyDatabaseHelperStudent(this);
-        db_date = new MyDatabaseHelperDate(this);
-        db_face = new MyDatabaseHelperFace(this);
+        initView();
+        initData();
+        initAction();
+    }
 
-        //get all courses
-        this.courseList = db_course.getAllCourses(account);
+    private void initData()
+    {
+        mDatabase_course = FirebaseDatabase.getInstance().getReference().child(account).child("course");
+        mDatabase_student = FirebaseDatabase.getInstance().getReference().child(account).child("student");
+        mDatabase_date = FirebaseDatabase.getInstance().getReference().child(account).child("date");
+        mDatabase_face = FirebaseDatabase.getInstance().getReference().child(account).child("face");
+    }
 
+    private void initView()
+    {
+        etDate = findViewById(R.id.etDate);
         lvAttendance = findViewById(R.id.lvAttendance);
         textInputLayoutDate = findViewById(R.id.outlineDatePicker);
         textInputLayoutStudentList = findViewById(R.id.outlineStudentList);
-        listMenu = findViewById(R.id.filled_exposed_dropdown_2);
+        viewModesMenu = findViewById(R.id.filled_exposed_dropdown_2);
         ivAttendance = findViewById(R.id.ivAttendance);
+        courseMenu = findViewById(R.id.filled_exposed_dropdown);
+        lvAttendance = findViewById(R.id.lvAttendance);
+    }
 
-        //display data on course menu
-        displayCourseMenu(courseList);
-        displayListMenu(listMenu);
+    private void initAction()
+    {
+        getCourseListFirebase(courseList -> displayCourseMenu(courseList));
+        displayViewModes(viewModesMenu);
         setDatePicker();
     }
 
+    /**
+     ******************* displaying view handlers *********************
+     */
+    // display courses on the autocomplete text view menu to pick the course
+    private void displayCourseMenu(List<Course> courseList)
+    {
+        // initialize course menu
+        ArrayAdapter<Course> tvArrayAdapter = new ArrayAdapter<>(this,
+                R.layout.dropdown_menu_popup_item, courseList);
+        courseMenu.setAdapter(tvArrayAdapter);
+
+        if (courseList.size() > 0)
+        {
+            courseMenu.setOnItemClickListener((parent, view, position, id) ->
+            {
+                course = (Course) parent.getItemAtPosition(position);
+                courseServerId = course.getCourseServerId();    // get course id on server
+
+                Log.i("EXECUTE", "Course Selected: " + courseServerId);
+                textInputLayoutDate.setEnabled(true);
+                if (!date.equalsIgnoreCase(""))
+                    viewModesEventHandler();
+            });
+        }
+        else
+        {
+            Log.i("EXECUTE", "No courses are available.");
+            Toast.makeText(getApplicationContext(), "No courses are available", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     // this method is to display the view modes of student list
-    private void displayListMenu(AutoCompleteTextView listMenu)
+    private void displayViewModes(AutoCompleteTextView listMenu)
     {
         // There are 3 options to display the student list after identify task
         String[] studentListOptions = getResources().getStringArray(R.array.display_modes_attendance);
@@ -136,92 +172,263 @@ public class AttendanceActivity extends AppCompatActivity
         listMenu.setAdapter(tvArrayAdapter);
     }
 
-    // display courses on the autocomplete textview menu to pick the course
-    private void displayCourseMenu(List<Course> courseList)
-    {
-        // initialize course menu
-        courseMenu = findViewById(R.id.filled_exposed_dropdown);
-        ArrayAdapter<Course> tvArrayAdapter = new ArrayAdapter<>(this,
-                R.layout.dropdown_menu_popup_item, courseList);
-        courseMenu.setAdapter(tvArrayAdapter);
-
-        if (courseList.size() > 0)
-        {
-            courseMenu.setOnItemClickListener((parent, view, position, id) ->
-            {
-                course = (Course) parent.getItemAtPosition(position);
-                courseServerId = course.getCourseServerId();    // get course id on server
-                // get all students in the course
-                studentList = db_student.getStudentWithCourse(courseServerId);
-                //displayStudentOnADate(date);
-                Log.i("EXECUTE", "Course Selected: " + courseServerId);
-                textInputLayoutDate.setEnabled(true);
-                if (!date.equalsIgnoreCase(""))
-                    checkDisplayOption();
-            });
-        }
-        else
-        {
-            Log.i("EXECUTE", "No courses are available.");
-        }
-    }
-
-    // display students on a day, request = 0 for in-class, = 1 for absent students
-    private void displayStudentOnADate(String date, int request)
-    {
-        lvAttendance = findViewById(R.id.lvAttendance);
-
-        List<Student> attendanceList = new ArrayList<>();
-        if(request == 0)
-        {
-            Log.i("EXECUTE", date);
-            for (Student student : studentList)
-            {
-                String status = db_date.getStudentStatus(student.getStudentServerId(),
-                        student.getCourseServerId(), date);
-                if (status.equalsIgnoreCase("YES"))
-                    attendanceList.add(student);
-            }
-        }
-        else if (request == 1)
-        {
-            for (Student student: studentList)
-            {
-                String status = db_date.getStudentStatus(student.getStudentServerId(),
-                        student.getCourseServerId(), date);
-                if (status.equalsIgnoreCase("NO"))
-                    attendanceList.add(student);
-            }
-        }
-        setStudentArrayAdapter(attendanceList); // set adapter to display on list view
-    }
-
-    private void setStudentArrayAdapter(List<Student> studentList)
-    {
-        if (studentList.size() == 0 || date.equalsIgnoreCase("")
-                || listMenu.getText().toString().equalsIgnoreCase(""))
-            ivAttendance.setVisibility(View.VISIBLE);
-        else if (studentList.size() > 0)
-            ivAttendance.setVisibility(View.GONE);
-
-        // create adapter for list view of student
-        studentListViewAdapter = new FaceListViewAdapter(studentList);
-        lvAttendance.setAdapter(studentListViewAdapter);
-    }
-
     // check the current mode that user is using to display student list
-    private void checkDisplayOption()
+    private void viewModesEventHandler()
     {
-        if (!listMenu.getText().toString().equalsIgnoreCase(""))
+        if (!viewModesMenu.getText().toString().equalsIgnoreCase(""))
         {
-            if (listMenu.getText().toString().equalsIgnoreCase("In-class students"))
+            if (viewModesMenu.getText().toString().equalsIgnoreCase("In-class students"))
                 displayStudentOnADate(date, 0);
             else
                 displayStudentOnADate(date, 1);
         }
         else
-            listMenu.setOnItemClickListener((parent, view, position, id) -> displayStudentOnADate(date, position));
+            viewModesMenu.setOnItemClickListener((parent, view, position, id) ->
+                    displayStudentOnADate(date, position));
 
+    }
+
+    // display students on a day, request = 0 for in-class, = 1 for absent students
+    private void displayStudentOnADate(String date, int request)
+    {
+        List<Pair<Pair<Uri, String>, Integer>> attendanceList = new ArrayList<>();
+
+        getStudentListFirebase(courseServerId, studentList ->
+                getFaceFirebase(faceList ->
+                {
+                    Log.i("EXECUTE", "STUDENT LIST: " + studentList.size());
+                    if(request == 0)    // display in-class students
+                    {
+                        for (Student student : studentList)
+                        {
+                            getStudentDateFirebase(courseServerId, student.getStudentServerId()
+                                    , date, dateObject ->
+                                    {
+                                        if (dateObject != null)
+                                        {
+                                            Log.i("EXECUTE", "Date executed: " + date + " - " + dateObject.getStudentAttendanceStatus());
+                                            if (dateObject.getStudentAttendanceStatus().equalsIgnoreCase("YES"))
+                                            {
+                                                Face studentFace = null;
+                                                for (Face face : faceList)
+                                                {
+                                                    if (face.getStudentServerId().equalsIgnoreCase(student.getStudentServerId()))
+                                                        studentFace = face;
+                                                }
+
+                                                Face finalStudentFace = studentFace;
+                                                getTotalAbsence(courseServerId, student.getStudentServerId(), counter ->
+                                                {
+                                                    assert finalStudentFace != null;
+                                                    Pair<Uri, String> identity = new Pair<>(Uri.parse(finalStudentFace
+                                                            .getStudentFaceUri()), student.getStudentName());
+                                                    Pair<Pair<Uri, String>, Integer> finalPair = new Pair<>(identity, counter);
+                                                    attendanceList.add(finalPair);
+                                                    setStudentArrayAdapter(attendanceList); // set adapter to display on list view
+                                                });
+                                            } else {
+                                                Log.i("EXECUTE", student.getStudentName() + " was absent today.");
+
+                                            }
+                                        } else {
+                                            Log.i("EXECUTE", "Date of this student has not been updated");
+                                        }
+                                    });
+                        }
+                    }
+                    else if (request == 1)
+                    {
+                        for (Student student : studentList)
+                        {
+                            getStudentDateFirebase(courseServerId, student.getStudentServerId(), date, dateObject ->
+                            {
+                                if (dateObject != null) {
+                                    if (dateObject.getStudentAttendanceStatus().equalsIgnoreCase("NO")) {
+                                        Face studentFace = null;
+                                        for (Face face : faceList) {
+                                            if (face.getStudentServerId().equalsIgnoreCase(student.getStudentServerId()))
+                                                studentFace = face;
+                                        }
+
+                                        Face finalStudentFace = studentFace;
+                                        getTotalAbsence(courseServerId, student.getStudentServerId(), counter ->
+                                        {
+                                            assert finalStudentFace != null;
+                                            Pair<Uri, String> identity = new Pair<>(Uri.parse(finalStudentFace
+                                                    .getStudentFaceUri()), student.getStudentName());
+                                            Pair<Pair<Uri, String>, Integer> finalPair = new Pair<>(identity, counter);
+                                            attendanceList.add(finalPair);
+                                            setStudentArrayAdapter(attendanceList); // set adapter to display on list view
+                                        });
+                                    } else
+                                        Log.i("EXECUTE", student.getStudentName() + " was not absent today.");
+                                } else
+                                    Log.i("EXECUTE", "Date of this student has not been updated");
+                            });
+                        }
+                    }
+                }));
+    }
+
+    /**
+     ******************* get data from Firebase realtime database *********************
+     */
+    private void getCourseListFirebase(CourseListInterface callback)
+    {
+        mDatabase_course.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Course> courseList = new ArrayList<>();
+                for(DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    courseList.add(dsp.getValue(Course.class));
+                }
+                callback.getCourseList(courseList);
+                mDatabase_course.removeEventListener(this);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void getStudentListFirebase(String courseServerId, StudentListInterface callback)
+    {
+        mDatabase_student.addValueEventListener(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+            {
+                List<Student> studentList = new ArrayList<>();
+                for (DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    Student student = dsp.getValue(Student.class);
+                    assert student != null;
+                    if (student.getCourseServerId().equalsIgnoreCase(courseServerId))
+                        studentList.add(student);
+                }
+                try {
+                    callback.getStudentList(studentList);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                mDatabase_student.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError)
+            {
+            }
+        });
+    }
+
+    private void getStudentDateFirebase(String courseServerId, String studentServerId, String date_string, DateInterface callback)
+    {
+        mDatabase_date.addValueEventListener(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+            {
+                Date date = new Date();
+                for (DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    Date temp = dsp.getValue(Date.class);
+                    assert temp != null;
+                    if (temp.getCourseServerId().equalsIgnoreCase(courseServerId)
+                            && temp.getStudentServerId().equalsIgnoreCase(studentServerId)
+                            && temp.getStudent_date().equalsIgnoreCase(date_string))
+                    {
+                        Log.i("EXECUTE", "temp: " + temp);
+                        date = temp;
+                    }
+                    else
+                    {
+                        Log.i("EXECUTE", "temp is null");
+                        Log.i("EXECUTE", "CSI: " + temp.getCourseServerId());
+                        Log.i("EXECUTE", "SVI: " + temp.getStudentServerId());
+                        Log.i("EXECUTE", "DATE: " + temp.getStudent_date());
+                    }
+
+                }
+                callback.getDate(date);
+                mDatabase_date.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError)
+            {
+            }
+        });
+    }
+
+    private void getTotalAbsence(String courseServerId, String studentServerId, TotalAbsenceInterface callback)
+    {
+        mDatabase_date.addValueEventListener(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+            {
+                int counter = 0;
+                for (DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    Date temp = dsp.getValue(Date.class);
+                    assert temp != null;
+                    if (temp.getCourseServerId().equalsIgnoreCase(courseServerId)
+                            && temp.getStudentServerId().equalsIgnoreCase(studentServerId)
+                            && temp.getStudentAttendanceStatus().equalsIgnoreCase("NO"))
+                        counter++;
+                }
+                callback.getTotalAbsence(counter);
+                mDatabase_date.removeEventListener(this);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError)
+            {
+            }
+        });
+    }
+    
+    // get face list from real time database
+    private void getFaceFirebase( FaceListInterface callback)
+    {
+        mDatabase_face.addValueEventListener(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+            {
+                List<com.vunguyen.vface.bean.Face> faceList = new ArrayList<>();
+                for (DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    com.vunguyen.vface.bean.Face face = dsp.getValue(com.vunguyen.vface.bean.Face.class);
+                    faceList.add(face);
+                }
+                callback.getFaceList(faceList);
+                mDatabase_face.removeEventListener(this);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError)
+            {
+            }
+        });
+    }
+
+    /**
+     ******************* Event handler methods *********************
+     */
+    private void setStudentArrayAdapter(List<Pair<Pair<Uri, String>, Integer>> studentList)
+    {
+        if (studentList.size() == 0 || date.equalsIgnoreCase("")
+                || viewModesMenu.getText().toString().equalsIgnoreCase(""))
+            ivAttendance.setVisibility(View.VISIBLE);
+        else if (studentList.size() > 0)
+        {
+            ivAttendance.setVisibility(View.GONE);
+            // create adapter for list view of student
+            //studentListViewAdapter = new FaceListViewAdapter(studentList);
+            studentListViewAdapter = new FaceListViewAdapter(studentList, "uri", AttendanceActivity.this, "withTotalAbsence");
+            lvAttendance.setAdapter(studentListViewAdapter);
+        }
     }
 
     // event for the date picker
@@ -231,25 +438,21 @@ public class AttendanceActivity extends AppCompatActivity
         Object localTime = local.atZone(ZoneId.ofOffset("UTC", ZoneOffset.UTC)).toInstant().toEpochMilli();
         MaterialDatePicker.Builder builder = MaterialDatePicker.Builder.datePicker();
         builder.setTitleText("VFACE");
-
-
         builder.setSelection(localTime);
 
         Log.i("EXECUTE", "Time zone: " + local);
 
         materialDatePicker = builder.build();
-
-
-        etDate = findViewById(R.id.etDate);
         textInputLayoutDate.setEndIconOnClickListener(v ->
                 materialDatePicker.show(getSupportFragmentManager(), "DATE_PICKER"));
 
-        materialDatePicker.addOnPositiveButtonClickListener(selection -> {
+        materialDatePicker.addOnPositiveButtonClickListener(selection ->
+        {
             etDate.setText(materialDatePicker.getHeaderText());
             etDate.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             date = materialDatePicker.getHeaderText();
             textInputLayoutStudentList.setEnabled(true);
-            checkDisplayOption();
+            viewModesEventHandler();
 
         });
     }
@@ -267,134 +470,5 @@ public class AttendanceActivity extends AppCompatActivity
         intent.putExtra("ACCOUNT", account);
         startActivity(intent);
         finish();
-    }
-
-    /**
-     * This class is a customize adapter to display students
-     * with face thumbnails
-     */
-    class FaceListViewAdapter implements ListAdapter
-    {
-        List<Uri> faceThumbnails;
-        List<String> studentInfo;
-        List<String> studentAbsence;
-
-        public FaceListViewAdapter()
-        {
-        }
-
-        public FaceListViewAdapter(List<Student> studentIdentityList)
-        {
-            faceThumbnails = new ArrayList<>();
-            studentInfo = new ArrayList<>();
-            studentAbsence = new ArrayList<>();
-
-
-            if (studentIdentityList != null)
-            {
-                Log.i("EXECUTE", Integer.toString(studentIdentityList.size()));
-                for (Student student : studentIdentityList)
-                {
-                    Uri uri = Uri.parse(db_face.getFaceWithStudent(student.getStudentServerId()).get(0).getStudentFaceUri());
-                    //Bitmap bitmap = ImageEditor.handlePhotoAndRotationBitmap(getApplicationContext(), uri);
-                    faceThumbnails.add(uri);
-
-                    studentInfo.add(student.getStudentName());
-                    int totalAbsence = db_date.getTotalAbsence(student.getStudentServerId(), student.getCourseServerId());
-                    studentAbsence.add(Integer.toString(totalAbsence));
-                }
-            }
-        }
-
-        @Override
-        public boolean areAllItemsEnabled()
-        {
-            return false;
-        }
-
-        @Override
-        public boolean isEnabled(int position)
-        {
-            return true;
-        }
-
-        @Override
-        public void registerDataSetObserver(DataSetObserver observer)
-        {
-
-        }
-
-        @Override
-        public void unregisterDataSetObserver(DataSetObserver observer)
-        {
-
-        }
-
-        @Override
-        public int getCount()
-        {
-            return faceThumbnails.size();
-        }
-
-        @Override
-        public Object getItem(int position)
-        {
-            return faceThumbnails.get(position);
-        }
-
-        @Override
-        public long getItemId(int position)
-        {
-            return position;
-        }
-
-        @Override
-        public boolean hasStableIds()
-        {
-            return false;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent)
-        {
-            if (convertView == null)
-            {
-                LayoutInflater layoutInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = layoutInflater.inflate(R.layout.item_face_with_description_2, parent, false);
-            }
-
-            convertView.setId(position);
-
-            // set face
-            Picasso.get().load(faceThumbnails.get(position)).into(((ImageView) convertView.findViewById(R.id.face_thumbnail)));
-           // ((ImageView) convertView.findViewById(R.id.face_thumbnail)).setImageBitmap(faceThumbnails.get(position));
-            //set info
-            ((TextView) convertView.findViewById(R.id.tvDetectedFace)).setText(studentInfo.get(position));
-            ((TextView) convertView.findViewById(R.id.tvDetectedFace)).setTextColor(Color.WHITE);
-
-            //set info
-            ((TextView) convertView.findViewById(R.id.tvAbsence)).setText(studentAbsence.get(position));
-            ((TextView) convertView.findViewById(R.id.tvAbsence)).setTextColor(Color.WHITE);
-
-            return convertView;
-        }
-
-        @Override
-        public int getItemViewType(int position)
-        {
-            return position;
-        }
-
-        @Override
-        public int getViewTypeCount()
-        {
-            return 1;
-        }
-
-        @Override
-        public boolean isEmpty()
-        {
-            return false;
-        }
     }
 }

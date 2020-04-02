@@ -6,6 +6,7 @@ package com.vunguyen.vface.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,14 +17,21 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 import com.vunguyen.vface.R;
+import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.LocaleHelper;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * This class implements methods to edit the user account profile
@@ -37,7 +45,11 @@ public class ManageAccountActivity extends AppCompatActivity
     private static final int GALLERY_REQUEST_CODE = 1;
     Uri profileUri = null;
     FirebaseUser user;
+    String filename;
     boolean newProfilePhoto = false;
+    private static FirebaseStorage storage = FirebaseStorage.getInstance();
+    // Create a storage reference from our app
+
 
     @Override
     protected void attachBaseContext(Context newBase)
@@ -52,6 +64,7 @@ public class ManageAccountActivity extends AppCompatActivity
         setContentView(R.layout.activity_manage_account);
 
         account = getIntent().getStringExtra("ACCOUNT");
+        filename = "profile_photo" + account;
         // get current logged in user from firebase
         user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -81,6 +94,32 @@ public class ManageAccountActivity extends AppCompatActivity
         else
             indicator = false;
         return indicator;
+    }
+
+    // Update display name and profile photo to firebase database
+    public void updateProfile()
+    {
+        if (etDisplayName.getText() != null)
+        {
+            Log.i("EXECUTE", "Uri updated: " + profileUri);
+            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                    .setDisplayName(etDisplayName.getText().toString())
+                    .setPhotoUri(profileUri)
+                    .build();
+
+            assert user != null;
+            user.updateProfile(profileUpdates)
+                    .addOnCompleteListener(task ->
+                    {
+                        if (task.isSuccessful())
+                        {
+                            Toast.makeText(getApplicationContext(),
+                                    R.string.profile_updated, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+        else
+            etDisplayName.requestFocus();
     }
 
     // display current information from database of the user
@@ -121,31 +160,7 @@ public class ManageAccountActivity extends AppCompatActivity
         }
     }
 
-    // Update display name and profile photo to firebase database
-    public void updateProfile()
-    {
-        if (etDisplayName.getText() != null)
-        {
-            Log.i("EXECUTE", "Uri updated: " + profileUri);
-            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                    .setDisplayName(etDisplayName.getText().toString())
-                    .setPhotoUri(profileUri)
-                    .build();
 
-            assert user != null;
-            user.updateProfile(profileUpdates)
-                    .addOnCompleteListener(task ->
-                    {
-                        if (task.isSuccessful())
-                        {
-                            Toast.makeText(getApplicationContext(),
-                                    R.string.profile_updated, Toast.LENGTH_SHORT).show();
-                        }
-                    });
-        }
-        else
-            etDisplayName.requestFocus();
-    }
 
     // go to another activity
     private void goToActivity(Intent intent)

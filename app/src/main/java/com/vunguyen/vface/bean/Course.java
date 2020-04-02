@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 public class Course implements Serializable
 {
-    private int courseId;           // Course ID auto-generated in database
+    private String courseId;           // Course ID auto-generated in database
     private String courseName;      // Course name from input
     private String courseIdNumber;  // Real course ID number from input
     private String courseServerId;  // Course unique ID string to work with server tasks.
@@ -29,7 +29,8 @@ public class Course implements Serializable
         this.courseAccount = courseAccount;
     }
 
-    public Course(int id, String courseIdNumber, String courseName, String courseServerId, String courseAccount)
+
+    public Course(String id, String courseIdNumber, String courseName, String courseServerId, String courseAccount)
     {
         this.courseId = id;
         this.courseIdNumber = courseIdNumber;
@@ -38,12 +39,12 @@ public class Course implements Serializable
         this.courseAccount = courseAccount;
     }
 
-    public int getCourseId()
+    public String getCourseId()
     {
         return courseId;
     }
 
-    public void setCourseId(int courseId)
+    public void setCourseId(String courseId)
     {
         this.courseId = courseId;
     }

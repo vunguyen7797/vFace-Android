@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,7 +17,7 @@ import com.vunguyen.vface.R;
 import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.LocaleHelper;
 import com.vunguyen.vface.helper.StorageHelper;
-import com.vunguyen.vface.helper.UriPhoto;
+import com.vunguyen.vface.helper.callbackInterfaces.UriPhotoInterface;
 
 import java.io.IOException;
 
@@ -72,22 +71,17 @@ public class CropImageActivity extends AppCompatActivity
     // Button Crop event
     public void btnCrop(View view)
     {
-        StorageHelper.uploadToFireBaseStorage(
-                new UriPhoto()
-                {
-                                                  @Override
-                                                  public void getUriPhoto(Uri uriPhoto)
-                                                  {
-                                                      Intent intent = new Intent(CropImageActivity.this, ManageAccountActivity.class);
-                                                      intent.putExtra("ACCOUNT", account);
-                                                      intent.setData(uriPhoto);
-                                                      startActivity(intent);
-                                                  }
-                                              }, ivCrop.getCroppedImage(),
+        StorageHelper.uploadToFireBaseStorage(ivCrop.getCroppedImage(),
                 "profile_photo" + account,
-                CropImageActivity.this, account, "profile_photo");
-
-
+                CropImageActivity.this, account, "profile_photo", new UriPhotoInterface() {
+                    @Override
+                    public void getUriPhoto(Uri uriPhoto) {
+                        Intent intent = new Intent(CropImageActivity.this, ManageAccountActivity.class);
+                        intent.putExtra("ACCOUNT", account);
+                        intent.setData(uriPhoto);
+                        startActivity(intent);
+                    }
+                });
     }
 
     // Back arrow button

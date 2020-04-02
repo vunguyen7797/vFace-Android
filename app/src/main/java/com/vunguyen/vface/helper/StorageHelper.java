@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.vunguyen.vface.helper.callbackInterfaces.UriPhotoInterface;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -33,7 +34,7 @@ public class StorageHelper
     private static StorageReference storageRef;
 
     // Upload Photo to Firebase Storage
-    public static void uploadToFireBaseStorage(UriPhoto callback, Bitmap bitmapImage, String filename, Context context, String account, String request)
+    public static void uploadToFireBaseStorage(Bitmap bitmapImage, String filename, Context context, String account, String request, UriPhotoInterface callback)
     {
         storageRef = storage.getReferenceFromUrl("gs://vface-a53e6.appspot.com/"+request);
         StorageReference croppedPhotoRef = storageRef.child(filename);
@@ -60,18 +61,24 @@ public class StorageHelper
             public void onComplete(@NonNull Task<Uri> task) {
                 if (task.isSuccessful()) {
                     Uri uriCroppedImage = task.getResult();
-                    Log.i("EXECUTE", "UPLOAD SUCCESSFULLY " +uriCroppedImage);
+                    Log.i("EXECUTE", "DOWNLOAD SUCCESSFULLY " +uriCroppedImage);
                     callback.getUriPhoto(uriCroppedImage);
-
+                    /*
+                    Intent intent = new Intent(context, ManageAccountActivity.class);
+                    intent.putExtra("FileName", filename);
+                    intent.putExtra("ACCOUNT", account);
+                    intent.setData(uriCroppedImage);
+                    Log.i("EXECUTE", "FILE NAME: " + filename);
+                    context.startActivity(intent);
+*/
                 } else {
                     // Handle failures
                     // ...
-                    Log.i("EXECUTE", "CANNOT UPLOAD PHOTO");
+                    Log.i("EXECUTE", "CANNOT DOWNLOAD PHOTO");
                 }
             }
         });
     }
-
     // save the image in storage to get URI
     public static Uri saveToInternalStorageUri(Bitmap bitmapImage, String fileName, Context mContext)
     {

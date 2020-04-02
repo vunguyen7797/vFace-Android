@@ -96,7 +96,7 @@ public class SettingsActivity extends AppCompatActivity
     @Override
     public void onBackPressed()
     {
-        Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);
+        Intent intent = new Intent(SettingsActivity.this, DashBoardActivity.class);
         goToActivity(intent);
     }
 

@@ -102,7 +102,7 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
             do
             {
                 Course course = new Course();
-                course.setCourseId(Integer.parseInt(cursor.getString(0)));
+                course.setCourseId(cursor.getString(0));
                 course.setCourseIdNumber(cursor.getString(1));
                 course.setCourseName(cursor.getString(2));
                 course.setCourseServerId(cursor.getString(3));
@@ -182,7 +182,7 @@ public class MyDatabaseHelperCourse extends SQLiteOpenHelper
             do
             {
                 Course course_tmp = new Course();
-                course.setCourseId(Integer.parseInt(cursor.getString(0)));
+                course.setCourseId(cursor.getString(0));
                 course.setCourseIdNumber(cursor.getString(1));
                 course.setCourseName(cursor.getString(2));
                 course.setCourseServerId(cursor.getString(3));

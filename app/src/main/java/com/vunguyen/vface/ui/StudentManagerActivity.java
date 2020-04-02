@@ -30,11 +30,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
+import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.LocaleHelper;
@@ -45,6 +55,7 @@ import com.vunguyen.vface.helper.MyDatabaseHelperStudent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -60,7 +71,9 @@ public class StudentManagerActivity extends AppCompatActivity
     private ArrayAdapter<Student> studentArrayAdapter;
     private MyDatabaseHelperStudent db_student;
     private MyDatabaseHelperCourse db_course;
-
+    DatabaseReference mDatabase_Course;
+    DatabaseReference mDatabase_Student;
+    DatabaseReference mDatabase_Face;
     // variables
     String account;
     private int courseId = 0;
@@ -78,6 +91,7 @@ public class StudentManagerActivity extends AppCompatActivity
     AutoCompleteTextView courseMenu;
     ListView lvStudents;
     ImageView ivWaiting;
+    ArrayAdapter<Course> tvArrayAdapter;
 
     @Override
     protected void attachBaseContext(Context newBase)
@@ -93,15 +107,16 @@ public class StudentManagerActivity extends AppCompatActivity
 
         // get account to identify the database
         account = getIntent().getStringExtra("ACCOUNT");
-
+        mDatabase_Course = FirebaseDatabase.getInstance().getReference().child(account).child("course");
         // get all courses belong to this account
+        mDatabase_Student = FirebaseDatabase.getInstance().getReference().child(account).child("student");
+        mDatabase_Face = FirebaseDatabase.getInstance().getReference().child(account).child("face");
+        getCourseList();
+
         db_course = new MyDatabaseHelperCourse(this);
         this.courseList = db_course.getAllCourses(account);
 
-        // initialize course menu
-        courseMenu = findViewById(R.id.filled_exposed_dropdown);
-        ArrayAdapter<Course> tvArrayAdapter = new ArrayAdapter<Course>(this, R.layout.dropdown_menu_popup_item, courseList);
-        courseMenu.setAdapter(tvArrayAdapter);
+
 
         // initialize student list view and student database
         lvStudents = findViewById(R.id.lvStudents);
@@ -111,28 +126,79 @@ public class StudentManagerActivity extends AppCompatActivity
         fabAddStudent.setVisibility(View.GONE);
         ivWaiting = findViewById(R.id.ivWaiting);
 
-        initializeSelection();
+
+        //initializeSelection();
     }
+
+    public void getCourseList()
+    {
+        mDatabase_Course.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Course> courseList = new ArrayList<>();
+                for(DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    Log.i("EXECUTE","DSP: " + dsp.getValue(Course.class));
+                    courseList.add(dsp.getValue(Course.class));
+
+                }
+                Log.i("EXECUTE","DSP Size: " + courseList.size());
+
+                // initialize course menu
+                courseMenu = findViewById(R.id.filled_exposed_dropdown);
+                tvArrayAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.dropdown_menu_popup_item, courseList);
+                courseMenu.setAdapter(tvArrayAdapter);
+
+                initializeSelection(courseList);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void getStudentList(String courseServerId)
+    {
+        mDatabase_Student.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Student> studentList = new ArrayList<>();
+                for(DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    Log.i("EXECUTE","DSP: " + dsp.getValue(Student.class));
+                    if (Objects.requireNonNull(dsp.getValue(Student.class)).getCourseServerId().equalsIgnoreCase(courseServerId))
+                        studentList.add(dsp.getValue(Student.class));
+                }
+
+                displayListView(studentList, courseServerId, 0);
+                Log.i("EXECUTE","DSP Size: " + studentList.size());
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     // initialize the list view data on the course selection
-    private void initializeSelection()
+    private void initializeSelection(List<Course> courseList)
     {
         if (courseList.size() != 0)
         {
             // set default
-            displayListView("",0);
+            //displayListView("",0);
             courseMenu.setOnItemClickListener((parent, view, position, id) ->
             {
                 courseId = (int) parent.getItemIdAtPosition(position);  // get the course id database
                 Course course = (Course) parent.getItemAtPosition(position);
                 courseServerId = course.getCourseServerId();            // get course id on server
-                displayListView(courseServerId, 1);   // request 1 to notify that selection is changed
+                getStudentList(courseServerId);
+                //displayListView(courseServerId, 1);   // request 1 to notify that selection is changed
                 ivWaiting.setVisibility(View.GONE);
                 fabAddStudent.setVisibility(View.VISIBLE);
                 lvStudents.setVisibility(View.VISIBLE);
-
-
             });
-
             // Button Add Student event, send the course ids to the student profile activity
             fabAddStudent.setOnClickListener(v -> addStudent());
         }
@@ -141,7 +207,7 @@ public class StudentManagerActivity extends AppCompatActivity
             // If there is no course, the button is disable and show notification
             fabAddStudent.setEnabled(false);
             fabAddStudent.setOnClickListener(v ->
-                    Toast.makeText(getApplicationContext(), "Addd a course before adding students.",
+                    Toast.makeText(getApplicationContext(), "Add a course before adding students.",
                     Toast.LENGTH_SHORT).show());
         }
     }
@@ -241,11 +307,47 @@ public class StudentManagerActivity extends AppCompatActivity
         MyDatabaseHelperDate db_date = new MyDatabaseHelperDate(this);
         db_date.deleteDatesWithStudent(student.getStudentServerId(), student.getCourseServerId());
         // Refresh ListView.
+        mDatabase_Student.child(student.getStudentName().toUpperCase()+"-"+student.getStudentServerId()).removeValue();
+        deleteAllFace(student.getStudentServerId());
         this.studentArrayAdapter.notifyDataSetChanged();
         // execute background task to delete student from server
         new DeleteStudentTask(courseServerId).execute(student.getStudentServerId());
     }
 
+    private void deleteAllFace(String studentServerId)
+    {
+        mDatabase_Face.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Face> faceList = new ArrayList<>();
+                for(DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    Log.i("EXECUTE","DSP: " + dsp.getValue(Student.class));
+                    if (Objects.requireNonNull(dsp.getValue(Face.class)).getStudentServerId().equalsIgnoreCase(studentServerId))
+                    {
+                        mDatabase_Face.child(dsp.getValue(Face.class).getStudentFaceServerId()).removeValue();
+                        StorageReference photoRef = FirebaseStorage.getInstance().getReferenceFromUrl(dsp.getValue(Face.class).getStudentFaceUri());
+                        photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.i("EXECUTE", "Deleted face from Firebase Storage");
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.i("EXECUTE", "Cannot delete face from Firebase Storage");
+                            }
+                        });
+                    }
+                }
+                Log.i("EXECUTE","DSP Size: " + faceList.size());
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     // Refresh the student list after adding new student
     @Override
@@ -257,10 +359,10 @@ public class StudentManagerActivity extends AppCompatActivity
             account = data.getStringExtra("ACCOUNT");
             // Refresh ListView
             if (needRefresh) {
-                this.studentList.clear();
-                MyDatabaseHelperStudent db_student = new MyDatabaseHelperStudent(this);
-                List<Student> list = db_student.getStudentWithCourse(courseServerId);
-                this.studentList.addAll(list);
+                //this.studentList.clear();
+               // MyDatabaseHelperStudent db_student = new MyDatabaseHelperStudent(this);
+               // List<Student> list = db_student.getStudentWithCourse(courseServerId);
+               // this.studentList.addAll(list);
                 // Notify data changed to grid view
                 this.studentArrayAdapter.notifyDataSetChanged();
             }
@@ -268,14 +370,10 @@ public class StudentManagerActivity extends AppCompatActivity
     }
 
     // Display the information of student on GridView based on course selection
-    private void displayListView(String courseServerId, int request)
+    private void displayListView(List<Student> studentList, String courseServerId, int request)
     {
         if (request == 0) // default data is the student of first course in the list
         {
-            List<Student> listStudents =  db_student.getStudentWithCourse(courseServerId);
-
-            this.studentList.addAll(listStudents);
-
             studentArrayAdapter = new ArrayAdapter<Student>(this,
                     android.R.layout.simple_list_item_1, android.R.id.text1, studentList)
             {
@@ -297,16 +395,6 @@ public class StudentManagerActivity extends AppCompatActivity
             // Register the menu context
             registerForContextMenu(this.lvStudents);
         }
-        else if (request == 1) // data changed after user selected another course
-        {
-            this.studentList.clear();
-            MyDatabaseHelperStudent db = new MyDatabaseHelperStudent(this);
-            List<Student> list = db.getStudentWithCourse(courseServerId);
-            this.studentList.addAll(list);
-            this.studentArrayAdapter.notifyDataSetChanged();
-
-        }
-
     }
 
     public void btnBackArrow(View view)

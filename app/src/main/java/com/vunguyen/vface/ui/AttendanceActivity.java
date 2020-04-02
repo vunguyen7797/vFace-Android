@@ -234,8 +234,7 @@ public class AttendanceActivity extends AppCompatActivity
                                         else
                                         {
                                             Log.i("EXECUTE", "Date of this student has not been updated");
-                                            Toast.makeText(getApplicationContext(), "Please check attendance first.", Toast.LENGTH_SHORT).show();
-
+                                            Toast.makeText(getApplicationContext(), "Attendance has not been checked for this day", Toast.LENGTH_SHORT).show();
                                         }
                                     });
                         }
@@ -269,7 +268,7 @@ public class AttendanceActivity extends AppCompatActivity
                                 }
                                 else {
                                     Log.i("EXECUTE", "Date of this student has not been updated");
-                                    Toast.makeText(getApplicationContext(), "Please check attendance first.", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), "Attendance has not been checked for this day", Toast.LENGTH_SHORT).show();
                                 }
                             });
                         }
@@ -355,7 +354,6 @@ public class AttendanceActivity extends AppCompatActivity
                         Log.i("EXECUTE", "CSI: " + temp.getCourseServerId());
                         Log.i("EXECUTE", "SVI: " + temp.getStudentServerId());
                         Log.i("EXECUTE", "DATE: " + temp.getStudent_date());
-                        date = null;
                     }
 
                 }

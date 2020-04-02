@@ -169,6 +169,8 @@ public class SelfCheckActivity extends AppCompatActivity
                 course = (Course) parent.getItemAtPosition(position);
                 courseServerId = course.getCourseServerId();    // get course id on server
                 btnFaceCheck.setEnabled(true);
+                Toast.makeText(getApplicationContext(), "Attendance data of this course today is reset.", Toast.LENGTH_SHORT).show();
+                resetAllData();
                 Log.i("EXECUTE", "Course Selected: " + courseServerId);
             });
         }
@@ -302,7 +304,6 @@ public class SelfCheckActivity extends AppCompatActivity
         {
             // The URI of photo taken with camera
             Uri uriTakenPhoto = data.getData();
-            resetAllData();
             detect(uriTakenPhoto);
         }
     }

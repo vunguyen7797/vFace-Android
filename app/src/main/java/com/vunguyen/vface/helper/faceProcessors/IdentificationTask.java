@@ -304,7 +304,7 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
     {
         if (result != null)
         {
-            Log.i("EXECUTE", "Identified successfully: " + result.length + " faces");
+            Log.i("EXECUTE", "Identified group successfully: " + result.length + " faces. - Turn: " + identifyTurn);
             int index = identifyTurn * 10;  // position of each identified students in container.
             for (IdentifyResult identifyResult : result)
             {
@@ -313,7 +313,7 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
                 {
                     String studentServerId = identifyResult.candidates.get(0).personId.toString();
                     String confidence = formatter.format(identifyResult.candidates.get(0).confidence);
-
+                    Log.i("EXECUTE", "Retrieve Data Student Server ID: " + studentServerId);
                     int finalI = index;
                     getSingleStudentFireBase(studentServerId, student -> {
                         Log.i("EXECUTE", "Retrieve Data... " + finalI + " : " + student);

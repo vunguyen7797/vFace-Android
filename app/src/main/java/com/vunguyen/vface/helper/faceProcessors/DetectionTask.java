@@ -212,7 +212,7 @@ public class DetectionTask extends AsyncTask<InputStream, String, Face[]>
         }
     }
 
-    public void selfIdentify()
+    private void selfIdentify()
     {
         // Start detection task only if the image to detect is selected.
         if (detected && courseServerId != null)

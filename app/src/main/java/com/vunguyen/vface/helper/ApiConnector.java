@@ -32,7 +32,7 @@ public class ApiConnector extends Application
     {
         super.onCreate();
         // Connect to Face Service Api
-        sFaceServiceClient = new FaceServiceRestClient("https://vface-3.cognitiveservices.azure.com/face/v1.0", "16898c9462714802b188f4c6b7a51d17");
+        sFaceServiceClient = new FaceServiceRestClient("https://vface-4.cognitiveservices.azure.com/face/v1.0", "81d5f2e93eec4ef89faec013ceef83a4");
     }
 
     public static FaceServiceClient getFaceServiceClient()

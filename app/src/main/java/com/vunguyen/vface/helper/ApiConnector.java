@@ -5,14 +5,12 @@ package com.vunguyen.vface.helper;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.res.Resources;
 
-import com.microsoft.projectoxford.face.FaceServiceClient;
-import com.microsoft.projectoxford.face.FaceServiceRestClient;
-import com.vunguyen.vface.R;
-import com.vunguyen.vface.ui.GeneralSettingActivity;
+//import com.microsoft.projectoxford.face.FaceServiceClient;
+//import com.microsoft.projectoxford.face.FaceServiceRestClient;
 
-import io.paperdb.Paper;
+import edmt.dev.edmtdevcognitiveface.FaceServiceClient;
+import edmt.dev.edmtdevcognitiveface.FaceServiceRestClient;
 
 /**
  * This class is to connect the app with Microsoft Face API service via the endpoint and subscription key

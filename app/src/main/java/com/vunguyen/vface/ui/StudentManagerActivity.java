@@ -7,7 +7,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -26,7 +25,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -37,19 +35,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.bean.Date;
 import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
-import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.LocaleHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * This class implements functions for student manager screen activity
@@ -58,6 +53,7 @@ public class StudentManagerActivity extends AppCompatActivity
 {
     // array adapter and database
     private ArrayAdapter<Student> studentArrayAdapter;
+    ArrayAdapter<Course> tvArrayAdapter;
     DatabaseReference mDatabase_Course;
     DatabaseReference mDatabase_Student;
     DatabaseReference mDatabase_Face;
@@ -80,7 +76,6 @@ public class StudentManagerActivity extends AppCompatActivity
     AutoCompleteTextView courseMenu;
     ListView lvStudents;
     ImageView ivWaiting;
-    ArrayAdapter<Course> tvArrayAdapter;
 
     @Override
     protected void attachBaseContext(Context newBase)
@@ -96,21 +91,32 @@ public class StudentManagerActivity extends AppCompatActivity
 
         // get account to identify the database
         account = getIntent().getStringExtra("ACCOUNT");
+
+        initView();
+        initData();
+    }
+
+    private void initData()
+    {
         mDatabase_Course = FirebaseDatabase.getInstance().getReference().child(account).child("course");
         // get all courses belong to this account
         mDatabase_Student = FirebaseDatabase.getInstance().getReference().child(account).child("student");
         mDatabase_Face = FirebaseDatabase.getInstance().getReference().child(account).child("face");
         mDatabase_Date = FirebaseDatabase.getInstance().getReference().child(account).child("date");
         getCourseList();
+    }
+
+    private void initView()
+    {
         // initialize student list view and student database
         lvStudents = findViewById(R.id.lvStudents);
         lvStudents.setVisibility(View.GONE);
         fabAddStudent = findViewById(R.id.floating_action_button);
         fabAddStudent.setVisibility(View.GONE);
         ivWaiting = findViewById(R.id.ivWaiting);
-
-        //initializeSelection();
+        courseMenu = findViewById(R.id.filled_exposed_dropdown);
     }
+
 
     public void getCourseList()
     {
@@ -120,15 +126,11 @@ public class StudentManagerActivity extends AppCompatActivity
                 List<Course> courseList = new ArrayList<>();
                 for(DataSnapshot dsp : dataSnapshot.getChildren())
                 {
-                    Log.i("EXECUTE","DSP: " + dsp.getValue(Course.class));
                     courseList.add(dsp.getValue(Course.class));
-
                 }
-                Log.i("EXECUTE","DSP Size: " + courseList.size());
 
-                // initialize course menu
-                courseMenu = findViewById(R.id.filled_exposed_dropdown);
-                tvArrayAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.dropdown_menu_popup_item, courseList);
+                tvArrayAdapter = new ArrayAdapter<>(getApplicationContext(),
+                        R.layout.dropdown_menu_popup_item, courseList);
                 courseMenu.setAdapter(tvArrayAdapter);
 
                 initializeSelection(courseList);
@@ -148,13 +150,11 @@ public class StudentManagerActivity extends AppCompatActivity
                 List<Student> studentList = new ArrayList<>();
                 for(DataSnapshot dsp : dataSnapshot.getChildren())
                 {
-                    Log.i("EXECUTE","DSP: " + dsp.getValue(Student.class));
-                    if (Objects.requireNonNull(dsp.getValue(Student.class)).getCourseServerId().equalsIgnoreCase(courseServerId))
+                    if (Objects.requireNonNull(dsp.getValue(Student.class))
+                            .getCourseServerId().equalsIgnoreCase(courseServerId))
                         studentList.add(dsp.getValue(Student.class));
                 }
-
-                displayListView(studentList, courseServerId, 0);
-                Log.i("EXECUTE","DSP Size: " + studentList.size());
+                displayListView(studentList, 0);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -168,8 +168,6 @@ public class StudentManagerActivity extends AppCompatActivity
     {
         if (courseList.size() != 0)
         {
-            // set default
-            //displayListView("",0);
             courseMenu.setOnItemClickListener((parent, view, position, id) ->
             {
                 courseId = (int) parent.getItemIdAtPosition(position);  // get the course id database
@@ -193,6 +191,7 @@ public class StudentManagerActivity extends AppCompatActivity
                     Toast.LENGTH_SHORT).show());
         }
     }
+
     // Event for clicking the back button on navigation bar
     @Override
     public void onBackPressed()
@@ -277,7 +276,6 @@ public class StudentManagerActivity extends AppCompatActivity
         startActivityForResult(intent, MY_REQUEST_CODE);
     }
 
-
     // Delete a student from database
     private void deleteStudent(Student student)
     {
@@ -288,7 +286,7 @@ public class StudentManagerActivity extends AppCompatActivity
         deleteAllDate(student);
         this.studentArrayAdapter.notifyDataSetChanged();
         // execute background task to delete student from server
-        new DeleteStudentTask(courseServerId).execute(student.getStudentServerId());
+        new com.vunguyen.vface.helper.asyncTasks.DeleteStudentTask(courseServerId).execute(student.getStudentServerId());
     }
 
     private void deleteAllFace(String studentServerId)
@@ -296,10 +294,8 @@ public class StudentManagerActivity extends AppCompatActivity
         mDatabase_Face.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                List<Face> faceList = new ArrayList<>();
                 for(DataSnapshot dsp : dataSnapshot.getChildren())
                 {
-                    Log.i("EXECUTE","DSP: " + dsp.getValue(Student.class));
                     if (Objects.requireNonNull(dsp.getValue(Face.class)).getStudentServerId().equalsIgnoreCase(studentServerId))
                     {
                         mDatabase_Face.child(Objects.requireNonNull(dsp.getValue(Face.class)).getStudentFaceServerId()).removeValue();
@@ -310,15 +306,9 @@ public class StudentManagerActivity extends AppCompatActivity
                             public void onSuccess(Void aVoid) {
                                 Log.i("EXECUTE", "Deleted face from Firebase Storage");
                             }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.i("EXECUTE", "Cannot delete face from Firebase Storage");
-                            }
-                        });
+                        }).addOnFailureListener(e -> Log.i("EXECUTE", "Cannot delete face from Firebase Storage"));
                     }
                 }
-                Log.i("EXECUTE","DSP Size: " + faceList.size());
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -371,7 +361,7 @@ public class StudentManagerActivity extends AppCompatActivity
     }
 
     // Display the information of student on GridView based on course selection
-    private void displayListView(List<Student> studentList, String courseServerId, int request)
+    private void displayListView(List<Student> studentList, int request)
     {
         if (request == 0) // default data is the student of first course in the list
         {
@@ -401,45 +391,5 @@ public class StudentManagerActivity extends AppCompatActivity
     public void btnBackArrow(View view)
     {
         onBackPressed();
-    }
-
-    /**
-     * This class is a background task to delete a student and its information on server
-     */
-    class DeleteStudentTask extends AsyncTask<String, String, String>
-    {
-        String courseServerId;
-        DeleteStudentTask(String courseServerId)
-        {
-            this.courseServerId = courseServerId;
-        }
-
-        @Override
-        protected String doInBackground(String... params)
-        {
-            // Connect to server
-            FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
-            try
-            {
-                Log.i("EXECUTE","Request: Deleting student " + params[0]);
-                UUID studentServerId = UUID.fromString(params[0]);
-                faceServiceClient.deletePersonInLargePersonGroup(courseServerId, studentServerId);
-                return params[0];
-            }
-            catch (Exception e)
-            {
-                Log.i("EXECUTE","ERROR DELETE STUDENT FROM SERVER: " + e.getMessage());
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result)
-        {
-            if (result != null)
-            {
-                Log.i("EXECUTE", "Response: Success. Deleting student " + result + " succeed");
-            }
-        }
     }
 }

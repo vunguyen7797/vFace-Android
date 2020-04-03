@@ -19,15 +19,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.LocaleHelper;
+import com.vunguyen.vface.helper.asyncTasks.AddCourseTask;
 
 import java.util.Objects;
 import java.util.UUID;
+
+import edmt.dev.edmtdevcognitiveface.FaceServiceClient;
 
 /**
  * This class contains background tasks to work with server
@@ -39,22 +40,16 @@ public class AddEditCourseActivity extends AppCompatActivity
     Course course;
     TextInputEditText etCourseID;
     TextInputEditText etCourseName;
-    ProgressDialog progressDialog;
 
     // Request code
     private static final int MODE_ADD = 1;
     private static final int MODE_EDIT = 2;
 
     String courseServerId;
-    private int mode;
     String account; // email address of the user
-
+    private int mode;
     private boolean needRefresh = true; // signal flag to refresh data
     DatabaseReference mDatabase;
-
-    // Access a Cloud Firestore instance from your Activity
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-
 
     @Override
     protected void attachBaseContext(Context newBase)
@@ -68,13 +63,18 @@ public class AddEditCourseActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_edit_course);
 
-        // Set event for Cancel button
-        btnCancel = findViewById(R.id.btnCancel);
+        initView();
+        initData();
+        initAction();
+    }
+
+    private void initAction()
+    {
         btnCancel.setOnClickListener(v -> onBackPressed());
+    }
 
-        etCourseID = findViewById(R.id.etCourseID);
-        etCourseName = findViewById(R.id.etCourseName);
-
+    private void initData()
+    {
         // Extract data passed from the previous activity
         Intent intentData = this.getIntent();
         this.course = (Course) intentData.getSerializableExtra("course");
@@ -93,12 +93,19 @@ public class AddEditCourseActivity extends AppCompatActivity
             this.etCourseName.setText(course.getCourseName());
             courseServerId = course.getCourseServerId();
         }
-
-        // initializing progress dialog
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("V.FACE");
     }
 
+    private void initView()
+    {
+        // Set event for Cancel button
+        btnCancel = findViewById(R.id.btnCancel);
+        etCourseID = findViewById(R.id.etCourseID);
+        etCourseName = findViewById(R.id.etCourseName);
+    }
+
+    /**
+     * ******************* Event handler methods **********************
+     */
     @Override
     public void onBackPressed()
     {
@@ -129,7 +136,8 @@ public class AddEditCourseActivity extends AppCompatActivity
                 // Generate a server string Id for the new course
                 courseServerId = UUID.randomUUID().toString();
                 // Execute the background task to create a course on server
-                new AddCourseTask().execute(courseServerId);
+                //new AddCourseTask().execute(courseServerId);
+                new com.vunguyen.vface.helper.asyncTasks.AddCourseTask(AddEditCourseActivity.this).execute(courseServerId);
                 this.course = new Course(courseNumberId, courseName, courseServerId, account);
                 mDatabase.child(courseName.toUpperCase() + "-" + courseServerId).setValue(course);
 
@@ -154,6 +162,11 @@ public class AddEditCourseActivity extends AppCompatActivity
         //finish();
     }
 
+    public void btnBackClick (View view)
+    {
+        onBackPressed();
+    }
+
     // Override Finish method to close the activity and send request refreshing
     // the list of course after adding or deleting a course.
     @Override
@@ -166,66 +179,5 @@ public class AddEditCourseActivity extends AppCompatActivity
         // Activity complete
         this.setResult(Activity.RESULT_OK, data);
         super.finish();
-    }
-
-    public void btnBackClick (View view)
-    {
-        onBackPressed();
-    }
-
-    /**
-     * This class implements background task to create a course
-     * as a large person group on Microsoft Face API server.
-     */
-    class AddCourseTask extends AsyncTask<String, String, String>
-    {
-        @Override
-        protected String doInBackground(String... params) {
-            // Get an instance of face service client.
-            FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
-            try {
-                publishProgress("Syncing with server...");
-                Log.i("EXECUTE", "Syncing with server to add course");
-
-                // Start creating a course as a person group in server.
-                faceServiceClient.createLargePersonGroup(params[0], "Name", "User Data");
-                return params[0];
-            } catch (Exception e) {
-                Log.i("EXECUTE", "Errors: " + e.getMessage());
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPreExecute() {
-            startProgressingDialog();
-        }
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            duringTaskProgressDialog(values[0]);
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (result != null) {
-                progressDialog.dismiss();
-                Log.i("EXECUTE", "Course " + result + " created successfully on server.");
-            } else {
-                Log.i("EXECUTE", "Response: Course is not created on server.");
-            }
-        }
-    }
-
-    // Showing the progressing dialog when the task starts
-    private void startProgressingDialog()
-    {
-        progressDialog.show();
-    }
-
-    // Showing message on progressing dialog during the task
-    private void duringTaskProgressDialog(String progress)
-    {
-        progressDialog.setMessage(progress);
     }
 }

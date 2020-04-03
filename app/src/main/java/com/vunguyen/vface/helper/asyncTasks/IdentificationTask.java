@@ -1,7 +1,7 @@
 /*
  * GroupIdentificationTask.java
  */
-package com.vunguyen.vface.helper.faceProcessors;
+package com.vunguyen.vface.helper.asyncTasks;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
@@ -23,12 +23,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.microsoft.projectoxford.face.FaceServiceClient;
-import com.microsoft.projectoxford.face.contract.IdentifyResult;
-import com.microsoft.projectoxford.face.contract.TrainingStatus;
 import com.vunguyen.vface.bean.Date;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
+import com.vunguyen.vface.helper.FaceListViewAdapter;
 import com.vunguyen.vface.helper.callbackInterfaces.StudentInterface;
 import com.vunguyen.vface.helper.callbackInterfaces.StudentListInterface;
 import com.vunguyen.vface.ui.GroupCheckActivity;
@@ -40,7 +38,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
+
+import edmt.dev.edmtdevcognitiveface.Contract.IdentifyResult;
+import edmt.dev.edmtdevcognitiveface.Contract.TrainingStatus;
+import edmt.dev.edmtdevcognitiveface.FaceServiceClient;
 
 /**
  * This class is to identify faces in a group of people after the detection process, running in background.

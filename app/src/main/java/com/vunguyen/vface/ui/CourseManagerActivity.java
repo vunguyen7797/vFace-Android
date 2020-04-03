@@ -37,7 +37,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.bean.Date;
@@ -49,6 +48,8 @@ import com.vunguyen.vface.helper.LocaleHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import edmt.dev.edmtdevcognitiveface.FaceServiceClient;
 
 /**
  * This activity class implements methods and events for the Course Manager feature.
@@ -88,7 +89,6 @@ public class CourseManagerActivity extends AppCompatActivity
 
         // Get email account
         account = getIntent().getStringExtra("ACCOUNT");
-        Log.i("EXECUTE", "Account CM: " + account);
         mDatabase_Course = FirebaseDatabase.getInstance().getReference().child(account).child("course");
         mDatabase_Student = FirebaseDatabase.getInstance().getReference().child(account).child("student");
         mDatabase_Face = FirebaseDatabase.getInstance().getReference().child(account).child("face");
@@ -108,9 +108,7 @@ public class CourseManagerActivity extends AppCompatActivity
                 List<Course> courseList = new ArrayList<>();
                 for(DataSnapshot dsp : dataSnapshot.getChildren())
                 {
-                    Log.i("EXECUTE","DSP: " + dsp.getValue(Course.class));
                     courseList.add(dsp.getValue(Course.class));
-
                 }
                 displayCourses(courseList);;
             }

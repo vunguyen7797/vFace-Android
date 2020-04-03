@@ -49,10 +49,10 @@ import java.util.Map;
 @SuppressLint("MissingPermission")
 public class CameraSource {
   @SuppressLint("InlinedApi")
-  public static final int CAMERA_FACING_BACK = CameraInfo.CAMERA_FACING_BACK;
+  private static final int CAMERA_FACING_BACK = CameraInfo.CAMERA_FACING_BACK;
 
   @SuppressLint("InlinedApi")
-  public static final int CAMERA_FACING_FRONT = CameraInfo.CAMERA_FACING_FRONT;
+  private static final int CAMERA_FACING_FRONT = CameraInfo.CAMERA_FACING_FRONT;
 
   private static final String TAG = "MIDemoApp:CameraSource";
 
@@ -73,7 +73,7 @@ public class CameraSource {
 
   private Camera camera;
 
-  protected int facing = CAMERA_FACING_FRONT;
+  private int facing = CAMERA_FACING_FRONT;
 
   /**
    * Rotation of the device, and thus the associated preview images captured from the device. See
@@ -85,7 +85,7 @@ public class CameraSource {
 
   // These values may be requested by the caller.  Due to hardware limitations, we may need to
   // select close, but not exactly the same values for these.
-  private final float requestedFps = 60.0f;
+  private final float requestedFps = 30.0f;
   public final static int requestedPreviewWidth = 1000;
   public final static int requestedPreviewHeight = 750;
   private final boolean requestedAutoFocus = true;

@@ -25,10 +25,10 @@ import java.nio.ByteBuffer;
 /**
  * This class contains several methods to work on bitmap image
  */
-public class BitmapProcessors
+class BitmapProcessors
 {
     @Nullable
-    public static Bitmap getBitmap(ByteBuffer data, FrameMetadata metadata)
+    static Bitmap getBitmap(ByteBuffer data, FrameMetadata metadata)
     {
         data.rewind();
         byte[] imageInBuffer = new byte[data.limit()];

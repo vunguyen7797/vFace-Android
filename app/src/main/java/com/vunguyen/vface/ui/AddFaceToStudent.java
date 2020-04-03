@@ -3,6 +3,7 @@
  */
 package com.vunguyen.vface.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -13,10 +14,6 @@ import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 
 import com.google.firebase.database.DatabaseReference;
-import com.microsoft.projectoxford.face.FaceServiceClient;
-import com.microsoft.projectoxford.face.contract.AddPersistedFaceResult;
-import com.microsoft.projectoxford.face.contract.Face;
-import com.microsoft.projectoxford.face.contract.FaceRectangle;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.StorageHelper;
@@ -29,6 +26,11 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+import edmt.dev.edmtdevcognitiveface.Contract.AddPersistedFaceResult;
+import edmt.dev.edmtdevcognitiveface.Contract.Face;
+import edmt.dev.edmtdevcognitiveface.Contract.FaceRectangle;
+import edmt.dev.edmtdevcognitiveface.FaceServiceClient;
 
 /**
  * This class contains methods to detect a face, adding face to student on
@@ -152,7 +154,7 @@ class AddFaceToStudent extends ActivityCompat
                 // Only allow one face detected at one time for each student
                 if (faces != null && faces.length == 1)
                 {
-                    Log.i("EXECUTE", "Response: Face detected.  " + (faces == null ? 0 : faces.length));
+                    Log.i("EXECUTE", "Response: Face detected.  " + faces.length);
                     List<Face> facesList = Arrays.asList(faces); // convert the result into a list
 
                     for (Face face : facesList)
@@ -203,7 +205,8 @@ class AddFaceToStudent extends ActivityCompat
      * This class contains background methods to work with server
      * for adding a face to the Microsoft server.
      */
-    class AddFaceTask extends AsyncTask<Void, String, Boolean>
+    @SuppressLint("StaticFieldLeak")
+    public class AddFaceTask extends AsyncTask<Void, String, Boolean>
     {
         @Override
         protected Boolean doInBackground(Void... params)

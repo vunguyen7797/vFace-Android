@@ -44,12 +44,13 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
-import com.microsoft.projectoxford.face.contract.FaceRectangle;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import edmt.dev.edmtdevcognitiveface.Contract.FaceRectangle;
 
 /**
  * This class contains the some methods to work on the bitmap image.

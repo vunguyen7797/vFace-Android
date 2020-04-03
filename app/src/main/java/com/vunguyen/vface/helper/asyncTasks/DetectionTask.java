@@ -1,7 +1,7 @@
 /*
  * DetectionTask.java
  */
-package com.vunguyen.vface.helper.faceProcessors;
+package com.vunguyen.vface.helper.asyncTasks;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
@@ -11,8 +11,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.microsoft.projectoxford.face.FaceServiceClient;
-import com.microsoft.projectoxford.face.contract.Face;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.ui.SelfCheckActivity;
@@ -23,6 +21,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+import edmt.dev.edmtdevcognitiveface.Contract.Face;
+import edmt.dev.edmtdevcognitiveface.FaceServiceClient;
 
 /**
  * This class implement the face detection task with server API

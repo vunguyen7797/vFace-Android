@@ -24,8 +24,6 @@ import com.vunguyen.vface.helper.LocaleHelper;
  */
 public class WelcomeScreenActivity extends AppCompatActivity
 {
-    TextView tvRegister;
-
     @Override
     protected void attachBaseContext(Context newBase)
     {
@@ -39,16 +37,6 @@ public class WelcomeScreenActivity extends AppCompatActivity
         setContentView(R.layout.activity_welcome_screen);
 
         openLoginWindow();
-        // event for login button
-        Button btnLogin = findViewById(R.id.btnLogin);
-        btnLogin.setOnClickListener(v -> openLoginWindow());
-
-        // Event for register text button
-        tvRegister = findViewById(R.id.tvRegister);
-        tvRegister.setOnClickListener(v -> {
-            startActivity(new Intent(WelcomeScreenActivity.this, SignUpActivity.class));
-            finish();
-        });
     }
 
     // Open login window for username and password

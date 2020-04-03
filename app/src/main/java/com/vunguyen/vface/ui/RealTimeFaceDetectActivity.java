@@ -50,7 +50,6 @@ public class RealTimeFaceDetectActivity extends BaseActivity
     private CameraSourcePreview preview;
     private GraphicOverlay graphicOverlay;
     private ImageView ivFaceFrame;
-    private Bitmap croppedImage = null;
 
     @Override
     protected void attachBaseContext(Context newBase)
@@ -174,12 +173,11 @@ public class RealTimeFaceDetectActivity extends BaseActivity
 
         float top = (float) (originalImage.getHeight() * 0.2);
         float newHeight = (float) (originalImage.getHeight() * 0.6);
-        croppedImage =
-                Bitmap.createBitmap(originalImage,
-                        ((int) (left)),
-                        (int) (top),
-                        ((int) (newWidth)),
-                        (int) (newHeight));
+        Bitmap croppedImage = Bitmap.createBitmap(originalImage,
+                ((int) (left)),
+                (int) (top),
+                ((int) (newWidth)),
+                (int) (newHeight));
 
         // When image is cropped , respond back to the SelectImage activity for other tasks
         if (croppedImage != null)

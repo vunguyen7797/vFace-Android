@@ -1,7 +1,7 @@
 /*
  * FaceListViewAdapter.java
  */
-package com.vunguyen.vface.helper.faceProcessors;
+package com.vunguyen.vface.helper;
 
 import android.content.Context;
 import android.database.DataSetObserver;

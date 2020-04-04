@@ -14,6 +14,10 @@ import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 
 import com.google.firebase.database.DatabaseReference;
+import com.microsoft.projectoxford.face.FaceServiceClient;
+import com.microsoft.projectoxford.face.contract.AddPersistedFaceResult;
+import com.microsoft.projectoxford.face.contract.Face;
+import com.microsoft.projectoxford.face.contract.FaceRectangle;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.StorageHelper;
@@ -26,11 +30,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-import edmt.dev.edmtdevcognitiveface.Contract.AddPersistedFaceResult;
-import edmt.dev.edmtdevcognitiveface.Contract.Face;
-import edmt.dev.edmtdevcognitiveface.Contract.FaceRectangle;
-import edmt.dev.edmtdevcognitiveface.FaceServiceClient;
 
 /**
  * This class contains methods to detect a face, adding face to student on
@@ -136,7 +135,7 @@ class AddFaceToStudent extends ActivityCompat
                         params[0],       // Face image input from a stream
                         true,        // Return face ID
                         false,      // Do not return face landmarks
-                        null);
+                        null, "recognition_02", "detection_02");
             }
             catch (Exception e)
             {
@@ -232,7 +231,8 @@ class AddFaceToStudent extends ActivityCompat
                         studentServerId_UUID,
                         imageInputStream,
                         "User data",
-                        faceRectangle);
+                        faceRectangle,
+                        "detection_02");
 
                 faceId = result.persistedFaceId;
                 Log.i("EXECUTE", "Face Id: " + faceId);

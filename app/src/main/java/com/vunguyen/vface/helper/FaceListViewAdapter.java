@@ -8,6 +8,7 @@ import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -19,6 +20,8 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.vunguyen.vface.R;
+import com.vunguyen.vface.bean.Student;
+import com.vunguyen.vface.bean.StudentInfoPackage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +39,8 @@ public class FaceListViewAdapter implements ListAdapter
     private Context context;
     private String request;
     private String mode;
+    //private List<Student> student;
+    private List<StudentInfoPackage> student;
 
     // when input photos are in bitmap format loading from memory
     public FaceListViewAdapter(List<Pair<Bitmap, String>> studentIdentityList, Context context)
@@ -88,7 +93,7 @@ public class FaceListViewAdapter implements ListAdapter
         }
     }
 
-    public FaceListViewAdapter(List<Pair<Pair<Uri, String>, Integer>> studentIdentityList, String request, Context context, String mode)
+    public FaceListViewAdapter(List<Pair<Pair<Uri, String>, Pair<Student, Integer>>> studentIdentityList, String request, Context context, String mode)
     {
         Log.i("EXECUTE", "Display list size: " + studentIdentityList.size());
         this.context = context;
@@ -97,12 +102,17 @@ public class FaceListViewAdapter implements ListAdapter
         faceThumbnailsUri = new ArrayList<>();
         studentInfo = new ArrayList<>();
         studentAbsence = new ArrayList<>();
+        student = new ArrayList<>();
 
-        for (Pair<Pair<Uri, String>, Integer> pair : studentIdentityList)
+        for (Pair<Pair<Uri, String>, Pair<Student, Integer>> pair : studentIdentityList)
         {
             faceThumbnailsUri.add(pair.first.first);
             studentInfo.add(pair.first.second);
-            studentAbsence.add(pair.second.toString());
+            Pair<Student, Uri> pair1 = new Pair<>(pair.second.first, pair.first.first);
+            Pair<Pair<Student, Uri>, Integer> finalPair = new Pair<>(pair1, pair.second.second);
+            StudentInfoPackage studentInfoPackage = new StudentInfoPackage(finalPair);
+            student.add(studentInfoPackage);
+            studentAbsence.add(pair.second.second.toString());
         }
 
     }
@@ -140,9 +150,9 @@ public class FaceListViewAdapter implements ListAdapter
     public Object getItem(int position)
     {
         if (request.equalsIgnoreCase("uri"))
-            return faceThumbnailsUri.get(position);
+            return student.get(position);
         else
-            return faceThumbnails.get(position);
+            return student.get(position);
     }
 
     @Override

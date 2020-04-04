@@ -38,6 +38,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.microsoft.projectoxford.face.FaceServiceClient;
+import com.microsoft.projectoxford.face.contract.CreatePersonResult;
 import com.squareup.picasso.Picasso;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Face;
@@ -53,8 +55,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import edmt.dev.edmtdevcognitiveface.Contract.CreatePersonResult;
-import edmt.dev.edmtdevcognitiveface.FaceServiceClient;
 
 /**
  * This class implements functions for a student profile activity

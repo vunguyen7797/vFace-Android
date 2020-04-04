@@ -264,6 +264,7 @@ public class GroupCheckActivity extends AppCompatActivity
                     {
                         listViewStudentsAdapter = new FaceListViewAdapter(displayUnknownList, GroupCheckActivity.this);
                         studentListChanged = true; // default option has been changed
+                        Toast.makeText(getApplicationContext(), displayUnknownList.size() + " unknown students in class", Toast.LENGTH_SHORT).show();
                         if (displayUnknownList.size() == 0)
                             ivWaitingIdentify.setVisibility(View.VISIBLE);
                         else

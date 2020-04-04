@@ -28,8 +28,6 @@ import com.vunguyen.vface.helper.asyncTasks.AddCourseTask;
 import java.util.Objects;
 import java.util.UUID;
 
-import edmt.dev.edmtdevcognitiveface.FaceServiceClient;
-
 /**
  * This class contains background tasks to work with server
  * and implements events for activity properties.

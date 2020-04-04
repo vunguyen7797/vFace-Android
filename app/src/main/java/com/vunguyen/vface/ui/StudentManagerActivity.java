@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -67,7 +68,7 @@ public class StudentManagerActivity extends AppCompatActivity
     // Menu request code
     private static final int MENU_ITEM_VIEW = 111;
     private static final int MENU_ITEM_EDIT = 222;
-    private static final int MENU_ITEM_ADD = 333;
+    //private static final int MENU_ITEM_ADD = 333;
     private static final int MENU_ITEM_DELETE = 444;
     private static final int MY_REQUEST_CODE = 1000;
 
@@ -209,7 +210,7 @@ public class StudentManagerActivity extends AppCompatActivity
     {
         super.onCreateContextMenu(menu, view, menuInfo);
         menu.add(0, MENU_ITEM_VIEW , 0, getResources().getString(R.string.menu_view_student));
-        menu.add(0, MENU_ITEM_ADD , 1, getResources().getString(R.string.menu_add_student));
+        //menu.add(0, MENU_ITEM_ADD , 1, getResources().getString(R.string.menu_add_student));
         menu.add(0, MENU_ITEM_EDIT , 2, getResources().getString(R.string.menu_edit_student));
         menu.add(0, MENU_ITEM_DELETE, 4, getResources().getString(R.string.menu_delete_student));
     }
@@ -226,18 +227,20 @@ public class StudentManagerActivity extends AppCompatActivity
 
         if(item.getItemId() == MENU_ITEM_VIEW)
         {
-            new MaterialAlertDialogBuilder(this)
+            /*new MaterialAlertDialogBuilder(this)
                     .setTitle("VFACE - STUDENT MANAGER")
                     .setMessage("Student ID Number: " + selectedStudent.getStudentIdNumber() +
                             "\nStudent Name: " + selectedStudent.getStudentName())
                     .setCancelable(false)
                     .setNegativeButton("OK", null)
-                    .show();
+                    .show(); */
+            passDataToStudentProfile(selectedStudent, StudentManagerActivity.this);
+
         }
-        else if(item.getItemId() == MENU_ITEM_ADD)
-        {
-            addStudent();
-        }
+       // else if(item.getItemId() == MENU_ITEM_ADD)
+        //{
+        //    addStudent();
+        //}
         else if (item.getItemId() == MENU_ITEM_EDIT)
         {
             Intent intent = new Intent(StudentManagerActivity.this, StudentDataActivity.class);
@@ -262,6 +265,61 @@ public class StudentManagerActivity extends AppCompatActivity
             return false;
         }
         return true;
+    }
+
+    private void passDataToStudentProfile(Student student, Context context)
+    {
+        mDatabase_Face.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+            {
+                for (DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    Face face = dsp.getValue(Face.class);
+                    assert face != null;
+                    if (face.getStudentServerId().equalsIgnoreCase(student.getStudentServerId()))
+                    {
+                        Uri faceUri = Uri.parse(face.getStudentFaceUri());
+
+                        mDatabase_Date.addValueEventListener(new ValueEventListener()
+                        {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+                            {
+                                int counter = 0;
+                                for (DataSnapshot dsp : dataSnapshot.getChildren())
+                                {
+                                    Date temp = dsp.getValue(Date.class);
+                                    assert temp != null;
+                                    if (temp.getCourseServerId().equalsIgnoreCase(courseServerId)
+                                            && temp.getStudentServerId().equalsIgnoreCase(student.getStudentServerId())
+                                            && temp.getStudentAttendanceStatus().equalsIgnoreCase("NO"))
+                                        counter++;
+                                }
+                                Integer totalAbsence = counter;
+                                Intent intent = new Intent(context, StudentProfilePageActivity.class);
+                                intent.putExtra("ACCOUNT", account);
+                                intent.putExtra("Student", student);
+                                intent.setData(faceUri);
+                                intent.putExtra("Absence", totalAbsence);
+                                startActivityForResult(intent, MY_REQUEST_CODE);
+                                mDatabase_Date.removeEventListener(this);
+                            }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError)
+                            {
+                            }
+                        });
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     // Go to the student profile activity to add student
@@ -350,11 +408,6 @@ public class StudentManagerActivity extends AppCompatActivity
             account = data.getStringExtra("ACCOUNT");
             // Refresh ListView
             if (needRefresh) {
-                //this.studentList.clear();
-               // MyDatabaseHelperStudent db_student = new MyDatabaseHelperStudent(this);
-               // List<Student> list = db_student.getStudentWithCourse(courseServerId);
-               // this.studentList.addAll(list);
-                // Notify data changed to grid view
                 this.studentArrayAdapter.notifyDataSetChanged();
             }
         }

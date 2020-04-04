@@ -159,4 +159,7 @@
     <string name="menu_delete_student">Delete Student</string>
     <string name="please_save_data_toast">Please save data</string>
     <string name="menu_delete_face">Delete Face</string>
+    <string name="title_student_profile_2">STUDENT PROFILE</string>
+    <string name="hint_total_absences">TOTAL ABSENCES</string>
+    <string name="title_absence_history">ABSENCE HISTORY</string>
 </resources>

@@ -3,13 +3,21 @@
  */
 package com.vunguyen.vface.ui;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.util.Pair;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
@@ -18,9 +26,11 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,6 +42,7 @@ import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.bean.Date;
 import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
+import com.vunguyen.vface.bean.StudentInfoPackage;
 import com.vunguyen.vface.helper.LocaleHelper;
 import com.vunguyen.vface.helper.callbackInterfaces.CourseListInterface;
 import com.vunguyen.vface.helper.callbackInterfaces.DateInterface;
@@ -71,6 +82,7 @@ public class AttendanceActivity extends AppCompatActivity
 
     //adapter
     FaceListViewAdapter studentListViewAdapter;
+    private static final int MY_REQUEST_CODE = 1000;
 
     // variables
     String account;
@@ -84,6 +96,7 @@ public class AttendanceActivity extends AppCompatActivity
         super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -118,9 +131,10 @@ public class AttendanceActivity extends AppCompatActivity
         lvAttendance = findViewById(R.id.lvAttendance);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void initAction()
     {
-        getCourseListFirebase(courseList -> displayCourseMenu(courseList));
+        getCourseListFirebase(this::displayCourseMenu);
         displayViewModes(viewModesMenu);
         setDatePicker();
     }
@@ -142,7 +156,10 @@ public class AttendanceActivity extends AppCompatActivity
             {
                 course = (Course) parent.getItemAtPosition(position);
                 courseServerId = course.getCourseServerId();    // get course id on server
-
+                List<Pair<Pair<Uri, String>, Pair<Student, Integer>>> studentList = new ArrayList<>();
+                studentListViewAdapter = new FaceListViewAdapter(studentList, "uri", AttendanceActivity.this, "withTotalAbsence");
+                lvAttendance.setAdapter(studentListViewAdapter);
+                ivAttendance.setVisibility(View.VISIBLE);
                 Log.i("EXECUTE", "Course Selected: " + courseServerId);
                 textInputLayoutDate.setEnabled(true);
                 if (!date.equalsIgnoreCase(""))
@@ -190,7 +207,7 @@ public class AttendanceActivity extends AppCompatActivity
     // display students on a day, request = 0 for in-class, = 1 for absent students
     private void displayStudentOnADate(String date, int request)
     {
-        List<Pair<Pair<Uri, String>, Integer>> attendanceList = new ArrayList<>();
+        List<Pair<Pair<Uri, String>, Pair<Student, Integer>>> attendanceList = new ArrayList<>();
 
         getStudentListFirebase(courseServerId, studentList ->
                 getFaceFirebase(faceList ->
@@ -221,7 +238,8 @@ public class AttendanceActivity extends AppCompatActivity
                                                     assert finalStudentFace != null;
                                                     Pair<Uri, String> identity = new Pair<>(Uri.parse(finalStudentFace
                                                             .getStudentFaceUri()), student.getStudentName());
-                                                    Pair<Pair<Uri, String>, Integer> finalPair = new Pair<>(identity, counter);
+                                                    Pair<Student, Integer> identity2 = new Pair<>(student, counter);
+                                                    Pair<Pair<Uri, String>, Pair<Student, Integer>> finalPair = new Pair<>(identity, identity2);
                                                     attendanceList.add(finalPair);
                                                     setStudentArrayAdapter(attendanceList); // set adapter to display on list view
                                                 });
@@ -258,7 +276,8 @@ public class AttendanceActivity extends AppCompatActivity
                                             assert finalStudentFace != null;
                                             Pair<Uri, String> identity = new Pair<>(Uri.parse(finalStudentFace
                                                     .getStudentFaceUri()), student.getStudentName());
-                                            Pair<Pair<Uri, String>, Integer> finalPair = new Pair<>(identity, counter);
+                                            Pair<Student, Integer> identity2 = new Pair<>(student, counter);
+                                            Pair<Pair<Uri, String>, Pair<Student, Integer>> finalPair = new Pair<>(identity, identity2);
                                             attendanceList.add(finalPair);
                                             setStudentArrayAdapter(attendanceList); // set adapter to display on list view
                                         });
@@ -421,7 +440,7 @@ public class AttendanceActivity extends AppCompatActivity
     /**
      ******************* Event handler methods *********************
      */
-    private void setStudentArrayAdapter(List<Pair<Pair<Uri, String>, Integer>> studentList)
+    private void setStudentArrayAdapter(List<Pair<Pair<Uri, String>, Pair<Student, Integer>>> studentList)
     {
         if (studentList.size() == 0 || date.equalsIgnoreCase("")
                 || viewModesMenu.getText().toString().equalsIgnoreCase(""))
@@ -433,10 +452,37 @@ public class AttendanceActivity extends AppCompatActivity
             //studentListViewAdapter = new FaceListViewAdapter(studentList);
             studentListViewAdapter = new FaceListViewAdapter(studentList, "uri", AttendanceActivity.this, "withTotalAbsence");
             lvAttendance.setAdapter(studentListViewAdapter);
+            lvAttendance.setOnItemClickListener((parent, view, position, id) -> {
+                //Log.i("EXECUTE", "Get student: " + student.toString());
+                StudentInfoPackage studentInfoPackage = (StudentInfoPackage) parent.getItemAtPosition(position);
+                Student student = studentInfoPackage.getStudent().first.first;
+                Uri studentUri = studentInfoPackage.getStudent().first.second;
+                Integer totalAbsence = studentInfoPackage.getStudent().second;
+                Log.i("EXECUTE", "Get student: " + student.toString());
+                Intent intent = new Intent(AttendanceActivity.this, StudentProfilePageActivity.class);
+                intent.putExtra("ACCOUNT", account);
+                intent.putExtra("Student", student);
+                intent.setData(studentUri);
+                intent.putExtra("Absence", totalAbsence);
+                startActivityForResult(intent, MY_REQUEST_CODE);
+            });
+        }
+    }
+
+    // Refresh the student list after adding new student
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK && requestCode == MY_REQUEST_CODE) {
+            boolean needRefresh = data.getBooleanExtra("needRefresh", true);
+            account = data.getStringExtra("ACCOUNT");
+
         }
     }
 
     // event for the date picker
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void setDatePicker()
     {
         LocalDateTime local = LocalDateTime.now();

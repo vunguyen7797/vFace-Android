@@ -11,19 +11,22 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.microsoft.projectoxford.face.FaceServiceClient;
+import com.microsoft.projectoxford.face.contract.Face;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.ui.SelfCheckActivity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-
-import edmt.dev.edmtdevcognitiveface.Contract.Face;
-import edmt.dev.edmtdevcognitiveface.FaceServiceClient;
 
 /**
  * This class implement the face detection task with server API
@@ -67,6 +70,7 @@ public class DetectionTask extends AsyncTask<InputStream, String, Face[]>
     {
         // Connect to server
         FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
+
         try
         {
             publishProgress("Detecting...");
@@ -76,8 +80,10 @@ public class DetectionTask extends AsyncTask<InputStream, String, Face[]>
             return faceServiceClient.detect(
                     params[0],  // stream of image to detect
                     true,    // return face ID
-                    false,  // don't return face landmarks
-                    null);
+                    false,          // don't return face landmarks
+                    null,           // don't return face attributes
+                    "recognition_02", // new recognition model
+                    "detection_02");    // new detection model
         }
         catch (Exception e)
         {

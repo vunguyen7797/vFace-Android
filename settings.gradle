@@ -1,2 +1,4 @@
 include ':app'
+include 'lib'
+project(':lib').projectDir = file('../ClientLibrary/lib')
 rootProject.name='VFACE'

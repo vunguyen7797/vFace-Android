@@ -1,9 +1,11 @@
+/*
+ * LocaleHelper.java
+ */
 package com.vunguyen.vface.helper;
 
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.ConfigurationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
@@ -11,6 +13,9 @@ import android.preference.PreferenceManager;
 
 import java.util.Locale;
 
+/**
+ * This class is to implements task for languages
+ */
 public class LocaleHelper
 {
     private static final String SELECTED_LANGUAGE = "Locale.Helper.Selected.Language";

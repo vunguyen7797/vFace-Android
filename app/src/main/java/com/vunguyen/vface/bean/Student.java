@@ -3,6 +3,8 @@
  */
 package com.vunguyen.vface.bean;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
 
 /**
@@ -10,12 +12,13 @@ import java.io.Serializable;
  */
 public class Student implements Serializable
 {
-    private int studentId;              // Student ID auto-generated in database
     private String courseServerId;      // Course unique ID string to work with server tasks
     private String studentName;         // Student name from input
     private String studentIdNumber;     // Real student ID number from input
     private String studentServerId;     // Student unique ID string to work with server tasks
     private String studentIdentifyFlag; // Indicator if the student is identified or not.
+    private String studentServerIdImport; // Original student server id
+    private int numberOfFaces;            // Number of faces
 
     public Student()
     {
@@ -28,6 +31,7 @@ public class Student implements Serializable
         this.studentIdNumber = studentIdNumber;
         this.studentName = studentName;
         this.studentServerId = studentServerId;
+        this.studentServerIdImport = "";
     }
 
     public Student (String studentIdNumber, String courseServerId, String studentName, String studentServerId, String studentIdentifyFlag)
@@ -37,15 +41,19 @@ public class Student implements Serializable
         this.studentName = studentName;
         this.studentServerId = studentServerId;
         this.studentIdentifyFlag = studentIdentifyFlag;
+        this.studentServerIdImport = "";
     }
 
-    public Student(int id, String courseServerId, String studentIdNumber, String studentName, String studentServerId)
+    public Student (String studentServerIdImport, String studentIdNumber, String courseServerId
+            , String studentName, String studentServerId, String studentIdentifyFlag, int numberOfFaces)
     {
-        this.studentId = id;
         this.courseServerId = courseServerId;
         this.studentIdNumber = studentIdNumber;
         this.studentName = studentName;
         this.studentServerId = studentServerId;
+        this.studentIdentifyFlag = studentIdentifyFlag;
+        this.studentServerIdImport = studentServerIdImport;
+        this.numberOfFaces = numberOfFaces;
     }
 
     public String getCourseServerId()
@@ -66,16 +74,6 @@ public class Student implements Serializable
     public void setStudentIdentifyFlag(String studentIdentifyFlag)
     {
         this.studentIdentifyFlag = studentIdentifyFlag;
-    }
-
-    public int getStudentId()
-    {
-        return studentId;
-    }
-
-    public void setStudentId(int studentId)
-    {
-        this.studentId = studentId;
     }
 
     public String getStudentName()
@@ -109,9 +107,26 @@ public class Student implements Serializable
     }
 
     // This method will return the student id number if the object is requested to return string
+    @NotNull
     @Override
     public String toString()
     {
         return this.studentName + " (" + this.studentIdNumber + ")";
+    }
+
+    public String getStudentServerIdImport() {
+        return studentServerIdImport;
+    }
+
+    public void setStudentServerIdImport(String studentServerIdImport) {
+        this.studentServerIdImport = studentServerIdImport;
+    }
+
+    public int getNumberOfFaces() {
+        return numberOfFaces;
+    }
+
+    public void setNumberOfFaces(int numberOfFaces) {
+        this.numberOfFaces = numberOfFaces;
     }
 }

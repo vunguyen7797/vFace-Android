@@ -41,16 +41,14 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.widget.ImageView;
+import android.os.Build;
 
+import androidx.annotation.RequiresApi;
 
 import com.microsoft.projectoxford.face.contract.FaceRectangle;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 
 /**
@@ -137,6 +135,7 @@ public class ImageEditor
     }
 
     // Process the image to fit the quality standard before displaying
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public static Bitmap handlePhotoAndRotationBitmap(Context context, Uri selectedImage)
             throws IOException {
         int MAX_HEIGHT = 1920;
@@ -147,6 +146,7 @@ public class ImageEditor
         options.inJustDecodeBounds = true;
         InputStream imageStream = context.getContentResolver().openInputStream(selectedImage);
         BitmapFactory.decodeStream(imageStream, null, options);
+        assert imageStream != null;
         imageStream.close();
 
         // Calculate inSampleSize
@@ -219,13 +219,18 @@ public class ImageEditor
      * @param selectedImage Image URI
      * @return The resulted Bitmap after manipulation
      */
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private static Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
 
         InputStream input = context.getContentResolver().openInputStream(selectedImage);
-        ExifInterface ei;
+        ExifInterface ei = null;
 
-        ei = new ExifInterface(input);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            assert input != null;
+            ei = new ExifInterface(input);
+        }
 
+        assert ei != null;
         int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
         switch (orientation) {

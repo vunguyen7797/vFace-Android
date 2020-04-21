@@ -7,9 +7,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.theartofdev.edmodo.cropper.CropImageView;
@@ -37,6 +39,7 @@ public class CropImageActivity extends AppCompatActivity
         super.attachBaseContext(LocaleHelper.onAttach(newBase, "en"));
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -50,6 +53,7 @@ public class CropImageActivity extends AppCompatActivity
     }
 
     // This method is to initialize the crop image view with the need-to-crop image
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private  void initializeCropImage()
     {
         ivCrop = findViewById(R.id.ivCrop);
@@ -73,14 +77,11 @@ public class CropImageActivity extends AppCompatActivity
     {
         StorageHelper.uploadToFireBaseStorage(ivCrop.getCroppedImage(),
                 "profile_photo" + account,
-                CropImageActivity.this, account, "profile_photo", new UriPhotoInterface() {
-                    @Override
-                    public void getUriPhoto(Uri uriPhoto) {
-                        Intent intent = new Intent(CropImageActivity.this, ManageAccountActivity.class);
-                        intent.putExtra("ACCOUNT", account);
-                        intent.setData(uriPhoto);
-                        startActivity(intent);
-                    }
+                "profile_photo", uriPhoto -> {
+                    Intent intent = new Intent(CropImageActivity.this, ManageAccountActivity.class);
+                    intent.putExtra("ACCOUNT", account);
+                    intent.setData(uriPhoto);
+                    startActivity(intent);
                 });
     }
 

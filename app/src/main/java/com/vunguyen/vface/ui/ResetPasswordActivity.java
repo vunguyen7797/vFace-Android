@@ -44,11 +44,13 @@ public class ResetPasswordActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reset_password);
+        initView();
+        initData();
+        initAction();
+    }
 
-        mFirebaseAuth = FirebaseAuth.getInstance();
-
-        emailID = findViewById(R.id.emailID);
-        btnSend = findViewById(R.id.btnSend);
+    private void initAction()
+    {
         btnSend.setOnClickListener(v ->
         {
             String email = emailID.getText().toString();
@@ -77,10 +79,20 @@ public class ResetPasswordActivity extends AppCompatActivity
             }
 
         });
+        ivBackArrow.setOnClickListener(v -> onBackPressed());
+    }
 
+    private void initData()
+    {
+        mFirebaseAuth = FirebaseAuth.getInstance();
+    }
+
+    private void initView()
+    {
+        emailID = findViewById(R.id.emailID);
+        btnSend = findViewById(R.id.btnSend);
         // Back to previous activity
         ivBackArrow = findViewById(R.id.ivBackArrow);
-        ivBackArrow.setOnClickListener(v -> onBackPressed());
     }
 
     @Override

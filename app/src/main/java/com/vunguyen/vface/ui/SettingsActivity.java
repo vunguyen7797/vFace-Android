@@ -49,26 +49,39 @@ public class SettingsActivity extends AppCompatActivity
         setContentView(R.layout.activity_settings);
         // get account to verify the database
         account = getIntent().getStringExtra("ACCOUNT");
-        int iconList[] = {R.drawable.baseline_account_circle_24,R.drawable.baseline_settings_24,
-                R.drawable.baseline_notification_important_24,R.drawable.baseline_lock_24,
-                R.drawable.baseline_announcement_24};
-        settingMenu = getResources().getStringArray(R.array.setting_menu);
-        displayMenu(iconList);
-        layoutLogOut = findViewById(R.id.layoutLogOut);
+        initView();
+        initData();
+        initAction();
+    }
+
+    private void initAction()
+    {
         layoutLogOut.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
             Intent intentWelcome = new Intent(SettingsActivity.this, WelcomeScreenActivity.class);
             startActivity(intentWelcome);
             finish();
         });
-
     }
 
+    private void initView()
+    {
+        layoutLogOut = findViewById(R.id.layoutLogOut);
+        lvMenu = findViewById(R.id.lvSetting);
+    }
+
+    private void initData()
+    {
+        int[] iconList = {R.drawable.baseline_account_circle_24,R.drawable.baseline_settings_24,
+                R.drawable.baseline_notification_important_24,R.drawable.baseline_lock_24,
+                R.drawable.baseline_announcement_24};
+        settingMenu = getResources().getStringArray(R.array.setting_menu);
+        displayMenu(iconList);
+    }
 
     // Display the menu
-    private void displayMenu(int iconList[])
+    private void displayMenu(int[] iconList)
     {
-        lvMenu = findViewById(R.id.lvSetting);
         menuAdapter = new ListViewAdapter(getApplicationContext(), settingMenu, iconList);
         lvMenu.setAdapter(menuAdapter);
         lvMenu.setOnItemClickListener((parent, view, position, id) -> {
@@ -107,13 +120,11 @@ public class SettingsActivity extends AppCompatActivity
 
     public class ListViewAdapter extends BaseAdapter
     {
-        private Context context;
         private String[] settingMenu;
         private int[] iconList;
 
-        public ListViewAdapter(Context context, String[] settingMenu,int[] iconList)
+        ListViewAdapter(Context context, String[] settingMenu, int[] iconList)
         {
-            this.context = context;
             this.settingMenu = settingMenu;
             this.iconList = iconList;
 

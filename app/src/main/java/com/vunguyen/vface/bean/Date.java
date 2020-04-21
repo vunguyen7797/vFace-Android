@@ -9,24 +9,14 @@ package com.vunguyen.vface.bean;
 public class Date
 {
     private String studentServerId;             // Student unique ID string to work with server tasks
-    private int dateId;                         // Date ID auto-generated in database
     private String studentAttendanceStatus;     // Face unique ID string to work with server tasks
     private String courseServerId;              // Course unique ID string to work with server tasks
     private String student_date;                // Attendance date of student
 
-    public Date(){};
+    public Date(){}
 
     public Date(String courseServerId, String studentServerId, String student_date, String studentAttendanceStatus)
     {
-        this.courseServerId = courseServerId;
-        this.studentAttendanceStatus = studentAttendanceStatus;
-        this.studentServerId = studentServerId;
-        this.student_date = student_date;
-    }
-
-    public Date(int dateId, String courseServerId, String studentServerId, String student_date, String studentAttendanceStatus)
-    {
-        this.dateId = dateId;
         this.courseServerId = courseServerId;
         this.studentAttendanceStatus = studentAttendanceStatus;
         this.studentServerId = studentServerId;
@@ -41,16 +31,6 @@ public class Date
     public void setStudentServerId(String studentServerId)
     {
         this.studentServerId = studentServerId;
-    }
-
-    public int getDateId()
-    {
-        return dateId;
-    }
-
-    public void setDateId(int dateId)
-    {
-        this.dateId = dateId;
     }
 
     public String getStudentAttendanceStatus()

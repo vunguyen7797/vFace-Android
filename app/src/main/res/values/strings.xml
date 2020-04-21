@@ -43,9 +43,9 @@
 
     <!-- Students management activities -->
     <string name="students_available">Students managers</string>
-    <string name="title_student_profile">STUDENT DATABASE</string>
+    <string name="title_student_profile">Student settings</string>
     <string name="hint_student_id">STUDENT ID</string>
-    <string name="hint_student_name">STUDENT NAME</string>
+    <string name="hint_student_name">STUDENT</string>
     <string name="btn_add_face">ADD FACE</string>
     <string name="btn_save">SAVE</string>
 
@@ -159,7 +159,8 @@
     <string name="menu_delete_student">Delete Student</string>
     <string name="please_save_data_toast">Please save data</string>
     <string name="menu_delete_face">Delete Face</string>
-    <string name="title_student_profile_2">STUDENT PROFILE</string>
-    <string name="hint_total_absences">TOTAL ABSENCES</string>
+    <string name="title_student_profile_2">Student profile</string>
+    <string name="hint_total_absences">OVERALL ATTENDANCE</string>
     <string name="title_absence_history">ABSENCE HISTORY</string>
+    <string name="hint_course_name">COURSE</string>
 </resources>

@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -25,12 +26,14 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.database.DataSnapshot;
@@ -58,6 +61,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class contains implementations for checking attendance
@@ -81,6 +85,7 @@ public class GroupCheckActivity extends AppCompatActivity
     Button btnTakePhoto;
     Button btnPickImage;
     ImageView ivClass;
+    ProgressBar progressBar;
 
     // Request codes
     private static final int REQUEST_IMAGE_CAPTURE = 101;
@@ -108,8 +113,8 @@ public class GroupCheckActivity extends AppCompatActivity
     FaceListViewAdapter listViewStudentsAdapter;
 
     // Data containers
-    public static List<Pair<Bitmap, String>> displayIdentifiedList;         // store detected In-class Students
-    public static List<Pair<Bitmap, String>> displayUnknownList;         // store detected Unknown Students
+    public static List<Pair<Bitmap, String>> displayIdentifiedList;    // store detected In-class Students
+    public static List<Pair<Bitmap, String>> displayUnknownList;       // store detected Unknown Students
 
     @Override
     protected void attachBaseContext(Context newBase)
@@ -146,6 +151,8 @@ public class GroupCheckActivity extends AppCompatActivity
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("V.FACE");
         spinViewModes = findViewById(R.id.spinStudentList);
+        progressBar = findViewById(R.id.progressBarGC);
+        progressBar.setVisibility(View.VISIBLE);
     }
 
     // initialize data
@@ -188,6 +195,8 @@ public class GroupCheckActivity extends AppCompatActivity
     // This method is used to display course list on menu
     private void displayCourseMenu(List<Course> courseList)
     {
+        progressBar.setVisibility(View.GONE);
+        ivWaitingIdentify.setVisibility(View.VISIBLE);
         // initialize course menu
         ArrayAdapter<Course> tvArrayAdapter = new ArrayAdapter<>
                 (this, R.layout.dropdown_menu_popup_item, courseList);
@@ -201,6 +210,13 @@ public class GroupCheckActivity extends AppCompatActivity
                 courseServerId = course.getCourseServerId();    // get course id on server
                 btnTakePhoto.setEnabled(true);
                 btnPickImage.setEnabled(true);
+                List<Pair<Uri, String>> displayList = new ArrayList<>();
+                listViewStudentsAdapter = new FaceListViewAdapter(displayList, "uri", GroupCheckActivity.this);
+                lvIdentifiedFaces.setAdapter(listViewStudentsAdapter);
+                ivWaitingIdentify.setVisibility(View.VISIBLE);
+                displayUnknownList.clear();
+                displayIdentifiedList.clear();
+                ivClass.setImageDrawable(getDrawable(R.drawable.teacher1));
                 Log.i("EXECUTE", "Course Selected: " + courseServerId);
             });
         }
@@ -300,61 +316,55 @@ public class GroupCheckActivity extends AppCompatActivity
     // This method is used to get absent students information for displaying
     private void displayAbsentStudent(Course course)
     {
-       getAbsenceListFirebase(course.getCourseServerId(), new StudentListInterface()
+       getAbsenceListFirebase(course.getCourseServerId(), absenceList -> getFaceFirebase(faceList ->
        {
-           @Override
-           public void getStudentList(List<Student> absenceList) throws IOException
+           Uri faceThumbnailUri = null;
+           List<Pair<Uri, String>> displayList = new ArrayList<>();
+           for (int i = 0; i < absenceList.size(); i++)
            {
-               getFaceFirebase(faceList ->
+               // Student information
+               String studentIdNumber = absenceList.get(i).getStudentIdNumber();
+               String studentServerId = absenceList.get(i).getStudentServerId();
+               String studentName = absenceList.get(i).getStudentName();
+               String identity = studentName + "\n"
+                       + "Student ID: " + studentIdNumber + "\n"
+                       + "Course: " + course;
+
+               // get first face of student as a thumbnail
+               int index = 0;
+               while (faceThumbnailUri == null)
                {
-                   Uri faceThumbnailUri = null;
-                   List<Pair<Uri, String>> displayList = new ArrayList<>();
-                   for (int i = 0; i < absenceList.size(); i++)
-                   {
-                       // Student information
-                       String studentIdNumber = absenceList.get(i).getStudentIdNumber();
-                       String studentServerId = absenceList.get(i).getStudentServerId();
-                       String studentName = absenceList.get(i).getStudentName();
-                       String identity = studentName + "\n"
-                               + "Student ID: " + studentIdNumber + "\n"
-                               + "Course: " + course;
-
-                       // get first face of student as a thumbnail
-                       int index = 0;
-                       while (faceThumbnailUri == null)
-                       {
-                           if (faceList.get(index).getStudentServerId().equalsIgnoreCase(studentServerId))
-                               faceThumbnailUri = Uri.parse(faceList.get(index).getStudentFaceUri());
-                           else
-                               index++;
-                       }
-
-                       mDatabase_date.child(studentName.toUpperCase()+"-"+date.replaceAll("[,]","")).child("studentAttendanceStatus").setValue("NO");
-                       // add pair of a thumbnail and student information to the display list
-                       Pair<Uri, String> pair = new Pair<>(faceThumbnailUri, identity);
-                       displayList.add(pair);
-                       faceThumbnailUri = null; // reset face thumbnail
-                   }
-
-                   if (displayList.size() > 0)
-                   {
-                       ivWaitingIdentify.setVisibility(View.GONE);
-                       listViewStudentsAdapter = new FaceListViewAdapter(displayList, "uri", GroupCheckActivity.this);
-                       ListView listView = findViewById(R.id.lvIdentifiedFaces);
-                       listView.setAdapter(listViewStudentsAdapter);
-                   }
+                   if (faceList.get(index).getStudentServerId().equalsIgnoreCase(studentServerId))
+                       faceThumbnailUri = Uri.parse(faceList.get(index).getStudentFaceUri());
                    else
-                   {
-                       ivWaitingIdentify.setVisibility(View.VISIBLE);
-                       Toast.makeText(getApplicationContext(),
-                               "No absent student.", Toast.LENGTH_SHORT).show();
-                   }
-               });
+                       index++;
+               }
+
+               mDatabase_date.child(studentName.toUpperCase()+"-"+date.replaceAll("[,]","") + studentServerId).child("studentAttendanceStatus").setValue("NO");
+               // add pair of a thumbnail and student information to the display list
+               Pair<Uri, String> pair = new Pair<>(faceThumbnailUri, identity);
+               displayList.add(pair);
+               faceThumbnailUri = null; // reset face thumbnail
            }
-       });
+
+           if (displayList.size() > 0)
+           {
+               ivWaitingIdentify.setVisibility(View.GONE);
+               listViewStudentsAdapter = new FaceListViewAdapter(displayList, "uri", GroupCheckActivity.this);
+           }
+           else
+           {
+               ivWaitingIdentify.setVisibility(View.VISIBLE);
+               listViewStudentsAdapter = new FaceListViewAdapter(displayList, "uri", GroupCheckActivity.this);
+               Toast.makeText(getApplicationContext(),
+                       "No absent students", Toast.LENGTH_SHORT).show();
+           }
+           lvIdentifiedFaces.setAdapter(listViewStudentsAdapter);
+       }));
     }
 
     // Display photo on the ImageView
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void displaySelectedPhoto(Uri uriImage)
     {
         // convert the bitmap loaded from storage into compatible format to display
@@ -379,7 +389,7 @@ public class GroupCheckActivity extends AppCompatActivity
     public void displayDate(TextView view)
     {
         Date today = Calendar.getInstance().getTime();
-        SimpleDateFormat formatter = new SimpleDateFormat("MMM d, yyyy", Locale.US);
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.US);
         String date = formatter.format(today);
         view.setText(date);
     }
@@ -520,7 +530,7 @@ public class GroupCheckActivity extends AppCompatActivity
                 for (Student student : studentList)
                 {
                     String path = student.getStudentName().toUpperCase()
-                            + "-" + date.replaceAll("[,]", "");
+                            + "-" + date.replaceAll("[,]", "")+student.getStudentServerId();
                     mDatabase_date.child(path).removeValue();
                 }
             }
@@ -557,6 +567,7 @@ public class GroupCheckActivity extends AppCompatActivity
      ******************* Event handler methods *********************
      */
     // Event for button taking photo
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void btnTakePhoto(View view)
     {
         // ask for permission to use the camera and write external storage
@@ -626,6 +637,7 @@ public class GroupCheckActivity extends AppCompatActivity
     }
 
     // Response from picking image and taking photo activities
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)
     {

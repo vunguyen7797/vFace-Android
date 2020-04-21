@@ -19,6 +19,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.helper.LocaleHelper;
 
+import java.util.Objects;
+
 /**
  * This class is to implement functions for the login screen activity
  */
@@ -45,6 +47,12 @@ public class LoginActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        initView();
+        initAction();
+    }
+
+    private void initAction()
+    {
         // use firebase service for user authentication
         firebaseAuth = FirebaseAuth.getInstance();
         authStateListener = firebaseAuth ->
@@ -52,36 +60,35 @@ public class LoginActivity extends AppCompatActivity
             FirebaseUser firebaseUser = this.firebaseAuth.getCurrentUser();
             if(firebaseUser != null)
             {
-                openDashBoard(firebaseUser.getEmail().replaceAll("[.]",""));
+                openDashBoard(Objects.requireNonNull(firebaseUser.getEmail()).replaceAll("[.]",""));
             }
             else
             {
-
-                Toast.makeText(LoginActivity.this, getResources().getString(R.string.please_log_in_toast), Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, getResources().getString(
+                        R.string.please_log_in_toast), Toast.LENGTH_SHORT).show();
             }
         };
 
-        emailID = findViewById(R.id.emailID);
-        password = findViewById(R.id.password);
-
-        // back arrow button
-        ivBackArrow = findViewById(R.id.ivBackArrow);
         ivBackArrow.setOnClickListener(v -> openWelcomeScreen());
-
         clickLogin();
-
-        // Register a new account button
-        tvRegister = findViewById(R.id.tvRegister);
         tvRegister.setOnClickListener(v -> openRegister());
-
-        // forgot password text button
-        tvForgotPwd = findViewById(R.id.tvForgotPassword);
         tvForgotPwd.setOnClickListener(v -> {
             Intent intoReset = new Intent(LoginActivity.this, ResetPasswordActivity.class);
             startActivity(intoReset);
             finish();
         });
+    }
 
+    private void initView()
+    {
+        emailID = findViewById(R.id.emailID);
+        password = findViewById(R.id.password);
+        // back arrow button
+        ivBackArrow = findViewById(R.id.ivBackArrow);
+        // Register a new account button
+        tvRegister = findViewById(R.id.tvRegister);
+        // forgot password text button
+        tvForgotPwd = findViewById(R.id.tvForgotPassword);
     }
 
     // event for login button

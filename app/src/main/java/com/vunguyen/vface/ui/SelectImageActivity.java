@@ -17,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.helper.LocaleHelper;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * This class implements events for taking photo and choosing photo options
  */
@@ -44,7 +46,7 @@ public class SelectImageActivity extends AppCompatActivity
 
     // Save the activity state when it's going to stop.
     @Override
-    protected void onSaveInstanceState(Bundle outState)
+    protected void onSaveInstanceState(@NotNull Bundle outState)
     {
         super.onSaveInstanceState(outState);
         outState.putParcelable("ImageUri", uriTakenPhoto);

@@ -5,7 +5,6 @@ package com.vunguyen.vface.ui;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -19,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,8 +33,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.R;
 import com.vunguyen.vface.bean.Course;
@@ -43,10 +41,13 @@ import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.LocaleHelper;
+import com.vunguyen.vface.helper.ProgressDialogCustom;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static android.view.View.GONE;
 
 
 /**
@@ -58,6 +59,7 @@ public class CourseManagerActivity extends AppCompatActivity
     ListView lvCourses;
     String account;
     FloatingActionButton fabAddCourse;
+    ProgressBar progressBar;
 
     // Request code for the menu
     private static final int MENU_ITEM_VIEW = 111;
@@ -87,17 +89,131 @@ public class CourseManagerActivity extends AppCompatActivity
 
         // Get email account
         account = getIntent().getStringExtra("ACCOUNT");
+        initView();
+        initData();
+        initAction();
+    }
+
+    private void initData()
+    {
         mDatabase_Course = FirebaseDatabase.getInstance().getReference().child(account).child("course");
         mDatabase_Student = FirebaseDatabase.getInstance().getReference().child(account).child("student");
         mDatabase_Face = FirebaseDatabase.getInstance().getReference().child(account).child("face");
         mDatabase_Date = FirebaseDatabase.getInstance().getReference().child(account).child("date");
-        // Set event for the Add Course button
-        fabAddCourse = findViewById(R.id.floating_action_button);
-        fabAddCourse.setOnClickListener(v -> actionAddCourse());;
-
         getCourseList();
     }
 
+    private void initView()
+    {
+        // Set event for the Add Course button
+        fabAddCourse = findViewById(R.id.floating_action_button);
+        lvCourses = findViewById(R.id.lvCoursesManager);
+        progressBar = findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void initAction()
+    {
+        fabAddCourse.setOnClickListener(v -> actionAddCourse());;
+    }
+
+    /**
+     * ********************** Methods for removing item *****************
+     */
+
+    // Delete the course if the user accepts
+    private void deleteCourse(Course course)
+    {
+        String courseServerId = course.getCourseServerId();
+        mDatabase_Course.child(course.getCourseName().toUpperCase() + "-" + courseServerId).removeValue();
+        deleteAllStudent(courseServerId);
+        Log.i("EXECUTE", "Deleted course: " + course.getCourseName() + "-" + courseServerId);
+        new DeleteCourseTask().execute(courseServerId); // delete course from server
+        // Refresh ListView.
+        this.courseArrayAdapter.notifyDataSetChanged();
+    }
+
+    private void deleteAllStudent(String courseServerId)
+    {
+        mDatabase_Student.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    if (Objects.requireNonNull(dsp.getValue(Student.class))
+                            .getCourseServerId().equalsIgnoreCase(courseServerId))
+                    {
+                        Student student = dsp.getValue(Student.class);
+                        assert student != null;
+                        String path = Objects.requireNonNull(student.getStudentName().toUpperCase())
+                                + "-" + Objects.requireNonNull(student.getStudentServerId());
+                        mDatabase_Student.child(path).removeValue();
+                        deleteAllFace(student.getStudentServerId());
+                        deleteAllDate(dsp.getValue(Student.class));
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void deleteAllFace(String studentServerId)
+    {
+        mDatabase_Face.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    Log.i("EXECUTE","DSP: " + dsp.getValue(Student.class));
+                    if (Objects.requireNonNull(dsp.getValue(Face.class)).getStudentServerId()
+                            .equalsIgnoreCase(studentServerId))
+                    {
+                        mDatabase_Face.child(Objects.requireNonNull(dsp.getValue(Face.class))
+                                .getStudentFaceServerId()).removeValue();
+                       /* StorageReference photoRef = FirebaseStorage.getInstance().getReferenceFromUrl
+                                (Objects.requireNonNull(dsp.getValue(Face.class)).getStudentFaceUri());
+                        photoRef.delete().addOnSuccessListener(aVoid -> Log.i("EXECUTE",
+                                "Deleted face from Firebase Storage")).addOnFailureListener(e ->
+                                Log.i("EXECUTE", "Cannot delete face from Firebase Storage")); */
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void deleteAllDate(Student student)
+    {
+        mDatabase_Date.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot dsp : dataSnapshot.getChildren())
+                {
+                    Date date = dsp.getValue(Date.class);
+                    assert date != null;
+                    if (date.getStudentServerId().equalsIgnoreCase(student.getStudentServerId()))
+                    {
+                        mDatabase_Date.child(student.getStudentName().toUpperCase() + "-" +
+                                date.getStudent_date().replaceAll("[,]", "")).removeValue();
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    /**
+     * ******************** get data from real time database **************
+     */
     public void getCourseList()
     {
         mDatabase_Course.addValueEventListener(new ValueEventListener() {
@@ -108,12 +224,12 @@ public class CourseManagerActivity extends AppCompatActivity
                 {
                     courseList.add(dsp.getValue(Course.class));
                 }
+                progressBar.setVisibility(View.INVISIBLE);
                 displayCourses(courseList);;
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError)
             {
-
             }
         });
     }
@@ -122,7 +238,6 @@ public class CourseManagerActivity extends AppCompatActivity
     public void displayCourses(List<Course> courseList)
     {
         // initialize list view
-        lvCourses = findViewById(R.id.lvCourses);
         if (courseList.size() == 0)
         {
             ImageView ivWaiting = findViewById(R.id.ivWaitingCourse);
@@ -148,9 +263,11 @@ public class CourseManagerActivity extends AppCompatActivity
         this.lvCourses.setAdapter(this.courseArrayAdapter);
         // Register the menu context for ListView.
         registerForContextMenu(this.lvCourses);
-
     }
 
+    /**
+     ************************** handling events methods *********************
+     */
     // Create Menu context for ListView
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view,
@@ -203,13 +320,7 @@ public class CourseManagerActivity extends AppCompatActivity
                     .setTitle("VFACE - COURSE MANAGER")
                     .setMessage("Are you sure you want to delete " + selectedCourse.getCourseName() + "?")
                     .setCancelable(false)
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener()
-                    {
-                        public void onClick(DialogInterface dialog, int id)
-                        {
-                            deleteCourse(selectedCourse);
-                        }
-                    })
+                    .setPositiveButton("Yes", (dialog, id) -> deleteCourse(selectedCourse))
                     .setNegativeButton("No", null)
                     .show();
         }
@@ -224,100 +335,6 @@ public class CourseManagerActivity extends AppCompatActivity
         Intent intent = new Intent(this, AddEditCourseActivity.class);
         intent.putExtra("ACCOUNT", account);
         this.startActivityForResult(intent, MY_REQUEST_CODE);
-    }
-
-    // Delete the course if the user accepts
-    private void deleteCourse(Course course)
-    {
-        String courseServerId = course.getCourseServerId();
-        //db_course.deleteCourse(course); // delete course from database
-        mDatabase_Course.child(course.getCourseName().toUpperCase() + "-" + courseServerId).removeValue();
-        deleteAllStudent(courseServerId);
-        Log.i("EXECUTE", "Deleted course: " + course.getCourseName() + "-" + courseServerId);
-        //this.courseList.remove(course); // delete course from the list
-        new DeleteCourseTask().execute(courseServerId); // delete course from server
-        // delete all students in the course
-        Log.i("EXECUTE", "Deleted course: " + courseServerId);
-        // Refresh ListView.
-        this.courseArrayAdapter.notifyDataSetChanged();
-    }
-
-    private void deleteAllStudent(String courseServerId)
-    {
-        mDatabase_Student.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for(DataSnapshot dsp : dataSnapshot.getChildren())
-                {
-                    if (Objects.requireNonNull(dsp.getValue(Student.class)).getCourseServerId().equalsIgnoreCase(courseServerId))
-                    {
-                        Student student = dsp.getValue(Student.class);
-                        assert student != null;
-                        String path = Objects.requireNonNull(student.getStudentName().toUpperCase())
-                                + "-" + Objects.requireNonNull(student.getStudentServerId());
-                        Log.i("EXECUTE", "Path Student: " + path);
-                        mDatabase_Student.child(path).removeValue();
-                        deleteAllFace(student.getStudentServerId());
-                        deleteAllDate(dsp.getValue(Student.class));
-                    }
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void deleteAllFace(String studentServerId)
-    {
-        mDatabase_Face.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for(DataSnapshot dsp : dataSnapshot.getChildren())
-                {
-                    Log.i("EXECUTE","DSP: " + dsp.getValue(Student.class));
-                    if (Objects.requireNonNull(dsp.getValue(Face.class)).getStudentServerId()
-                            .equalsIgnoreCase(studentServerId))
-                    {
-                        mDatabase_Face.child(Objects.requireNonNull(dsp.getValue(Face.class))
-                                .getStudentFaceServerId()).removeValue();
-                        StorageReference photoRef = FirebaseStorage.getInstance().getReferenceFromUrl
-                                (Objects.requireNonNull(dsp.getValue(Face.class)).getStudentFaceUri());
-                        photoRef.delete().addOnSuccessListener(aVoid -> Log.i("EXECUTE",
-                                "Deleted face from Firebase Storage")).addOnFailureListener(e ->
-                                Log.i("EXECUTE", "Cannot delete face from Firebase Storage"));
-                    }
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void deleteAllDate(Student student)
-    {
-        mDatabase_Date.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for(DataSnapshot dsp : dataSnapshot.getChildren())
-                {
-                    Date date = dsp.getValue(Date.class);
-                    assert date != null;
-                    if (date.getStudentServerId().equalsIgnoreCase(student.getStudentServerId()))
-                    {
-                        mDatabase_Date.child(student.getStudentName().toUpperCase() + "-" +
-                                date.getStudent_date().replaceAll("[,]", "")).removeValue();
-                    }
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
     }
 
     // Response from AddEditCourse Activity
@@ -381,7 +398,7 @@ public class CourseManagerActivity extends AppCompatActivity
             if (result != null)
             {
                 Toast.makeText(getApplicationContext(),
-                        "The course has been deleted.", Toast.LENGTH_SHORT).show();
+                        "The course has been deleted", Toast.LENGTH_SHORT).show();
             }
             else
             {

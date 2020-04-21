@@ -93,7 +93,8 @@ public class FaceListViewAdapter implements ListAdapter
         }
     }
 
-    public FaceListViewAdapter(List<Pair<Pair<Uri, String>, Pair<Student, Integer>>> studentIdentityList, String request, Context context, String mode)
+    public FaceListViewAdapter(List<Pair<Pair<Uri, String>, Pair<Student, Integer>>> studentIdentityList
+            , String request, Context context, String mode)
     {
         Log.i("EXECUTE", "Display list size: " + studentIdentityList.size());
         this.context = context;
@@ -114,7 +115,6 @@ public class FaceListViewAdapter implements ListAdapter
             student.add(studentInfoPackage);
             studentAbsence.add(pair.second.second.toString());
         }
-
     }
 
     @Override
@@ -170,10 +170,14 @@ public class FaceListViewAdapter implements ListAdapter
     {
         if (convertView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            if (this.mode.equalsIgnoreCase("withTotalAbsence"))
+            if (this.mode.equalsIgnoreCase("withTotalAbsence")) {
+                assert layoutInflater != null;
                 convertView = layoutInflater.inflate(R.layout.item_face_with_description_2, parent, false);
-            else
+            }
+            else {
+                assert layoutInflater != null;
                 convertView = layoutInflater.inflate(R.layout.item_face_with_description, parent, false);
+            }
         }
 
         convertView.setId(position);

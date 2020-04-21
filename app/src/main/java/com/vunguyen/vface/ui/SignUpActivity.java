@@ -47,12 +47,13 @@ public class SignUpActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
-        // register the account with firebase server
-        firebaseAuth = FirebaseAuth.getInstance();
-        emailID = findViewById(R.id.emailID);
-        password = findViewById(R.id.password);
+        initView();
+        initData();
+        initAction();
+    }
 
-        btnSignUp = findViewById(R.id.btnSignUp);
+    private void initAction()
+    {
         btnSignUp.setOnClickListener(v ->
         {
             String email = emailID.getText().toString();
@@ -74,22 +75,22 @@ public class SignUpActivity extends AppCompatActivity
             }
             else if (!email.isEmpty() && !pwd.isEmpty())
             {
-               firebaseAuth.createUserWithEmailAndPassword(email,pwd)
-                       .addOnCompleteListener(SignUpActivity.this, task ->
-                       {
-                           if (!task.isSuccessful())
-                           {
-                               Toast.makeText(SignUpActivity.this, "Register failed. Please try again!"
-                                       ,Toast.LENGTH_SHORT).show();
-                           }
-                           else
-                           {
-                               Toast.makeText(SignUpActivity.this, "Registered Successful. Please log in."
-                                       , Toast.LENGTH_SHORT).show();
+                firebaseAuth.createUserWithEmailAndPassword(email,pwd)
+                        .addOnCompleteListener(SignUpActivity.this, task ->
+                        {
+                            if (!task.isSuccessful())
+                            {
+                                Toast.makeText(SignUpActivity.this, "Register failed. Please try again!"
+                                        ,Toast.LENGTH_SHORT).show();
+                            }
+                            else
+                            {
+                                Toast.makeText(SignUpActivity.this, "Registered Successful. Please log in."
+                                        , Toast.LENGTH_SHORT).show();
 
-                               startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
-                           }
-                       });
+                                startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
+                            }
+                        });
             }
             else
             {
@@ -97,21 +98,32 @@ public class SignUpActivity extends AppCompatActivity
             }
         });
 
-        // go back to welcome screen
-        ivBackArrow = findViewById(R.id.ivBackArrow);
         ivBackArrow.setOnClickListener(v ->
         {
             Intent intent = new Intent(this, WelcomeScreenActivity.class );
             openActivity(intent);
         });
 
-        // go to login screen
-        tvLogin = findViewById(R.id.txtLogin);
         tvLogin.setOnClickListener(v ->
         {
             Intent intent = new Intent(this, LoginActivity.class);
             openActivity(intent);
         });
+    }
+
+    private void initData()
+    {
+        // register the account with firebase server
+        firebaseAuth = FirebaseAuth.getInstance();
+    }
+
+    private void initView()
+    {
+        emailID = findViewById(R.id.emailID);
+        password = findViewById(R.id.password);
+        tvLogin = findViewById(R.id.txtLogin);
+        ivBackArrow = findViewById(R.id.ivBackArrow);
+        btnSignUp = findViewById(R.id.btnSignUp);
     }
 
     public void openActivity(Intent intent)

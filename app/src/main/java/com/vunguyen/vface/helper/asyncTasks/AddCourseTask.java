@@ -33,13 +33,16 @@ public class AddCourseTask extends AsyncTask<String, String, String>
         FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
         try
         {
-            publishProgress("Syncing with server...");
+            publishProgress("Syncing with server to add course...");
             Log.i("EXECUTE", "Syncing with server to add course");
 
             // Start creating a course as a person group in server.
-            faceServiceClient.createLargePersonGroup(params[0], "Name", "User Data", "recognition_02");
+            faceServiceClient.createLargePersonGroup(params[0], "Name", "User Data",
+                    "recognition_02");
             return params[0];
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Log.i("EXECUTE", "Errors: " + e.getMessage());
             return null;
         }
@@ -56,12 +59,15 @@ public class AddCourseTask extends AsyncTask<String, String, String>
     }
 
     @Override
-    protected void onPostExecute(String result) {
+    protected void onPostExecute(String result)
+    {
         if (result != null)
         {
             progressDialog.dismiss();
             Log.i("EXECUTE", "Course " + result + " created successfully on server.");
-        } else {
+        }
+        else
+        {
             Log.i("EXECUTE", "Response: Course is not created on server.");
         }
     }

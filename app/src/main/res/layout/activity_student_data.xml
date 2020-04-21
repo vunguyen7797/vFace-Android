@@ -33,7 +33,7 @@
             android:layout_gravity="center"
             android:textColor="#ffffff"
             android:gravity="center"
-            android:layout_marginEnd="50dp"/>
+            android:layout_marginEnd="40dp"/>
     </LinearLayout>
 
     <com.google.android.material.card.MaterialCardView
@@ -71,7 +71,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:textColor="#ffffff"
-                        android:maxLength="8"/>
+                        android:maxLength="8"
+                        android:inputType="number"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </RelativeLayout>
 
@@ -123,6 +124,17 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/ivFaceWaiting"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/student_loading"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="60dp"
+                android:layout_marginTop="10dp"
+                android:visibility="gone"/>
             <GridView
                 android:id="@+id/gvStudentFace"
                 android:layout_marginLeft="20dp"
@@ -154,7 +166,6 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:text="@string/btn_add_face"
-                    android:onClick="btnAddFace"
                     android:textColor="#ffffff"
                     android:background="@drawable/button"
                     android:layout_marginRight="20dp"/>

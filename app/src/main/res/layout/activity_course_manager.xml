@@ -6,6 +6,7 @@
     tools:context=".ui.CourseManagerActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -40,7 +41,6 @@
         </LinearLayout>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cvCourses"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="20dp"
@@ -61,21 +61,17 @@
                 android:visibility="gone"/>
 
             <ListView
-                android:id="@+id/lvCourses"
+                android:id="@+id/lvCoursesManager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@id/tvAddCourseTip"
                 android:layout_below="@id/tvTitle"
                 android:layout_marginStart="20dp"
-                android:layout_marginLeft="20dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="20dp"
-                android:layout_marginRight="20dp"
                 android:layout_marginBottom="20dp"
                 android:background="@android:color/transparent"
                 android:divider="#ffffff"
-                android:dividerHeight="0.5dp"
-                />
+                android:dividerHeight="0.5dp" />
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -112,5 +108,19 @@
         app:iconSize="30dp"
         app:iconTint="@color/white"
         app:srcCompat="@drawable/ic_plus_24px" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:visibility="gone"
+            app:layout_anchorGravity="center" />
+    </RelativeLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

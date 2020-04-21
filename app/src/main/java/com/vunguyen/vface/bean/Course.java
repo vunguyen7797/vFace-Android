@@ -3,6 +3,8 @@
  */
 package com.vunguyen.vface.bean;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
 
 /**
@@ -10,43 +12,20 @@ import java.io.Serializable;
  */
 public class Course implements Serializable
 {
-    private String courseId;           // Course ID auto-generated in database
     private String courseName;      // Course name from input
     private String courseIdNumber;  // Real course ID number from input
     private String courseServerId;  // Course unique ID string to work with server tasks.
-    private String courseAccount;   // Account ID that is using the app
 
     public Course()
     {
 
     }
 
-    public Course(String courseIdNumber, String courseName, String courseServerId, String courseAccount)
+    public Course(String courseIdNumber, String courseName, String courseServerId)
     {
         this.courseIdNumber = courseIdNumber;
         this.courseName = courseName;
         this.courseServerId = courseServerId;
-        this.courseAccount = courseAccount;
-    }
-
-
-    public Course(String id, String courseIdNumber, String courseName, String courseServerId, String courseAccount)
-    {
-        this.courseId = id;
-        this.courseIdNumber = courseIdNumber;
-        this.courseName = courseName;
-        this.courseServerId = courseServerId;
-        this.courseAccount = courseAccount;
-    }
-
-    public String getCourseId()
-    {
-        return courseId;
-    }
-
-    public void setCourseId(String courseId)
-    {
-        this.courseId = courseId;
     }
 
     public String getCourseName()
@@ -79,17 +58,8 @@ public class Course implements Serializable
         this.courseServerId = courseServerId;
     }
 
-    public String getCourseAccount()
-    {
-        return courseAccount;
-    }
-
-    public void setCourseAccount(String courseAccount)
-    {
-        this.courseAccount = courseAccount;
-    }
-
     // This method will return course name if the object is requested to return string
+    @NotNull
     @Override
     public String toString()
     {

@@ -18,6 +18,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -59,7 +60,48 @@ public class DashBoardActivity extends AppCompatActivity
 
         // email to identify database
         account = getIntent().getStringExtra("ACCOUNT");
+        initView();
+        initData();
+        initAction();
+    }
 
+    private void initAction()
+    {
+        cvGroupCheck.setOnClickListener(v -> {
+            Intent intent = new Intent(DashBoardActivity.this, GroupCheckActivity.class);
+            goToAFeature(intent);
+        });
+
+        cvAddStudentCourse.setOnClickListener(v -> {
+            Intent intent = new Intent(DashBoardActivity.this, StudentCoursesActivity.class);
+            goToAFeature(intent);
+
+        });
+
+        cvAttendance.setOnClickListener(v -> {
+            Intent intent = new Intent(DashBoardActivity.this, AttendanceActivity.class);
+            goToAFeature(intent);
+        });
+
+        cvAboutUs.setOnClickListener(v -> {
+            Intent intent = new Intent(DashBoardActivity.this, AboutActivity.class);
+            goToAFeature(intent);
+        });
+
+        cvSettings.setOnClickListener(v -> {
+            Intent intent = new Intent(DashBoardActivity.this, SettingsActivity.class);
+            goToAFeature(intent);
+        });
+
+
+        cvSelfCheck.setOnClickListener(v -> {
+            Intent intent = new Intent(DashBoardActivity.this, SelfCheckActivity.class);
+            goToAFeature(intent);
+        });
+    }
+
+    private void initData()
+    {
         // subscription notice
         if (getString(R.string.subscription_key).startsWith("Please")) {
             new AlertDialog.Builder(this)
@@ -68,9 +110,6 @@ public class DashBoardActivity extends AppCompatActivity
                     .setCancelable(false)
                     .show();
         }
-
-        ivPhoto = findViewById(R.id.logo);
-        tvDisplayName = findViewById(R.id.tvDisplayName);
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null && user.getPhotoUrl() != null)
@@ -90,45 +129,19 @@ public class DashBoardActivity extends AppCompatActivity
             String slogan = getResources().getString(R.string.sloganDashboard);
             tvDisplayName.setText(slogan);
         }
+    }
 
+    private void initView()
+    {
+        ivPhoto = findViewById(R.id.logo);
+        tvDisplayName = findViewById(R.id.tvDisplayName);
         // set event for each menu item
         cvGroupCheck = findViewById(R.id.cvGroupCheck);
-        cvGroupCheck.setOnClickListener(v -> {
-            Intent intent = new Intent(DashBoardActivity.this, GroupCheckActivity.class);
-            goToAFeature(intent);
-        });
-
         cvAddStudentCourse = findViewById(R.id.cvAddStudentCourse);
-        cvAddStudentCourse.setOnClickListener(v -> {
-            Intent intent = new Intent(DashBoardActivity.this, StudentCoursesActivity.class);
-            goToAFeature(intent);
-
-        });
-
         cvAttendance = findViewById(R.id.cvAttendance);
-        cvAttendance.setOnClickListener(v -> {
-            Intent intent = new Intent(DashBoardActivity.this, AttendanceActivity.class);
-            goToAFeature(intent);
-        });
-
         cvAboutUs = findViewById(R.id.cvAboutUs);
-        cvAboutUs.setOnClickListener(v -> {
-            Intent intent = new Intent(DashBoardActivity.this, AboutActivity.class);
-            goToAFeature(intent);
-        });
-
         cvSettings = findViewById(R.id.cvSetting);
-        cvSettings.setOnClickListener(v -> {
-            Intent intent = new Intent(DashBoardActivity.this, SettingsActivity.class);
-            goToAFeature(intent);
-        });
-
         cvSelfCheck = findViewById(R.id.cvSelfCheck);
-        cvSelfCheck.setOnClickListener(v -> {
-            Intent intent = new Intent(DashBoardActivity.this, SelfCheckActivity.class);
-            goToAFeature(intent);
-        });
-
     }
 
     // This method is used to go to other activities

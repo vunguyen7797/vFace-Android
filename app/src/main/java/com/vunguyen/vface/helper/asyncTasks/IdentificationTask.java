@@ -4,6 +4,7 @@
 package com.vunguyen.vface.helper.asyncTasks;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -30,6 +31,7 @@ import com.vunguyen.vface.bean.Date;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.FaceListViewAdapter;
+import com.vunguyen.vface.helper.ProgressDialogCustom;
 import com.vunguyen.vface.helper.callbackInterfaces.StudentInterface;
 import com.vunguyen.vface.helper.callbackInterfaces.StudentListInterface;
 import com.vunguyen.vface.ui.GroupCheckActivity;
@@ -48,6 +50,7 @@ import java.util.UUID;
 public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]>
 {
     private ProgressDialog progressDialog;
+    private ProgressDialogCustom progressDialogCustom;
 
     private static final String REQUEST = "SELF_CHECK";
     private boolean succeed = true;
@@ -80,9 +83,8 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
         this.detectedDetailsList = detectedDetailsList;
         this.detectedFacesList = detectedFacesList;
 
+        progressDialogCustom =  new ProgressDialogCustom((Activity) this.context);
         progressDialog = new ProgressDialog(this.context);
-        progressDialog.setTitle("V.FACE");
-        progressDialog.setCancelable(false);
 
         displayIdentifiedList = new ArrayList<>();
         displayUnknownList = new ArrayList<>();
@@ -101,10 +103,8 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
         this.courseServerId = courseServerId;
         this.request = request;
 
+        progressDialogCustom =  new ProgressDialogCustom((Activity) this.context);
         progressDialog = new ProgressDialog(this.context);
-        progressDialog.setTitle("V.FACE");
-        progressDialog.setCancelable(false);
-
         displayIdentifiedList = new ArrayList<>();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -122,28 +122,30 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
         FaceServiceClient faceServiceClient = ApiConnector.getFaceServiceClient();
         try
         {
-            publishProgress("Getting course status...");
             TrainingStatus trainingStatus = faceServiceClient.getLargePersonGroupTrainingStatus(
                     this.courseServerId);
             if (trainingStatus.status != TrainingStatus.Status.Succeeded)
             {
-                publishProgress("Course training status is " + trainingStatus.status);
+                //progressDialog.setCancelable(true);
+                //publishProgress("Course training status is " + trainingStatus.status);
+                progressDialogCustom.setCancelable(true);
+                progressDialogCustom.dismissDialog();
                 succeed = false;
                 return null;
             }
 
-            publishProgress("Identifying students...");
             Log.i("EXECUTE", "IDENTIFYING...");
             // Start identification process
             return faceServiceClient.identityInLargePersonGroup(
                     this.courseServerId,
                     params,             // faceId
-                    1);              // maximum of candidates can be returned for one student
+                    1);  // maximum of candidates can be returned for one student
         }
         catch (Exception e)
         {
             succeed = false;
-            publishProgress(e.getMessage());
+            //publishProgress(e.getMessage());
+            Toast.makeText(this.context, "This course has no students in database", Toast.LENGTH_SHORT).show();
             Log.i("EXECUTE", "IDENTIFY ERROR: " + e.getMessage());
             return null;
         }
@@ -158,7 +160,7 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
     protected void onProgressUpdate(String... values)
     {
         // Show the status of background identify task on screen
-        duringTaskProgressDialog(values[0]);
+       // duringTaskProgressDialog(values[0]);
     }
 
     // Working on student information to display after identify
@@ -167,16 +169,16 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
     {
         if (request.equalsIgnoreCase(REQUEST))
         {
-            selfCheckPostExecute(result);
+            selfCheckPostExecute(succeed, result);
         }
         else
             groupCheckPostExecute(result);
 
     }
 
-    private void selfCheckPostExecute(IdentifyResult[] result)
+    private void selfCheckPostExecute(boolean succeed, IdentifyResult[] result)
     {
-        if (result != null)
+        if (result != null && succeed)
         {
             Log.i("EXECUTE", "Identified successfully: " + result.length + " faces");
             DecimalFormat formatter = new DecimalFormat("#0.00");
@@ -191,7 +193,6 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
                     {
                         if (student != null)
                         {
-                            String studentIdNumber = student.getStudentIdNumber();
                             String studentName = student.getStudentName();
                             String identity = studentName + "\n" + confidence;
 
@@ -205,15 +206,12 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
                                 if (!SelfCheckActivity.detectedDetailsList.get(i).equalsIgnoreCase("UNKNOWN STUDENT"))
                                 {
                                     int length = SelfCheckActivity.detectedDetailsList.get(i).length();
-                                    // get the confidence to compare
-                                    String comparedConfidence = SelfCheckActivity.detectedDetailsList
-                                            .get(i).substring(length - 4, length);
-                                    Log.i("EXECUTE", "NEW CONFIDENCE: " + comparedConfidence + " CONFIDENCE: " + confidence);
+
                                     // if there is a duplicate name
                                     if (SelfCheckActivity.detectedDetailsList.get(i).contains(studentName))
                                     {
                                         identity = "UNKNOWN STUDENT";
-                                        Toast.makeText(this.context, "This student was already identified.", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(this.context, "This student was already checked", Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             }
@@ -223,14 +221,12 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
                                 String date_string = SelfCheckActivity.tvDate.getText().toString();
                                 Date date = new Date(courseServerId, studentServerId, date_string, student.getStudentIdentifyFlag());
                                 mDatabase_date.child(studentName.toUpperCase() + "-"
-                                        + date_string.replaceAll("[,]","")).setValue(date);
+                                        + date_string.replaceAll("[,]","") + studentServerId).setValue(date);
                                 // update student flag
                                 mDatabase_student.child(student.getStudentName().toUpperCase()
                                         + "-" + studentServerId).setValue(student);
                             }
                             SelfCheckActivity.detectedDetailsList.add(identity);
-                            Log.i("EXECUTE", "Detail list size: " + SelfCheckActivity.detectedDetailsList.size());
-                            Log.i("EXECUTE", "Face list size: " + SelfCheckActivity.detectedFacesList.size());
                         }
                         else
                             Log.i("EXECUTE", "Student is null");
@@ -250,26 +246,28 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
                             {
                                 if (!"UNKNOWN STUDENT".equalsIgnoreCase(SelfCheckActivity.detectedDetailsList.get(i)))
                                 {
-                                    Pair<Bitmap, String> pair = new Pair<>(SelfCheckActivity.detectedFacesList.get(i), SelfCheckActivity.detectedDetailsList.get(i));
+                                    Pair<Bitmap, String> pair = new Pair<>(SelfCheckActivity.detectedFacesList.get(i)
+                                            , SelfCheckActivity.detectedDetailsList.get(i));
                                     displayIdentifiedList.add(pair);
-                                    Log.i("EXECUTE", "Display list size:: " + displayIdentifiedList.size());
                                 }
                                 else
                                     Log.i("EXECUTE", "Student is null, cannot pair");
                             }
 
-                            getAbsenceListFirebase(courseServerId, absentList -> {
+                            getAbsenceListFirebase(courseServerId, absentList ->
+                            {
                                 for (Student student : absentList)
                                 {
                                     String date_string = SelfCheckActivity.tvDate.getText().toString();
                                     Date date = new Date(courseServerId, student.getStudentServerId()
                                             , date_string, student.getStudentIdentifyFlag());
                                     mDatabase_date.child(student.getStudentName().toUpperCase() + "-"
-                                            + date_string.replaceAll("[,]", "")).setValue(date);
+                                            + date_string.replaceAll("[,]", "")+student.getStudentServerId()).setValue(date);
                                 }
                             });
 
-                            progressDialog.dismiss();
+                            //progressDialog.dismiss();
+                            progressDialogCustom.dismissDialog();
                             // wait until all async tasks completed to update UI view
                             new CountDownTimer(1000, 1000)
                             {
@@ -287,14 +285,13 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
                             }.start();
                         }
                     }.start();
-
                 }
                 else
                 {
-                    //identity"UNKNOWN STUDENT");
                     Log.i("EXECUTE", "STUDENT NULL");
                     progressDialog.dismiss();
-                    Toast.makeText(this.context, "This student is not identified.", Toast.LENGTH_SHORT).show();
+                    //progressDialogCustom.dismissDialog();
+                    Toast.makeText(this.context, "This student is not identified. \nPlease try again", Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -304,7 +301,7 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
     {
         if (result != null)
         {
-            Log.i("EXECUTE", "Identified group successfully: " + result.length + " faces. - Turn: " + identifyTurn);
+            Log.i("EXECUTE", "Identified group successfully: " + result.length + " faces");
             int index = identifyTurn * 10;  // position of each identified students in container.
             for (IdentifyResult identifyResult : result)
             {
@@ -316,11 +313,9 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
                     Log.i("EXECUTE", "Retrieve Data Student Server ID: " + studentServerId);
                     int finalI = index;
                     getSingleStudentFireBase(studentServerId, student -> {
-                        Log.i("EXECUTE", "Retrieve Data... " + finalI + " : " + student);
                         if (student != null)
                         {
                             // Get information for each identified student
-                            //String studentIdNumber = student.getStudentIdNumber();
                             String studentName = student.getStudentName();
                             String identity = studentName+ "\n" + confidence;
                             // set flag YES to indicate that this student is identified successfully
@@ -363,7 +358,7 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
                                         date_string, student.getStudentIdentifyFlag());
                                 // update date of attendance for student
                                 mDatabase_date.child(studentName.toUpperCase() + "-"
-                                        + date_string.replaceAll("[,]","")).setValue(date);
+                                        + date_string.replaceAll("[,]","") + studentServerId).setValue(date);
                                 // update student flag
                                 mDatabase_student.child(student.getStudentName().toUpperCase()
                                         + "-" + studentServerId).setValue(student);
@@ -398,7 +393,8 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
                 @Override
                 public void onFinish()
                 {
-                    progressDialog.dismiss();
+                    //progressDialog.dismiss();
+                    progressDialogCustom.dismissDialog();
                     if (identifyTurn == totalTurn)
                     {
                         Log.i("EXECUTE", "Turn equal ==");
@@ -421,19 +417,14 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
                             i++;
                         }
 
-                        getAbsenceListFirebase(courseServerId, new StudentListInterface()
-                        {
-                            @Override
-                            public void getStudentList(List<Student> absentList)
+                        getAbsenceListFirebase(courseServerId, absentList -> {
+                            for (Student student : absentList)
                             {
-                                for (Student student : absentList)
-                                {
-                                    String date_string = GroupCheckActivity.tvDate.getText().toString();
-                                    Date date = new Date(courseServerId, student.getStudentServerId()
-                                            , date_string, student.getStudentIdentifyFlag());
-                                    mDatabase_date.child(student.getStudentName().toUpperCase() + "-"
-                                            + date_string.replaceAll("[,]", "")).setValue(date);
-                                }
+                                String date_string = GroupCheckActivity.tvDate.getText().toString();
+                                Date date = new Date(courseServerId, student.getStudentServerId()
+                                        , date_string, student.getStudentIdentifyFlag());
+                                mDatabase_date.child(student.getStudentName().toUpperCase() + "-"
+                                        + date_string.replaceAll("[,]", "") + student.getStudentServerId()).setValue(date);
                             }
                         });
 
@@ -456,10 +447,16 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
                 }
             }.start();
         }
+        else
+        {
+            Toast.makeText(this.context, "This course has no students in database", Toast.LENGTH_SHORT).show();
+        }
     }
     private void startProgressDialog()
     {
-        progressDialog.show();
+        //progressDialogCustom.startProgressDialog("Identifying...");
+        //progressDialog.show();
+        progressDialogCustom.startProgressDialog("Identifying...");
     }
 
     private void duringTaskProgressDialog(String progress)
@@ -536,9 +533,12 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
 
             if (request.equalsIgnoreCase("GROUP_CHECK"))
             {
-                if (studentIdentityList.size() == 0) {
+                if (studentIdentityList.size() == 0)
+                {
                     Toast.makeText(context, "No students are in class today.", Toast.LENGTH_LONG).show();
-                } else {
+                }
+                else
+                {
                     GroupCheckActivity.ivWaitingIdentify.setVisibility(View.GONE);
                     Toast.makeText(context, studentIdentityList.size() + " students are in class today."
                             , Toast.LENGTH_LONG).show();
@@ -553,6 +553,10 @@ public class IdentificationTask extends AsyncTask<UUID, String, IdentifyResult[]
                 SelfCheckActivity.ivWaitingIdentify.setVisibility(View.GONE);
                 SelfCheckActivity.listView.setAdapter(listViewStudentsAdapter);
             }
+        }
+        else
+        {
+
         }
     }
 }

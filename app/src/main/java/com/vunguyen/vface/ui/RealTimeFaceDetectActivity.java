@@ -63,11 +63,12 @@ public class RealTimeFaceDetectActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_real_time_face_detect);
 
-        preview = findViewById(R.id.cameraPreview);
+        initView();
+        initAction();
+    }
 
-        ivFaceFrame = findViewById(R.id.faceFrame);
-        graphicOverlay = findViewById(R.id.graphicFaceOverlay);
-
+    private void initAction()
+    {
         if (PermissionProcessors.allPermissionsAccepted(this))
         {
             createCameraSource();
@@ -76,8 +77,14 @@ public class RealTimeFaceDetectActivity extends BaseActivity
         {
             PermissionProcessors.getRuntimePermissions(this);
         }
+    }
 
+    private void initView()
+    {
+        preview = findViewById(R.id.cameraPreview);
 
+        ivFaceFrame = findViewById(R.id.faceFrame);
+        graphicOverlay = findViewById(R.id.graphicFaceOverlay);
     }
 
     // This activity will not use camera directly from the phone
@@ -182,7 +189,8 @@ public class RealTimeFaceDetectActivity extends BaseActivity
         // When image is cropped , respond back to the SelectImage activity for other tasks
         if (croppedImage != null)
         {
-            Uri uriImage = StorageHelper.saveToInternalStorageUri(croppedImage, "image.png", this);
+            Uri uriImage = StorageHelper.saveToInternalStorageUri
+                    (croppedImage, "image.png", this);
             Intent intent = new Intent();
             intent.setData(uriImage);
             setResult(RESULT_OK, intent);
@@ -201,7 +209,8 @@ public class RealTimeFaceDetectActivity extends BaseActivity
     }
 
     @Override
-    public void onFrame(Bitmap image, FirebaseVisionFace face, FrameMetadata frameMetadata, GraphicOverlay graphicOverlay)
+    public void onFrame(Bitmap image, FirebaseVisionFace face, FrameMetadata frameMetadata,
+                        GraphicOverlay graphicOverlay)
     {
         originalImage = image;
     }

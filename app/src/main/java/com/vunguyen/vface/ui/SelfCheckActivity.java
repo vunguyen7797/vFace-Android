@@ -4,6 +4,7 @@
 package com.vunguyen.vface.ui;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -12,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -33,6 +35,7 @@ import com.vunguyen.vface.bean.Course;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.helper.ImageEditor;
 import com.vunguyen.vface.helper.LocaleHelper;
+import com.vunguyen.vface.helper.asyncTasks.DetectionTask;
 import com.vunguyen.vface.helper.callbackInterfaces.CourseListInterface;
 import com.vunguyen.vface.helper.callbackInterfaces.StudentListInterface;
 
@@ -226,6 +229,8 @@ public class SelfCheckActivity extends AppCompatActivity
     private void resetAllData()
     {
         ivWaitingIdentify.setVisibility(View.GONE);
+        detectedFacesList.clear();
+        detectedDetailsList.clear();
         // reset data lists
         resetStudentDate(courseServerId);
         resetStudentFlag(courseServerId);
@@ -235,15 +240,18 @@ public class SelfCheckActivity extends AppCompatActivity
     // reset all date if users check attendance more than 1 for the same course
     private void resetStudentDate(String courseServerId)
     {
-        getStudentListFirebase(courseServerId, (StudentListInterface) studentList -> {
+        getStudentListFirebase(courseServerId, studentList -> {
             if (tvDate.getText().toString().equalsIgnoreCase(date)
                     && courseMenu.getText().toString().equalsIgnoreCase(course.getCourseName()))
             {
                 for (Student student : studentList)
                 {
-                    String path = student.getStudentName().toUpperCase()
-                            + "-" + date.replaceAll("[,]", "");
-                    mDatabase_date.child(path).removeValue();
+                    if (student.getCourseServerId().equalsIgnoreCase(courseServerId))
+                    {
+                        String path = student.getStudentName().toUpperCase()
+                                + "-" + date.replaceAll("[,]", "") + student.getStudentServerId();
+                        mDatabase_date.child(path).removeValue();
+                    }
                 }
             }
         });
@@ -279,6 +287,7 @@ public class SelfCheckActivity extends AppCompatActivity
      ******************* Event handler methods *********************
      */
     // Response on result of option which was just executed
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
@@ -310,7 +319,7 @@ public class SelfCheckActivity extends AppCompatActivity
     public void setDate(TextView view)
     {
         Date today = Calendar.getInstance().getTime();
-        SimpleDateFormat formatter = new SimpleDateFormat("MMM d, yyyy", Locale.US);
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.US);
         String date = formatter.format(today);
         view.setText(date);
     }
@@ -322,6 +331,7 @@ public class SelfCheckActivity extends AppCompatActivity
     }
 
     // This method is to detect faces in the bitmap photo
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void detect(Uri uriImage)
     {
         try
@@ -338,10 +348,7 @@ public class SelfCheckActivity extends AppCompatActivity
         bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, output);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(output.toByteArray());
 
-        new com.vunguyen.vface.helper.asyncTasks.DetectionTask(SelfCheckActivity.this,
+        new DetectionTask(SelfCheckActivity.this,
                 bitmapImage, detected, courseServerId, "SELF-CHECK").execute(inputStream);
-        // Start a background task to detect faces in the image.
-      //  new DetectionTask().execute(inputStream);
-       // Log.i("EXECUTE","Detected value?: " + detected);
     }
 }

@@ -1,6 +1,7 @@
+/*
+ * GeneralSettingActivity.java
+ */
 package com.vunguyen.vface.ui;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,25 +13,23 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.vunguyen.vface.R;
-import com.vunguyen.vface.bean.Course;
-import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.LocaleHelper;
-
-import org.w3c.dom.Text;
-
-import java.util.List;
-import java.util.Locale;
 
 import io.paperdb.Paper;
 
+/**
+ * This class implements some features to customize the app
+ */
 public class GeneralSettingActivity extends AppCompatActivity
 {
     String account;
     AutoCompleteTextView languageMenu;
     String[] languagesList;
-    public static TextView language_title;
-    public static TextView tv_generalSetting;
+    TextView language_title;
+    TextView tv_generalSetting;
 
     @Override
     protected void attachBaseContext(Context newBase)
@@ -44,18 +43,31 @@ public class GeneralSettingActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_general_setting);
         account = getIntent().getStringExtra("ACCOUNT");
-        languageMenu = findViewById(R.id.filled_exposed_dropdown_language);
+
+        initView();
+        initData();
+        initAction();
+    }
+
+    private void initAction()
+    {
         displayLanguageMenu();
+    }
 
-        language_title = findViewById(R.id.tv_language_title);
-        tv_generalSetting = findViewById(R.id.tvTitle);
-
-
+    private void initData()
+    {
         Paper.init(this);
         String language = Paper.book().read("language");
         if (language == null)
             Paper.book().write("language", "en");
-        updateView((String)Paper.book().read("language"));
+        updateView(Paper.book().read("language"));
+    }
+
+    private void initView()
+    {
+        languageMenu = findViewById(R.id.filled_exposed_dropdown_language);
+        language_title = findViewById(R.id.tv_language_title);
+        tv_generalSetting = findViewById(R.id.tvTitle);
     }
 
 
@@ -71,7 +83,8 @@ public class GeneralSettingActivity extends AppCompatActivity
     {
         languagesList = getResources().getStringArray(R.array.languages);
         // initialize course menu
-        ArrayAdapter<String> tvArrayAdapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popup_item, languagesList);
+        ArrayAdapter<String> tvArrayAdapter = new ArrayAdapter<>(this,
+                R.layout.dropdown_menu_popup_item, languagesList);
         languageMenu.setAdapter(tvArrayAdapter);
 
         languageMenu.setSelection(0);
@@ -82,12 +95,12 @@ public class GeneralSettingActivity extends AppCompatActivity
                if (position == 0)
                {
                    Paper.book().write("language", "en");
-                   updateView((String)Paper.book().read("language"));
+                   updateView(Paper.book().read("language"));
                }
                else if (position == 1)
                {
                    Paper.book().write("language", "vi");
-                   updateView((String)Paper.book().read("language"));
+                   updateView(Paper.book().read("language"));
                }
                else if (position == 2)
                {

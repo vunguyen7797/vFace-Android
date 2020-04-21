@@ -1,3 +1,6 @@
+/*
+ * DeleteFaceTask.java
+ */
 package com.vunguyen.vface.helper.asyncTasks;
 
 import android.annotation.SuppressLint;
@@ -17,10 +20,10 @@ import java.util.UUID;
  */
 public class DeleteFaceTask extends AsyncTask<String, String, String>
 {
-    private String courseServerId;
-    private UUID studentServerId;
+    final private String courseServerId;
+    final private UUID studentServerId;
     @SuppressLint("StaticFieldLeak")
-    private Context context;
+    final private Context context;
 
     public DeleteFaceTask(String courseServerId, String studentServerId, Context context)
     {
@@ -45,6 +48,7 @@ public class DeleteFaceTask extends AsyncTask<String, String, String>
         catch (Exception e)
         {
             Log.i("EXECUTE","Error Delete face: " + (e.getMessage()));
+            Toast.makeText(this.context,"Cannot delete face", Toast.LENGTH_SHORT).show();
             return null;
         }
     }
@@ -55,7 +59,7 @@ public class DeleteFaceTask extends AsyncTask<String, String, String>
         if (result != null)
         {
             Log.i("EXECUTE","Face " + result + " successfully deleted");
-            Toast.makeText(this.context,"Face Deleted.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this.context,"Face deleted successfully", Toast.LENGTH_SHORT).show();
         }
     }
 }

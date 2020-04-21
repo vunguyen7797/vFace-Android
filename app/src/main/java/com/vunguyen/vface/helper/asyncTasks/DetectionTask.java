@@ -4,6 +4,7 @@
 package com.vunguyen.vface.helper.asyncTasks;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,28 +16,28 @@ import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.microsoft.projectoxford.face.contract.Face;
 import com.vunguyen.vface.helper.ApiConnector;
 import com.vunguyen.vface.helper.ImageEditor;
+import com.vunguyen.vface.helper.ProgressDialogCustom;
 import com.vunguyen.vface.ui.SelfCheckActivity;
+import com.vunguyen.vface.ui.StudentManagerActivity;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
  * This class implement the face detection task with server API
  */
-@SuppressLint("StaticFieldLeak")
 public class DetectionTask extends AsyncTask<InputStream, String, Face[]>
 {
+    @SuppressLint("StaticFieldLeak")
     private Context context;
+    private Activity activity;
 
     private ProgressDialog progressDialog;
+    private ProgressDialogCustom progressDialogCustom;
 
     private List<Bitmap> detectedFacesList;
     private List<String> detectedDetailsList;
@@ -60,9 +61,10 @@ public class DetectionTask extends AsyncTask<InputStream, String, Face[]>
         this.courseServerId = courseServerId;
 
         facesList = new ArrayList<>();
-        progressDialog = new ProgressDialog(this.context);
-        progressDialog.setTitle("V.FACE");
-        progressDialog.setCancelable(false);
+        //progressDialog = new ProgressDialog(this.context);
+        //progressDialog.setTitle("V.FACE");
+        //progressDialog.setCancelable(false);
+        progressDialogCustom =  new ProgressDialogCustom((Activity) this.context);
     }
 
     @Override
@@ -73,7 +75,7 @@ public class DetectionTask extends AsyncTask<InputStream, String, Face[]>
 
         try
         {
-            publishProgress("Detecting...");
+            //publishProgress("Detecting...");
             Log.i("EXECUTE", "Detecting faces...");
 
             // Start detection process
@@ -87,7 +89,7 @@ public class DetectionTask extends AsyncTask<InputStream, String, Face[]>
         }
         catch (Exception e)
         {
-            publishProgress(e.getMessage());
+            //publishProgress(e.getMessage());
             return null;
         }
     }
@@ -132,14 +134,15 @@ public class DetectionTask extends AsyncTask<InputStream, String, Face[]>
             {
                 this.detected = false;
                 Log.i("EXECUTE", "NO FACE DETECTED!");
-                progressDialog.dismiss();
-                Toast.makeText(context, "No face detected.", Toast.LENGTH_SHORT).show();
+                //progressDialog.dismiss();
+                progressDialogCustom.dismissDialog();
+                Toast.makeText(context, "No face detected", Toast.LENGTH_SHORT).show();
             }
             else
             {
                 Log.i("EXECUTE", "FACE DETECTED!");
                 this.detected = true;
-                progressDialog.dismiss();
+                progressDialogCustom.dismissDialog();
                 if (request.equalsIgnoreCase(REQUEST))
                 {
                     selfIdentify();
@@ -155,12 +158,14 @@ public class DetectionTask extends AsyncTask<InputStream, String, Face[]>
     // display the progress dialog when a task is processing
     private void startProgressDialog()
     {
-        progressDialog.show();
+        //progressDialog.show()
+        progressDialogCustom.startProgressDialog("Detecting...");
     }
 
     private void duringTaskProgressDialog(String progress)
     {
-        progressDialog.setMessage(progress);
+        //progressDialog.setMessage(progress);
+        //progressDialogCustom.publish(progress);
     }
 
     // This method is to identify a student through the detected face

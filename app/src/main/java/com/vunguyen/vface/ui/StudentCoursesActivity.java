@@ -42,28 +42,35 @@ public class StudentCoursesActivity extends AppCompatActivity
 
         // get account to verify the database
         account = getIntent().getStringExtra("ACCOUNT");
+        initView();
+        initAction();
+    }
 
-        // go to course manager
-        cvAddCourse = findViewById(R.id.cvAddCourse);
+    private void initAction()
+    {
         cvAddCourse.setOnClickListener(v -> {
             Intent intent = new Intent(StudentCoursesActivity.this, CourseManagerActivity.class);
             intent.putExtra("ACCOUNT", account);
             startActivity(intent);
             finish();
         });
-
-        // go back to dashboard
-        ivBackArrow = findViewById(R.id.ivBackArrow);
         ivBackArrow.setOnClickListener(v -> onBackPressed());
-
-        // go to student manager activity
-        cvAddStudent = findViewById(R.id.cvAddStudent);
         cvAddStudent.setOnClickListener(v -> {
             Intent intent = new Intent(StudentCoursesActivity.this, StudentManagerActivity.class);
             intent.putExtra("ACCOUNT", account);
             startActivity(intent);
             finish();
         });
+    }
+
+    private void initView()
+    {
+        // go to course manager
+        cvAddCourse = findViewById(R.id.cvAddCourse);
+        // go back to dashboard
+        ivBackArrow = findViewById(R.id.ivBackArrow);
+        // go to student manager activity
+        cvAddStudent = findViewById(R.id.cvAddStudent);
     }
 
     // go back to previous activity

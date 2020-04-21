@@ -47,9 +47,6 @@ public class ManageAccountActivity extends AppCompatActivity
     FirebaseUser user;
     String filename;
     boolean newProfilePhoto = false;
-    private static FirebaseStorage storage = FirebaseStorage.getInstance();
-    // Create a storage reference from our app
-
 
     @Override
     protected void attachBaseContext(Context newBase)
@@ -64,13 +61,20 @@ public class ManageAccountActivity extends AppCompatActivity
         setContentView(R.layout.activity_manage_account);
 
         account = getIntent().getStringExtra("ACCOUNT");
+        initView();
+        initData();
+        initAction();
+    }
+
+    private void initData()
+    {
         filename = "profile_photo" + account;
         // get current logged in user from firebase
         user = FirebaseAuth.getInstance().getCurrentUser();
+    }
 
-        etDisplayName = findViewById(R.id.etDisplayName);
-        ivProfilePhoto = findViewById(R.id.ivProfilePhoto);
-
+    private void initAction()
+    {
         newProfilePhoto = setPhotoAfterCropped();
         if (newProfilePhoto)
         {
@@ -78,6 +82,12 @@ public class ManageAccountActivity extends AppCompatActivity
         }
         else
             displayInfo(1); // display with photo
+    }
+
+    private void initView()
+    {
+        etDisplayName = findViewById(R.id.etDisplayName);
+        ivProfilePhoto = findViewById(R.id.ivProfilePhoto);
     }
 
     // set the cropped image to image view for later update
@@ -159,8 +169,6 @@ public class ManageAccountActivity extends AppCompatActivity
             recreate();
         }
     }
-
-
 
     // go to another activity
     private void goToActivity(Intent intent)

@@ -25,7 +25,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.StudentProfilePageActivity"></activity>
+        <activity android:name=".ui.StudentProfilePageActivity" />
         <activity android:name=".ui.GeneralSettingActivity" />
         <activity android:name=".ui.SelfCheckActivity" />
         <activity android:name=".ui.CropImageActivity" />

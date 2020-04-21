@@ -34,7 +34,7 @@ public class StorageHelper
     private static StorageReference storageRef;
 
     // Upload Photo to Firebase Storage
-    public static void uploadToFireBaseStorage(Bitmap bitmapImage, String filename, Context context, String account, String request, UriPhotoInterface callback)
+    public static void uploadToFireBaseStorage(Bitmap bitmapImage, String filename, String request, UriPhotoInterface callback)
     {
         storageRef = storage.getReferenceFromUrl("gs://vface-a53e6.appspot.com/"+request);
         StorageReference croppedPhotoRef = storageRef.child(filename);
@@ -56,26 +56,15 @@ public class StorageHelper
                 // Continue with the task to get the download URL
                 return croppedPhotoRef.getDownloadUrl();
             }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                if (task.isSuccessful()) {
-                    Uri uriCroppedImage = task.getResult();
-                    Log.i("EXECUTE", "DOWNLOAD SUCCESSFULLY " +uriCroppedImage);
-                    callback.getUriPhoto(uriCroppedImage);
-                    /*
-                    Intent intent = new Intent(context, ManageAccountActivity.class);
-                    intent.putExtra("FileName", filename);
-                    intent.putExtra("ACCOUNT", account);
-                    intent.setData(uriCroppedImage);
-                    Log.i("EXECUTE", "FILE NAME: " + filename);
-                    context.startActivity(intent);
-*/
-                } else {
-                    // Handle failures
-                    // ...
-                    Log.i("EXECUTE", "CANNOT DOWNLOAD PHOTO");
-                }
+        }).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Uri uriCroppedImage = task.getResult();
+                Log.i("EXECUTE", "DOWNLOAD SUCCESSFULLY " +uriCroppedImage);
+                callback.getUriPhoto(uriCroppedImage);
+            } else {
+                // Handle failures
+                // ...
+                Log.i("EXECUTE", "CANNOT DOWNLOAD PHOTO");
             }
         });
     }

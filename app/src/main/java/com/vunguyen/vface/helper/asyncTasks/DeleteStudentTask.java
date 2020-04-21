@@ -2,12 +2,12 @@ package com.vunguyen.vface.helper.asyncTasks;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.vunguyen.vface.helper.ApiConnector;
 
 import java.util.UUID;
-
 
 /**
  * This class is a background task to delete a student and its information on server

@@ -3,21 +3,17 @@
  */
 package com.vunguyen.vface.ui;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
 import android.util.Pair;
-import android.view.ContextMenu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.Adapter;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
@@ -30,7 +26,6 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -43,20 +38,21 @@ import com.vunguyen.vface.bean.Date;
 import com.vunguyen.vface.bean.Face;
 import com.vunguyen.vface.bean.Student;
 import com.vunguyen.vface.bean.StudentInfoPackage;
+import com.vunguyen.vface.helper.FaceListViewAdapter;
 import com.vunguyen.vface.helper.LocaleHelper;
 import com.vunguyen.vface.helper.callbackInterfaces.CourseListInterface;
 import com.vunguyen.vface.helper.callbackInterfaces.DateInterface;
 import com.vunguyen.vface.helper.callbackInterfaces.FaceListInterface;
 import com.vunguyen.vface.helper.callbackInterfaces.StudentListInterface;
 import com.vunguyen.vface.helper.callbackInterfaces.TotalAbsenceInterface;
-import com.vunguyen.vface.helper.FaceListViewAdapter;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class implements methods to display in-class and absent students
@@ -65,7 +61,6 @@ import java.util.List;
 public class AttendanceActivity extends AppCompatActivity
 {
     // UI feature
-    MaterialDatePicker materialDatePicker;
     TextInputLayout textInputLayoutDate;
     TextInputLayout textInputLayoutStudentList;
     EditText etDate;
@@ -88,6 +83,7 @@ public class AttendanceActivity extends AppCompatActivity
     String account;
     Course course;
     String courseServerId;
+    String courseName;
     String date="";
 
     @Override
@@ -156,8 +152,10 @@ public class AttendanceActivity extends AppCompatActivity
             {
                 course = (Course) parent.getItemAtPosition(position);
                 courseServerId = course.getCourseServerId();    // get course id on server
+                courseName = course.getCourseName();
                 List<Pair<Pair<Uri, String>, Pair<Student, Integer>>> studentList = new ArrayList<>();
-                studentListViewAdapter = new FaceListViewAdapter(studentList, "uri", AttendanceActivity.this, "withTotalAbsence");
+                studentListViewAdapter = new FaceListViewAdapter(studentList, "uri"
+                        , AttendanceActivity.this, "withTotalAbsence");
                 lvAttendance.setAdapter(studentListViewAdapter);
                 ivAttendance.setVisibility(View.VISIBLE);
                 Log.i("EXECUTE", "Course Selected: " + courseServerId);
@@ -194,14 +192,23 @@ public class AttendanceActivity extends AppCompatActivity
         if (!viewModesMenu.getText().toString().equalsIgnoreCase(""))
         {
             if (viewModesMenu.getText().toString().equalsIgnoreCase("In-class students"))
+            {
                 displayStudentOnADate(date, 0);
+            }
             else
+            {
                 displayStudentOnADate(date, 1);
+            }
         }
         else
             viewModesMenu.setOnItemClickListener((parent, view, position, id) ->
-                    displayStudentOnADate(date, position));
-
+            {
+                List<Pair<Pair<Uri, String>, Pair<Student, Integer>>> studentList = new ArrayList<>();
+                studentListViewAdapter = new FaceListViewAdapter(studentList, "uri"
+                        , AttendanceActivity.this, "withTotalAbsence");
+                lvAttendance.setAdapter(studentListViewAdapter);
+                displayStudentOnADate(date, position);
+            });
     }
 
     // display students on a day, request = 0 for in-class, = 1 for absent students
@@ -212,7 +219,6 @@ public class AttendanceActivity extends AppCompatActivity
         getStudentListFirebase(courseServerId, studentList ->
                 getFaceFirebase(faceList ->
                 {
-                    Log.i("EXECUTE", "STUDENT LIST: " + studentList.size());
                     if(request == 0)    // display in-class students
                     {
                         for (Student student : studentList)
@@ -222,9 +228,12 @@ public class AttendanceActivity extends AppCompatActivity
                                     {
                                         if (dateObject.getStudent_date() != null)
                                         {
-                                            Log.i("EXECUTE", "Date executed: " + date + " - " + dateObject.getStudentAttendanceStatus());
+                                            boolean empty = true;
+                                            Log.i("EXECUTE", "Date executed: " + date +
+                                                    " - " + dateObject.getStudentAttendanceStatus());
                                             if (dateObject.getStudentAttendanceStatus().equalsIgnoreCase("YES"))
                                             {
+                                                empty = false;
                                                 Face studentFace = null;
                                                 for (Face face : faceList)
                                                 {
@@ -235,23 +244,34 @@ public class AttendanceActivity extends AppCompatActivity
                                                 Face finalStudentFace = studentFace;
                                                 getTotalAbsence(courseServerId, student.getStudentServerId(), counter ->
                                                 {
+                                                    boolean listEmpty = true;
                                                     assert finalStudentFace != null;
                                                     Pair<Uri, String> identity = new Pair<>(Uri.parse(finalStudentFace
                                                             .getStudentFaceUri()), student.getStudentName());
                                                     Pair<Student, Integer> identity2 = new Pair<>(student, counter);
                                                     Pair<Pair<Uri, String>, Pair<Student, Integer>> finalPair = new Pair<>(identity, identity2);
                                                     attendanceList.add(finalPair);
+                                                    if (attendanceList.size() > 0)
+                                                        listEmpty = false;
                                                     setStudentArrayAdapter(attendanceList); // set adapter to display on list view
                                                 });
-                                            } else {
+                                            }
+                                            else
+                                            {
                                                 Log.i("EXECUTE", student.getStudentName() + " was absent today.");
-
+                                            }
+                                            if (empty)
+                                            {
+                                                Log.i("EXECUTE","STILL EMPTY");
+                                                //ivAttendance.setVisibility(View.VISIBLE);
                                             }
                                         }
                                         else
                                         {
                                             Log.i("EXECUTE", "Date of this student has not been updated");
-                                            Toast.makeText(getApplicationContext(), "Attendance has not been checked for this day", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(getApplicationContext(),
+                                                    "Attendance has not been checked for this day",
+                                                    Toast.LENGTH_SHORT).show();
                                         }
                                     });
                         }
@@ -262,8 +282,12 @@ public class AttendanceActivity extends AppCompatActivity
                         {
                             getStudentDateFirebase(courseServerId, student.getStudentServerId(), date, dateObject ->
                             {
-                                if (dateObject.getStudent_date() != null) {
-                                    if (dateObject.getStudentAttendanceStatus().equalsIgnoreCase("NO")) {
+                                if (dateObject.getStudent_date() != null)
+                                {
+                                    boolean empty = true;
+                                    if (dateObject.getStudentAttendanceStatus().equalsIgnoreCase("NO"))
+                                    {
+                                        empty = false;
                                         Face studentFace = null;
                                         for (Face face : faceList) {
                                             if (face.getStudentServerId().equalsIgnoreCase(student.getStudentServerId()))
@@ -281,12 +305,19 @@ public class AttendanceActivity extends AppCompatActivity
                                             attendanceList.add(finalPair);
                                             setStudentArrayAdapter(attendanceList); // set adapter to display on list view
                                         });
-                                    } else
+                                    }
+                                    else
                                         Log.i("EXECUTE", student.getStudentName() + " was not absent today.");
+                                    if (empty)
+                                    {
+                                        Log.i("EXECUTE","STILL EMPTY");
+                                        //ivAttendance.setVisibility(View.VISIBLE);
+                                    }
                                 }
                                 else {
                                     Log.i("EXECUTE", "Date of this student has not been updated");
-                                    Toast.makeText(getApplicationContext(), "Attendance has not been checked for this day", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), "Attendance has not " +
+                                            "been checked for this day", Toast.LENGTH_SHORT).show();
                                 }
                             });
                         }
@@ -347,7 +378,8 @@ public class AttendanceActivity extends AppCompatActivity
         });
     }
 
-    private void getStudentDateFirebase(String courseServerId, String studentServerId, String date_string, DateInterface callback)
+    private void getStudentDateFirebase(String courseServerId, String studentServerId,
+                                        String date_string, DateInterface callback)
     {
         mDatabase_date.addValueEventListener(new ValueEventListener()
         {
@@ -449,11 +481,11 @@ public class AttendanceActivity extends AppCompatActivity
         {
             ivAttendance.setVisibility(View.GONE);
             // create adapter for list view of student
-            //studentListViewAdapter = new FaceListViewAdapter(studentList);
-            studentListViewAdapter = new FaceListViewAdapter(studentList, "uri", AttendanceActivity.this, "withTotalAbsence");
+            studentListViewAdapter = new FaceListViewAdapter(studentList, "uri",
+                    AttendanceActivity.this, "withTotalAbsence");
             lvAttendance.setAdapter(studentListViewAdapter);
-            lvAttendance.setOnItemClickListener((parent, view, position, id) -> {
-                //Log.i("EXECUTE", "Get student: " + student.toString());
+            lvAttendance.setOnItemClickListener((parent, view, position, id) ->
+            {
                 StudentInfoPackage studentInfoPackage = (StudentInfoPackage) parent.getItemAtPosition(position);
                 Student student = studentInfoPackage.getStudent().first.first;
                 Uri studentUri = studentInfoPackage.getStudent().first.second;
@@ -462,6 +494,7 @@ public class AttendanceActivity extends AppCompatActivity
                 Intent intent = new Intent(AttendanceActivity.this, StudentProfilePageActivity.class);
                 intent.putExtra("ACCOUNT", account);
                 intent.putExtra("Student", student);
+                intent.putExtra("CourseName", courseName);
                 intent.setData(studentUri);
                 intent.putExtra("Absence", totalAbsence);
                 startActivityForResult(intent, MY_REQUEST_CODE);
@@ -474,10 +507,9 @@ public class AttendanceActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK && requestCode == MY_REQUEST_CODE) {
-            boolean needRefresh = data.getBooleanExtra("needRefresh", true);
+        if (resultCode == Activity.RESULT_OK && requestCode == MY_REQUEST_CODE)
+        {
             account = data.getStringExtra("ACCOUNT");
-
         }
     }
 
@@ -485,27 +517,38 @@ public class AttendanceActivity extends AppCompatActivity
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void setDatePicker()
     {
-        LocalDateTime local = LocalDateTime.now();
-        Object localTime = local.atZone(ZoneId.ofOffset("UTC", ZoneOffset.UTC)).toInstant().toEpochMilli();
-        MaterialDatePicker.Builder builder = MaterialDatePicker.Builder.datePicker();
-        builder.setTitleText("VFACE");
-        builder.setSelection(localTime);
+        Calendar c = Calendar.getInstance();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int day = c.get(Calendar.DAY_OF_MONTH);
 
-        Log.i("EXECUTE", "Time zone: " + local);
-
-        materialDatePicker = builder.build();
         textInputLayoutDate.setEndIconOnClickListener(v ->
-                materialDatePicker.show(getSupportFragmentManager(), "DATE_PICKER"));
-
-        materialDatePicker.addOnPositiveButtonClickListener(selection ->
-        {
-            etDate.setText(materialDatePicker.getHeaderText());
-            etDate.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            date = materialDatePicker.getHeaderText();
-            textInputLayoutStudentList.setEnabled(true);
-            viewModesEventHandler();
-
-        });
+                {
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                            (view, year1, month1, dayOfMonth) ->
+                    {
+                        String dateStr = year1+Integer.toString(month1+1)+dayOfMonth;
+                        Log.i("EXECUTE", "Date string:" + dateStr);
+                        @SuppressLint("SimpleDateFormat")
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMd");
+                        java.util.Date d = null;
+                        try
+                        {
+                             d = dateFormat.parse(dateStr);
+                        }
+                        catch (ParseException ex)
+                        {
+                            Log.v("Exception", Objects.requireNonNull(ex.getLocalizedMessage()));
+                        }
+                        dateFormat.applyPattern("MMM dd, yyyy");
+                        etDate.setText(dateFormat.format(d));
+                        etDate.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                        date = dateFormat.format(d);
+                        textInputLayoutStudentList.setEnabled(true);
+                        viewModesEventHandler();
+                    }, year, month, day);
+                    datePickerDialog.show();
+                });
     }
 
     // button back event

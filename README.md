@@ -9,10 +9,10 @@ To keep track of the attendance of students, face recognition is the fastest way
 * Checking attendance by a group photo via Group-check mode.
 * Keeping track of the class attendance situation via Attendance manager.
 * Adding courses and students data including faces via Data manager.
-
-## Upcoming features
 * Checking attendance one by one via Self-check mode.
 * Changing languages + timezones via Settings
+
+## Upcoming features
 * UI customizing via Settings.
 * Notifications, etc.
 
